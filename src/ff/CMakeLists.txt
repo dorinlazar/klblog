@@ -3,8 +3,6 @@ add_library(klfileformats
     codescanner.hpp
     poorconfig.cpp
     poorconfig.hpp
-    textscanner.cpp
-    textscanner.hpp
     markwrite.cpp
     markwrite.hpp
     mwblocks.hpp)

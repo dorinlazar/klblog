@@ -7,3 +7,4 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 find_package(fmt)
 
 add_subdirectory(src)
+add_subdirectory(test)

@@ -6,7 +6,7 @@
 #include "kl/kltext.hpp"
 #include "kl/kltime.hpp"
 #include "kl/klvalue.hpp"
-#include "ff/textscanner.hpp"
+#include "kl/textscanner.hpp"
 #include <variant>
 
 namespace kl {

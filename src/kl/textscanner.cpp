@@ -1,4 +1,5 @@
 #include "textscanner.hpp"
+
 namespace kl {
 ParsingError::ParsingError(const Text& why, uint32_t line, uint32_t column)
     : std::logic_error((why + "@"_t + std::to_string(line) + ":" + std::to_string(column)).toText().toString()),

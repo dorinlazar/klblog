@@ -1,5 +1,5 @@
 #include "poorconfig.hpp"
-#include "textscanner.hpp"
+#include "kl/textscanner.hpp"
 #include "kl/klfs.hpp"
 using namespace kl;
 
