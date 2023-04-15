@@ -1,0 +1,1 @@
+add_executable(klblog blog.cpp blog.hpp blogsettings.cpp blogsettings.hpp systemsettings.cpp systemsettings.hpp klblog.cpp)
