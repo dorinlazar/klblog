@@ -1,7 +1,7 @@
-#include "kltime.h"
+#include "kltime.hpp"
 #include <algorithm>
 #include <chrono>
-#include "ff/textscanner.h"
+#include "ff/textscanner.hpp"
 // #include <format>
 
 using namespace kl;

@@ -210,6 +210,37 @@ public:
   Text quote_escaped() const;
 };
 
+class TextChain {
+  uint32_t _length = 0;
+  List<Text> _chain;
+
+  void _updateLength();
+
+public:
+  TextChain() = default;
+  TextChain(const TextChain&) = default;
+  TextChain(TextChain&&) = default;
+  TextChain(std::initializer_list<Text> l);
+  TextChain(List<Text>&& l);
+  TextChain(const List<Text>& l);
+
+  inline TextChain& operator=(const TextChain& v) = default;
+
+  void operator+=(const Text& text);
+  void add(const Text& text);
+  void operator+=(const TextChain& text);
+  void add(const TextChain& text);
+
+  Text toText() const;
+  operator Text() const;
+
+  const List<Text>& chain() const;
+
+  void clear();
+  kl::Text join(char splitchar = '\0');
+  kl::Text join(kl::Text split_text);
+};
+
 inline namespace literals {
 kl::Text operator"" _t(const char* p, size_t s);
 }

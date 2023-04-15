@@ -1,15 +1,14 @@
 #include "markwrite.hpp"
 #include "ff/poorconfig.hpp"
 
-Document::Document(const Text &content)
-{
+namespace kl {
+Document::Document(const Text& content) {
   TextScanner scanner(content);
   _metadata.read(scanner);
   _content.read(scanner);
 }
 
-void DocumentMetadata::read(TextScanner &scanner)
-{
+void DocumentMetadata::read(TextScanner& scanner) {
   static DateTime defaultDate(2020, 1, 1);
   _properties = PoorConfig::parse(scanner);
   CHECK(_properties->isMap(), "Expected a map as document metadata");
@@ -23,19 +22,17 @@ void DocumentMetadata::read(TextScanner &scanner)
   _lastUpdate = pubTime.has_value() ? DateTime::parse(*pubTime) : _publish;
 
   auto m = _properties->asMap();
-  if (_properties->asMap().has("author"))
-  {
+  if (_properties->asMap().has("author")) {
     _authors = _properties->get("author")->getArrayValue();
   }
 }
 
 void DocumentContent::_readParagraph() {}
 
-void DocumentContent::read(TextScanner &scanner)
-{
+void DocumentContent::read(TextScanner& scanner) {
   _baseContent = scanner.remainder();
-  while (!scanner.empty())
-  {
+  while (!scanner.empty()) {
     _readParagraph();
   }
 }
+} // namespace kl

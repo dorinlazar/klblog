@@ -1,10 +1,12 @@
 add_library(klfileformats
     codescanner.cpp
-    codescanner.hpp"
+    codescanner.hpp
     poorconfig.cpp
-    poorconfig.hpp"
+    poorconfig.hpp
     textscanner.cpp
-    textscanner.hpp"
+    textscanner.hpp
     markwrite.cpp
-    markwrite.hpp"
+    markwrite.hpp
     mwblocks.hpp)
+
+target_include_directories(klfileformats PRIVATE ${CMAKE_SOURCE_DIR}/src)
