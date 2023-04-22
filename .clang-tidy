@@ -12,7 +12,8 @@ Checks: >
   -misc-non-private-member-variables-in-classes,
   -readability-identifier-length,
   -misc-no-recursion,
-  -readability-function-cognitive-complexity
+  -readability-function-cognitive-complexity,
+  -modernize-pass-by-value
 # Turn all the warnings from the checks above into errors.
 # WarningsAsErrors: "*"
 

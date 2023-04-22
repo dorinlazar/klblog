@@ -12,7 +12,7 @@ public:
 
 class InvalidInputData : public std::logic_error {
 public:
-  InvalidInputData(const Text& what, const Text& expected);
+  InvalidInputData(const Text& received, const Text& expected);
 };
 
 class IOException {

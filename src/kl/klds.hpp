@@ -298,7 +298,7 @@ using PList = List<uptr<T>>;
 } // namespace kl
 
 template <typename K, typename V>
-inline std::ostream& std::operator<<(std::ostream& os, const kl::Dict<K, V>& d) {
+inline std::ostream& operator<<(std::ostream& os, const kl::Dict<K, V>& d) {
   os << "{";
   bool commaNeeded = false;
   for (const auto& [k, v]: d) {
@@ -313,7 +313,7 @@ inline std::ostream& std::operator<<(std::ostream& os, const kl::Dict<K, V>& d) 
 }
 
 template <typename T>
-inline std::ostream& std::operator<<(std::ostream& os, const kl::List<T>& l) {
+inline std::ostream& operator<<(std::ostream& os, const kl::List<T>& l) {
   os << "[";
   bool commaNeeded = false;
   for (const auto& t: l) {
@@ -328,7 +328,7 @@ inline std::ostream& std::operator<<(std::ostream& os, const kl::List<T>& l) {
 }
 
 template <typename T>
-inline std::ostream& std::operator<<(std::ostream& os, const kl::Set<T>& l) {
+inline std::ostream& operator<<(std::ostream& os, const kl::Set<T>& l) {
   os << "[";
   bool commaNeeded = false;
   for (const auto& t: l) {

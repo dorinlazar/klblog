@@ -87,8 +87,8 @@ public:
           m_scanner.error("Invalid indentation for start of map");
         }
       }
-      auto currentIndent = m_scanner.get_indent_level();
-      if (indent_level > currentIndent) { // end for this level of indentation
+      auto current_indent = m_scanner.get_indent_level();
+      if (indent_level > current_indent) { // end for this level of indentation
         return value;
       }
       if (indent_level < m_scanner.get_indent_level()) {
