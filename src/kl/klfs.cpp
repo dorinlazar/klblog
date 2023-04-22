@@ -16,8 +16,7 @@ namespace fs = std::filesystem;
 const std::array<Text, 2> DISCARDABLE_FOLDERS {"."_t, ".."_t};
 const Text FOLDER_SEPARATOR("/");
 
-namespace {
-Text read_file_impl(const Text& filename) {
+Text klfs_read_file_impl(const Text& filename) {
   fs::path p = filename.starts_with(FOLDER_SEPARATOR[0]) ? filename.toView() : fs::current_path() / filename.toView();
   auto size = fs::file_size(p); // throws if error;
 
@@ -33,11 +32,10 @@ Text read_file_impl(const Text& filename) {
     return {};
   }
   if (size >= 3) {
-    char a, b, c;
-    a = is.get();
-    b = is.get();
-    c = is.get();
-    if (a != (char)0xEF || b != (char)0xBB || c != (char)0xBF) {
+    const char a = is.get();
+    const char b = is.get();
+    const char c = is.get();
+    if (a != '\xEF' || b != '\xBB' || c != '\xBF') {
       is.seekg(0);
     } else {
       size -= 3;
@@ -51,7 +49,7 @@ Text read_file_impl(const Text& filename) {
   return {};
 }
 
-static Text normalize_path(const Text& filename) {
+Text klfs_normalize_path(const Text& filename) {
   TextChain tc;
   uint32_t last_pos = 0;
   bool last_was_slash = false;
@@ -87,9 +85,8 @@ static Text normalize_path(const Text& filename) {
   }
   return res;
 }
-}
 
-FilePath::FilePath(const Text& path) : m_full_name(normalize_path(path)) {
+FilePath::FilePath(const Text& path) : m_full_name(klfs_normalize_path(path)) {
   m_last_slash_pos = m_full_name.last_pos(FOLDER_SEPARATOR[0]);
   m_last_dot_pos = m_full_name.last_pos('.');
   if (m_last_dot_pos.has_value() && (*m_last_dot_pos == 0 || m_full_name[*m_last_dot_pos - 1] == FOLDER_SEPARATOR[0])) {
@@ -268,7 +265,7 @@ bool FileSystem::exists(const Text& path) {
   return std::filesystem::exists(path.toView());
 }
 
-FileReader::FileReader(const Text& name) { m_unread_content = read_file_impl(name); }
+FileReader::FileReader(const Text& name) { m_unread_content = klfs_read_file_impl(name); }
 
 std::optional<Text> FileReader::read_line() {
   if (m_unread_content.size()) [[likely]] {
