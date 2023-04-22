@@ -71,7 +71,7 @@ struct FileReader : public InputSource {
   bool has_data() override final;
 
 private:
-  Text _unreadContent; // we can do away with this.
+  Text m_unread_content; // we can do away with this.
 };
 
 struct Folder {

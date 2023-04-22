@@ -1,7 +1,5 @@
 add_library(
   klfileformats
-  codescanner.cpp
-  codescanner.hpp
   poorconfig.cpp
   poorconfig.hpp
   markwrite.cpp

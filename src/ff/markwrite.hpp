@@ -12,29 +12,29 @@
 namespace kl {
 
 struct DocumentMetadata {
-  Text _title;
-  DateTime _publish;
-  DateTime _lastUpdate;
-  List<Text> _authors;
-  Text _featuredImage;
-  PValue _properties;
+  Text title;
+  DateTime publish;
+  DateTime last_update;
+  List<Text> authors;
+  Text featured_image;
+  PValue properties;
 
 public:
   void read(TextScanner& scanner);
 };
 
 struct DocumentContent {
-  Text _baseContent;
+  Text base_content;
 
-  void _readParagraph();
+  void read_paragraph();
 
 public:
   void read(TextScanner& scanner);
 };
 
-struct Document {
-  DocumentMetadata _metadata;
-  DocumentContent _content;
+class Document {
+  DocumentMetadata m_metadata;
+  DocumentContent m_content;
 
 public:
   Document(const Text& content);

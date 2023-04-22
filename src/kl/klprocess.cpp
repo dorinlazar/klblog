@@ -43,7 +43,7 @@ struct Process::Impl {
 
 public:
   Impl(const List<Text>& params) {
-    CHECK(params.size() > 0, "Expected more than one parameter to Process invocation");
+    check(params.size() > 0, "Expected more than one parameter to Process invocation");
     _exe = to_c_string(FileSystem::executable_path(params[0]));
     _params = to_c_array(params);
   }

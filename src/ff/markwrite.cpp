@@ -4,35 +4,35 @@
 namespace kl {
 Document::Document(const Text& content) {
   TextScanner scanner(content);
-  _metadata.read(scanner);
-  _content.read(scanner);
+  m_metadata.read(scanner);
+  m_content.read(scanner);
 }
 
 void DocumentMetadata::read(TextScanner& scanner) {
   static DateTime defaultDate(2020, 1, 1);
-  _properties = PoorConfig::parse(scanner);
-  CHECK(_properties->isMap(), "Expected a map as document metadata");
-  _title = _properties->getOpt("title").value_or(""_t);
-  _featuredImage = _properties->getOpt("image").value_or(""_t);
+  properties = PoorConfig::parse(scanner);
+  check(properties->isMap(), "Expected a map as document metadata");
+  title = properties->getOpt("title").value_or(""_t);
+  featured_image = properties->getOpt("image").value_or(""_t);
 
-  auto pubTime = _properties->getOpt("date");
-  _publish = pubTime.has_value() ? DateTime::parse(*pubTime) : defaultDate;
+  auto pubTime = properties->getOpt("date");
+  publish = pubTime.has_value() ? DateTime::parse(*pubTime) : defaultDate;
 
-  pubTime = _properties->getOpt("updated");
-  _lastUpdate = pubTime.has_value() ? DateTime::parse(*pubTime) : _publish;
+  pubTime = properties->getOpt("updated");
+  last_update = pubTime.has_value() ? DateTime::parse(*pubTime) : publish;
 
-  auto m = _properties->asMap();
-  if (_properties->asMap().has("author")) {
-    _authors = _properties->get("author")->getArrayValue();
+  auto m = properties->asMap();
+  if (properties->asMap().has("author")) {
+    authors = properties->get("author")->getArrayValue();
   }
 }
 
-void DocumentContent::_readParagraph() {}
+void DocumentContent::read_paragraph() {}
 
 void DocumentContent::read(TextScanner& scanner) {
-  _baseContent = scanner.remainder();
+  base_content = scanner.remainder();
   while (!scanner.empty()) {
-    _readParagraph();
+    read_paragraph();
   }
 }
 } // namespace kl

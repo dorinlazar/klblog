@@ -4,7 +4,7 @@ namespace klblog {
 using namespace kl;
 
 SystemSettings::SystemSettings(int argc, char** argv, char** envp) {
-  CHECK(argc > 0, "internal error: invalid number of arguments: {}", argc);
+  check(argc > 0, "internal error: invalid number of arguments: {}", argc);
   for (int i = 1; i < argc; i++) {
     if ("-v"_t == argv[i]) {
       verbosity = VerbosityLevel::Verbose;
@@ -31,7 +31,7 @@ SystemSettings::SystemSettings(int argc, char** argv, char** envp) {
       }
     }
   } catch (...) {
-    FATAL("usage: {} [-d <source>] [-o <target>]", argv[0]);
+    fatal("usage: {} [-d <source>] [-o <target>]", argv[0]);
   }
 }
 

@@ -4,7 +4,7 @@
 
 namespace kl {
 class PoorConfig {
-  PValue _value;
+  PValue m_value;
 
 public:
   PoorConfig(const Text& filename);

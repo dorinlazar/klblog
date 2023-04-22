@@ -266,39 +266,39 @@ bool FileSystem::exists(const Text& path) {
   return std::filesystem::exists(path.toView());
 }
 
-FileReader::FileReader(const Text& name) { _unreadContent = read_file_impl(name); }
+FileReader::FileReader(const Text& name) { m_unread_content = read_file_impl(name); }
 
 std::optional<Text> FileReader::read_line() {
-  if (_unreadContent.size()) [[likely]] {
-    auto [res, next] = _unreadContent.splitNextLine();
-    _unreadContent = next;
+  if (m_unread_content.size()) [[likely]] {
+    auto [res, next] = m_unread_content.splitNextLine();
+    m_unread_content = next;
     return res;
   }
   return {};
 }
 
 List<Text> FileReader::read_all_lines(SplitEmpty onEmpty) {
-  auto res = _unreadContent.splitLines(onEmpty);
-  _unreadContent.reset();
+  auto res = m_unread_content.splitLines(onEmpty);
+  m_unread_content.reset();
   return res;
 }
 
 Text FileReader::read_all() {
-  auto res = _unreadContent;
-  _unreadContent.reset();
+  auto res = m_unread_content;
+  m_unread_content.reset();
   return res;
 }
 
 std::optional<char> FileReader::read_char() {
-  if (_unreadContent.size()) [[likely]] {
-    char c = _unreadContent[0];
-    _unreadContent = _unreadContent.skip(1);
+  if (m_unread_content.size()) [[likely]] {
+    char c = m_unread_content[0];
+    m_unread_content = m_unread_content.skip(1);
     return c;
   }
   return {};
 }
 
-bool FileReader::has_data() { return _unreadContent.size(); }
+bool FileReader::has_data() { return m_unread_content.size(); }
 
 Folder::Folder(const kl::Text& name, const kl::Text& path, const Folder* parent)
     : m_parent(parent), m_name(name), m_path(path) {}
@@ -313,7 +313,7 @@ void Folder::add_item(const kl::FileSystemEntryInfo& fi, const kl::Text& fullPat
   } else {
     auto fi2 = fi;
     auto baseFolder = fi.path.baseFolder();
-    CHECK(m_folders.has(baseFolder), "Sanity check: File in folder", baseFolder, "added, but folder not recorded");
+    kl::check(m_folders.has(baseFolder), "Sanity check: File in folder", baseFolder, "added, but folder not recorded");
     fi2.path = fi2.path.discardBaseFolder();
     m_folders[baseFolder]->add_item(fi2, fullPath);
   }

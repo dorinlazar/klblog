@@ -8,7 +8,7 @@
 #include <functional>
 #include <optional>
 #include <memory>
-
+// TODO: switch to ranges.
 namespace kl {
 
 template <typename T>
