@@ -35,7 +35,7 @@ public:
   ParsedCharacter readCharEscaped();
   Text read_quoted_string();
   Text readUntil(char character);
-  Text readWord();
+  Text read_word();
   Text read_line();
   Text remainder() const;
   uint32_t readDigit();
@@ -43,7 +43,7 @@ public:
   void expect_ws(char character, NewLineHandling handling = NewLineHandling::Keep);
   bool starts_with(const Text& txt);
   void skip(uint32_t nChars);
-  uint32_t getIndentationLevel() const;
+  uint32_t get_indent_level() const;
 
 public:
   struct DataLocation {

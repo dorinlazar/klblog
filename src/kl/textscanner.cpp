@@ -127,7 +127,7 @@ Text TextScanner::readUntil(char character) {
   }
 }
 
-Text TextScanner::readWord() {
+Text TextScanner::read_word() {
   auto start = loc._offset;
   while (!empty()) {
     char c = *loc._current;
@@ -202,7 +202,7 @@ void TextScanner::error(const Text& why) const { throw ParsingError(why, loc._li
 const TextScanner::DataLocation& TextScanner::location() const { return loc; }
 void TextScanner::restore_location(const TextScanner::DataLocation& location) { loc = location; }
 
-uint32_t TextScanner::getIndentationLevel() const {
+uint32_t TextScanner::get_indent_level() const {
   for (uint32_t i = 0; i < loc._dataLeft; i++) {
     if (loc._current[i] != ' ') {
       return i;

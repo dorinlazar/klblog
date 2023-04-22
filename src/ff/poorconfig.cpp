@@ -9,7 +9,7 @@ class PoorConfigParser {
   const char m_comment = '#';
   bool m_preamble = false;
 
-  bool _useless_line() {
+  bool is_useless_line() {
     auto start_of_line = m_scanner.location();
     auto line = m_scanner.read_line().trim_left();
     if (line.size() == 0 || line[0] == m_comment) {
@@ -19,7 +19,7 @@ class PoorConfigParser {
     return false;
   }
 
-  void _discard_after_value_junk() {
+  void discard_after_value_junk() {
     m_scanner.skip_whitespace(NewLineHandling::Keep);
     if (!m_scanner.empty()) {
       if (m_scanner.top_char() != m_comment && m_scanner.top_char() != '\n') {
@@ -45,14 +45,15 @@ public:
       m_scanner.skip_whitespace();
       if (empty && m_scanner.top_char() == ']') {
         m_scanner.read_char();
-        _discard_after_value_junk();
+        discard_after_value_junk();
         return value;
       }
+      empty = false;
       value->add(m_scanner.read_quoted_string());
       m_scanner.skip_whitespace();
       auto next = m_scanner.read_char();
       if (next.character == ']' && !next.escaped) {
-        _discard_after_value_junk();
+        discard_after_value_junk();
         return value;
       }
       if (next.escaped || next.character != ',') {
@@ -63,15 +64,15 @@ public:
     return nullptr;
   }
 
-  PValue read_map(uint32_t minIndent = 0) {
+  PValue read_map(uint32_t min_indent = 0) {
     auto value = Value::create_map();
-    std::optional<uint32_t> indentLevel;
+    std::optional<uint32_t> indent_level;
     while (!m_scanner.empty()) {
-      if (_useless_line()) {
+      if (is_useless_line()) {
         continue;
       }
       if (m_preamble && (m_scanner.starts_with("---") || m_scanner.starts_with("..."))) {
-        if (minIndent == 0) {
+        if (min_indent == 0) {
           m_scanner.skip(3);
           auto loc = m_scanner.location();
           if (m_scanner.read_line().trim().size() != 0) {
@@ -80,33 +81,33 @@ public:
         }
         break;
       }
-      if (!indentLevel.has_value()) {
-        indentLevel = m_scanner.getIndentationLevel();
-        if (*indentLevel < minIndent) {
+      if (!indent_level.has_value()) {
+        indent_level = m_scanner.get_indent_level();
+        if (*indent_level < min_indent) {
           m_scanner.error("Invalid indentation for start of map");
         }
       }
-      auto currentIndent = m_scanner.getIndentationLevel();
-      if (indentLevel > currentIndent) { // end for this level of indentation
+      auto currentIndent = m_scanner.get_indent_level();
+      if (indent_level > currentIndent) { // end for this level of indentation
         return value;
       }
-      if (indentLevel < m_scanner.getIndentationLevel()) {
+      if (indent_level < m_scanner.get_indent_level()) {
         m_scanner.error("Bad indentation for map key/value pair");
       }
       m_scanner.skip_whitespace(NewLineHandling::Keep);
-      auto key = m_scanner.readWord();
+      auto key = m_scanner.read_word();
       if (key.size() == 0) {
         m_scanner.error("Empty key or invalid indentation");
       }
       m_scanner.expect_ws(m_split);
       m_scanner.skip_whitespace(NewLineHandling::Keep);
-      char top_char = m_scanner.top_char();
+      const char top_char = m_scanner.top_char();
       if (top_char == '\n' || top_char == m_comment) { // we'll have a map value
         m_scanner.read_line();
-        value->add(key, read_map(*indentLevel));
+        value->add(key, read_map(*indent_level));
       } else if (top_char == '"') {
-        Text v = m_scanner.read_quoted_string();
-        _discard_after_value_junk();
+        const Text v = m_scanner.read_quoted_string();
+        discard_after_value_junk();
         value->add(key, v);
       } else if (top_char == '[') {
         value->add(key, read_array());

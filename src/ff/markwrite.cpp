@@ -9,18 +9,19 @@ Document::Document(const Text& content) {
   m_content.read(scanner);
 }
 
+const DateTime DEFAULT_DATE(2020, 1, 1);
+
 void DocumentMetadata::read(TextScanner& scanner) {
-  static DateTime defaultDate(2020, 1, 1);
   m_properties = PoorConfig::parse(scanner);
   check(m_properties->is_map(), "Expected a map as document metadata");
   m_title = m_properties->get_opt("title").value_or(""_t);
   m_featured_image = m_properties->get_opt("image").value_or(""_t);
 
-  auto pubTime = m_properties->get_opt("date");
-  m_published_time = pubTime.has_value() ? DateTime::parse(*pubTime) : defaultDate;
+  auto pub_time = m_properties->get_opt("date");
+  m_published_time = pub_time.has_value() ? DateTime::parse(*pub_time) : DEFAULT_DATE;
 
-  pubTime = m_properties->get_opt("updated");
-  m_last_update = pubTime.has_value() ? DateTime::parse(*pubTime) : m_published_time;
+  pub_time = m_properties->get_opt("updated");
+  m_last_update = pub_time.has_value() ? DateTime::parse(*pub_time) : m_published_time;
 
   auto m = m_properties->as_map();
   if (m_properties->as_map().has("author")) {
