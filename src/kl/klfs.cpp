@@ -15,12 +15,13 @@ namespace fs = std::filesystem;
 
 const std::array<Text, 2> DISCARDABLE_FOLDERS {"."_t, ".."_t};
 const Text FOLDER_SEPARATOR("/");
+const std::size_t LARGEST_SUPPORTED_FILE = 0x8FFFFFFFULL;
 
 Text klfs_read_file_impl(const Text& filename) {
-  fs::path p = filename.starts_with(FOLDER_SEPARATOR[0]) ? filename.toView() : fs::current_path() / filename.toView();
+  const fs::path p = filename.starts_with(FOLDER_SEPARATOR[0]) ? filename.toView() : fs::current_path() / filename.toView();
   auto size = fs::file_size(p); // throws if error;
 
-  if (size > 0x8FFFFFFFULL) [[unlikely]] {
+  if (size > LARGEST_SUPPORTED_FILE) [[unlikely]] {
     // we don't work with oversized data
     throw std::out_of_range("File size exceeds expectations");
   }
@@ -32,9 +33,9 @@ Text klfs_read_file_impl(const Text& filename) {
     return {};
   }
   if (size >= 3) {
-    const char a = is.get();
-    const char b = is.get();
-    const char c = is.get();
+    const char a = static_cast<char>(is.get());
+    const char b = static_cast<char>(is.get());
+    const char c = static_cast<char>(is.get());
     if (a != '\xEF' || b != '\xBB' || c != '\xBF') {
       is.seekg(0);
     } else {
@@ -42,9 +43,9 @@ Text klfs_read_file_impl(const Text& filename) {
     }
   }
   if (size > 0) {
-    auto memblock = TextRefCounter::allocate(size);
+    auto *memblock = TextRefCounter::allocate(size);
     is.read(memblock->text_data(), size);
-    return Text(memblock, size);
+    return {memblock, size};
   }
   return {};
 }
@@ -101,8 +102,8 @@ Text FilePath::filename() const {
 }
 Text FilePath::extension() const { return m_last_dot_pos.has_value() ? m_full_name.skip(*m_last_dot_pos + 1) : Text(); }
 Text FilePath::stem() const {
-  uint32_t stem_start = m_last_slash_pos.has_value() ? *m_last_slash_pos + 1 : 0;
-  uint32_t stem_end = m_last_dot_pos.value_or(m_full_name.size());
+  const uint32_t stem_start = m_last_slash_pos.has_value() ? *m_last_slash_pos + 1 : 0;
+  const uint32_t stem_end = m_last_dot_pos.value_or(m_full_name.size());
   return Text(m_full_name, stem_start, stem_end - stem_start);
 }
 Text FilePath::fullPath() const { return m_full_name; }
@@ -128,7 +129,7 @@ Text FilePath::baseFolder(uint32_t levels) const {
     if (m_full_name[0] == FOLDER_SEPARATOR[0]) {
       levels++;
     }
-    auto pos = m_full_name.pos(FOLDER_SEPARATOR[0], levels);
+    const auto pos = m_full_name.pos(FOLDER_SEPARATOR[0], levels);
     if (pos.has_value()) {
       return m_full_name.subpos(0, *pos - 1);
     }
@@ -141,7 +142,7 @@ FilePath FilePath::discardBaseFolder(uint32_t levels) const {
     return *this;
   }
   if (levels < depth()) {
-    Text p = m_full_name[0] == FOLDER_SEPARATOR[0] ? m_full_name.skip(1) : m_full_name;
+    const Text p = m_full_name[0] == FOLDER_SEPARATOR[0] ? m_full_name.skip(1) : m_full_name;
     auto pos = p.pos(FOLDER_SEPARATOR[0], levels);
     if (pos.has_value()) {
       return p.subpos(*pos + 1, p.size());
@@ -151,7 +152,7 @@ FilePath FilePath::discardBaseFolder(uint32_t levels) const {
 }
 
 FilePath FilePath::replaceBaseFolder(const kl::Text& new_folder, uint32_t levels) const {
-  FilePath fp = discardBaseFolder(levels);
+  const FilePath fp = discardBaseFolder(levels);
   return FilePath(new_folder + FOLDER_SEPARATOR + fp.m_full_name);
 }
 
@@ -177,11 +178,13 @@ FilePath FilePath::add(const kl::Text& component) const {
 std::strong_ordering FilePath::operator<=>(const FilePath& fp) const { return m_full_name <=> fp.m_full_name; }
 bool FilePath::operator==(const FilePath& fp) const { return m_full_name == fp.m_full_name; }
 
-std::vector<FileSystemEntryInfo> _get_directory_entries(const Text& folder) {
+const std::size_t MAX_PATH_SIZE=1024;
+
+std::vector<FileSystemEntryInfo> klfs_get_directory_entries(const Text& folder) {
   std::vector<FileSystemEntryInfo> res;
-  char buffer[1024];
-  folder.fill_c_buffer(buffer, 1024);
-  DIR* dir = opendir(buffer);
+  std::array<char, MAX_PATH_SIZE> buffer;
+  folder.fill_c_buffer(buffer.data(), buffer.size());
+  DIR* dir = opendir(buffer.data());
   dirent* de;
   Text padded_folder = folder + FOLDER_SEPARATOR;
   while ((de = readdir(dir))) {
@@ -191,10 +194,10 @@ std::vector<FileSystemEntryInfo> _get_directory_entries(const Text& folder) {
     }
     if (de->d_type == DT_REG || de->d_type == DT_DIR || de->d_type == DT_LNK) {
       Text fullPath = padded_folder + t;
-      fullPath.fill_c_buffer(buffer, 1024);
+      fullPath.fill_c_buffer(buffer.data(), buffer.size());
       struct stat statbuf;
       FileType ft = FileType::Directory;
-      if (0 == stat(buffer, &statbuf)) {
+      if (0 == stat(buffer.data(), &statbuf)) {
         if (S_ISREG(statbuf.st_mode)) {
           ft = FileType::File;
         } else if (S_ISDIR(statbuf.st_mode)) {
@@ -219,7 +222,7 @@ void FileSystem::navigate_tree(const Text& treeBase,
   while (!to_process.empty()) {
     FileSystemEntryInfo fi = to_process.front();
     to_process.pop();
-    auto entries = _get_directory_entries(fi.path.fullPath());
+    auto entries = klfs_get_directory_entries(fi.path.fullPath());
     for (const auto& entry: entries) {
       auto res = processor(entry);
       if (res == NavigateInstructions::Continue && entry.type == FileType::Directory) {

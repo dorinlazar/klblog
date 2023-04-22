@@ -13,7 +13,8 @@ Checks: >
   -readability-identifier-length,
   -misc-no-recursion,
   -readability-function-cognitive-complexity,
-  -modernize-pass-by-value
+  -modernize-pass-by-value,
+  -modernize-return-braced-init-list
 # Turn all the warnings from the checks above into errors.
 # WarningsAsErrors: "*"
 
