@@ -1,3 +1,5 @@
+#include "klnet.hpp"
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
@@ -5,10 +7,9 @@
 #include <openssl/ssl.h>
 #include <arpa/inet.h>
 
-#include "klnet.hpp"
 #include "klexcept.hpp"
 
-using namespace kl;
+namespace kl {
 
 static int connect_to_server(const Text& server, uint16_t port) {
   std::string server_str = server.toString();
@@ -165,3 +166,4 @@ TimeSpan SslClient::readTimeout() { return _impl->client.readTimeout(); }
 void SslClient::setReadTimeout(TimeSpan ts) { _impl->client.setReadTimeout(ts); }
 TimeSpan SslClient::writeTimeout() { return _impl->client.writeTimeout(); }
 void SslClient::setWriteTimeout(TimeSpan ts) { _impl->client.setWriteTimeout(ts); }
+} // namespace kl

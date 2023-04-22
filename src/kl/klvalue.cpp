@@ -1,7 +1,7 @@
 #include "klvalue.hpp"
 #include "klfs.hpp"
-using namespace kl;
 
+namespace kl {
 Value::Value(ValueType vt) {
   switch (vt) {
   case ValueType::Null: _value = NullValue(); break;
@@ -155,5 +155,7 @@ std::optional<Text> Value::getOpt(const kl::Text& path) {
   }
   return {};
 }
+
+} // namespace kl
 
 bool operator==(const kl::Value& v, const kl::Text& t) { return v.isScalar() && v.getValue() == t; }

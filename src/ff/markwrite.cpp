@@ -11,27 +11,27 @@ Document::Document(const Text& content) {
 
 void DocumentMetadata::read(TextScanner& scanner) {
   static DateTime defaultDate(2020, 1, 1);
-  properties = PoorConfig::parse(scanner);
-  check(properties->isMap(), "Expected a map as document metadata");
-  title = properties->getOpt("title").value_or(""_t);
-  featured_image = properties->getOpt("image").value_or(""_t);
+  m_properties = PoorConfig::parse(scanner);
+  check(m_properties->isMap(), "Expected a map as document metadata");
+  m_title = m_properties->getOpt("title").value_or(""_t);
+  m_featured_image = m_properties->getOpt("image").value_or(""_t);
 
-  auto pubTime = properties->getOpt("date");
-  publish = pubTime.has_value() ? DateTime::parse(*pubTime) : defaultDate;
+  auto pubTime = m_properties->getOpt("date");
+  m_published_time = pubTime.has_value() ? DateTime::parse(*pubTime) : defaultDate;
 
-  pubTime = properties->getOpt("updated");
-  last_update = pubTime.has_value() ? DateTime::parse(*pubTime) : publish;
+  pubTime = m_properties->getOpt("updated");
+  m_last_update = pubTime.has_value() ? DateTime::parse(*pubTime) : m_published_time;
 
-  auto m = properties->asMap();
-  if (properties->asMap().has("author")) {
-    authors = properties->get("author")->getArrayValue();
+  auto m = m_properties->asMap();
+  if (m_properties->asMap().has("author")) {
+    m_authors = m_properties->get("author")->getArrayValue();
   }
 }
 
 void DocumentContent::read_paragraph() {}
 
 void DocumentContent::read(TextScanner& scanner) {
-  base_content = scanner.remainder();
+  m_base_content = scanner.remainder();
   while (!scanner.empty()) {
     read_paragraph();
   }

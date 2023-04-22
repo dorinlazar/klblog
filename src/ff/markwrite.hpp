@@ -11,20 +11,21 @@
 
 namespace kl {
 
-struct DocumentMetadata {
-  Text title;
-  DateTime publish;
-  DateTime last_update;
-  List<Text> authors;
-  Text featured_image;
-  PValue properties;
+class DocumentMetadata {
+
+  Text m_title;
+  DateTime m_published_time;
+  DateTime m_last_update;
+  List<Text> m_authors;
+  Text m_featured_image;
+  PValue m_properties;
 
 public:
   void read(TextScanner& scanner);
 };
 
-struct DocumentContent {
-  Text base_content;
+class DocumentContent {
+  Text m_base_content;
 
   void read_paragraph();
 
@@ -37,7 +38,7 @@ class Document {
   DocumentContent m_content;
 
 public:
-  Document(const Text& content);
+  explicit Document(const Text& content);
 };
 
 } // namespace kl

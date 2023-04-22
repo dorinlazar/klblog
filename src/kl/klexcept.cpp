@@ -1,5 +1,6 @@
 #include "klexcept.hpp"
-using namespace kl;
+
+namespace kl {
 
 OperationNotSupported::OperationNotSupported(const Text& op, const Text& reason)
     : std::logic_error(("Operation not supported"_t + op + ": " + reason).toText().toString()) {}
@@ -9,3 +10,5 @@ InvalidInputData::InvalidInputData(const Text& received, const Text& expected)
 IOException::IOException(const Text& why) : _why(why) {}
 IOException IOException::currentStandardError() { return IOException(strerror(errno)); }
 const Text& IOException::what() { return _why; }
+
+} // namespace kl

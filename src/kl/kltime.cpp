@@ -4,8 +4,7 @@
 #include "kl/textscanner.hpp"
 // #include <format>
 
-using namespace kl;
-
+namespace kl {
 static constexpr bool _leap_year(uint32_t year) { // Leap year, for one-based 1-400 interval
   return ((year & 0x03) == 0) && year != 100 && year != 200 && year != 300;
 }
@@ -271,3 +270,4 @@ DateTime DateTime::parse(const Text& src) {
   }
   return dt;
 }
+} // namespace kl

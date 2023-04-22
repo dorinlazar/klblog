@@ -1,8 +1,8 @@
 #include "poorconfig.hpp"
 #include "kl/textscanner.hpp"
 #include "kl/klfs.hpp"
-using namespace kl;
 
+namespace kl {
 class PoorConfigParser {
   TextScanner& m_scanner;
   char m_split;
@@ -132,3 +132,4 @@ PValue PoorConfig::parse(TextScanner& scanner, char split) {
 
 PoorConfig::PoorConfig(const Text& filename) { m_value = parse(FileReader(filename).read_all()); }
 PValue PoorConfig::top() const { return m_value; }
+} // namespace kl

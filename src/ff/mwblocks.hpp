@@ -3,12 +3,11 @@
 #include "kl/kltext.hpp"
 
 namespace kl::mw {
-using namespace kl;
 
 enum class BlockType { Open, Paragraph };
 
 struct Block {
-  TextChain contents;
+  kl::TextChain contents;
   BlockType type = BlockType::Open;
 
 public:

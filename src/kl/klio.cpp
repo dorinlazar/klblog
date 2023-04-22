@@ -1,11 +1,11 @@
+#include "klio.hpp"
+
 #include <sys/stat.h>
 #include <sys/uio.h>
 #include <fcntl.h>
 #include <poll.h>
 
-#include "klio.hpp"
-using namespace kl;
-
+namespace kl {
 static Text s_notImplemented = "Not implemented by derived class"_t;
 
 Stream::~Stream() { close(); }
@@ -204,3 +204,4 @@ void PosixFileStream::close() {
 PosixFileStream::~PosixFileStream() { close(); }
 
 int PosixFileStream::file_descriptor() { return _fd; }
+} // namespace kl

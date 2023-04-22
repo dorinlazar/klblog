@@ -3,8 +3,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
-using namespace kl;
-
+namespace kl {
 static char* to_c_string(const Text& t) {
   char* p = (char*)malloc(t.size() + 1);
   std::copy(t.begin(), t.end(), p);
@@ -175,3 +174,4 @@ bool ProcessHorde::run(uint32_t nJobs, bool verbose) {
 
   return true;
 }
+} // namespace kl

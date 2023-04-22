@@ -7,7 +7,7 @@ class PoorConfig {
   PValue m_value;
 
 public:
-  PoorConfig(const Text& filename);
+  explicit PoorConfig(const Text& filename);
   PValue top() const;
 
 public:
