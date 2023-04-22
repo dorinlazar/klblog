@@ -45,9 +45,9 @@ public:
   TextChain to_string() const;
 
 public:
-  void setValue(const Text& txt);
-  Text getValue() const;
-  List<Text> getArrayValue() const;
+  void set_value(const Text& txt);
+  Text get_value() const;
+  List<Text> get_array_value() const;
 
   void add(PValue v);
   void add(const Text& txt, PValue v);
@@ -60,7 +60,7 @@ public:
   PValue get(const Text& key) const;
   bool has(const Text& key) const;
   size_t size() const;
-  std::optional<Text> getOpt(const kl::Text& path);
+  std::optional<Text> get_opt(const kl::Text& path);
 
 public:
   inline void perform(std::function<void(NullValue&)> nullOp, std::function<void(Text&)> scalarOp,

@@ -208,7 +208,7 @@ public:
     return it->second;
   }
 
-  const std::optional<V> getOpt(const K& key) const {
+  const std::optional<V> get_opt(const K& key) const {
     auto it = _map.find(key);
     if (it == _map.end()) {
       return {};

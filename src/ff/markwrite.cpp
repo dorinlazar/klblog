@@ -13,18 +13,18 @@ void DocumentMetadata::read(TextScanner& scanner) {
   static DateTime defaultDate(2020, 1, 1);
   m_properties = PoorConfig::parse(scanner);
   check(m_properties->is_map(), "Expected a map as document metadata");
-  m_title = m_properties->getOpt("title").value_or(""_t);
-  m_featured_image = m_properties->getOpt("image").value_or(""_t);
+  m_title = m_properties->get_opt("title").value_or(""_t);
+  m_featured_image = m_properties->get_opt("image").value_or(""_t);
 
-  auto pubTime = m_properties->getOpt("date");
+  auto pubTime = m_properties->get_opt("date");
   m_published_time = pubTime.has_value() ? DateTime::parse(*pubTime) : defaultDate;
 
-  pubTime = m_properties->getOpt("updated");
+  pubTime = m_properties->get_opt("updated");
   m_last_update = pubTime.has_value() ? DateTime::parse(*pubTime) : m_published_time;
 
   auto m = m_properties->as_map();
   if (m_properties->as_map().has("author")) {
-    m_authors = m_properties->get("author")->getArrayValue();
+    m_authors = m_properties->get("author")->get_array_value();
   }
 }
 

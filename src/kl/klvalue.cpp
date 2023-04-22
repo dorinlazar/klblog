@@ -40,9 +40,9 @@ const ListValue& Value::as_list() const { return std::get<(int)ValueType::List>(
 Text Value::as_scalar() const { return std::get<(int)ValueType::Scalar>(_value); }
 
 ValueType Value::type() const { return ValueType(_value.index()); }
-void Value::setValue(const Text& txt) { _value = txt; }
-Text Value::getValue() const { return as_scalar(); }
-List<Text> Value::getArrayValue() const {
+void Value::set_value(const Text& txt) { _value = txt; }
+Text Value::get_value() const { return as_scalar(); }
+List<Text> Value::get_array_value() const {
   if (is_scalar()) {
     return {as_scalar()};
   }
@@ -137,7 +137,7 @@ TextChain Value::to_string() const {
   return tc;
 }
 
-std::optional<Text> Value::getOpt(const kl::Text& path) {
+std::optional<Text> Value::get_opt(const kl::Text& path) {
   Value* v = this;
   for (const auto& val: kl::FilePath(path).breadcrumbs()) {
     if (v->is_map()) {
@@ -151,11 +151,11 @@ std::optional<Text> Value::getOpt(const kl::Text& path) {
     }
   }
   if (v != nullptr && v->is_scalar()) {
-    return v->getValue();
+    return v->get_value();
   }
   return {};
 }
 
 } // namespace kl
 
-bool operator==(const kl::Value& v, const kl::Text& t) { return v.is_scalar() && v.getValue() == t; }
+bool operator==(const kl::Value& v, const kl::Text& t) { return v.is_scalar() && v.get_value() == t; }

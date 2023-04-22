@@ -8,11 +8,11 @@ namespace klblog {
 void Settings::parse(const kl::Text& filename) {
   auto config = kl::PoorConfig(filename);
   auto value = config.top();
-  website_url = value->getOpt("url").value_or("https://localhost/");
-  website_title = value->getOpt("title").value_or(""_t);
-  copyright_notice = value->getOpt("copyright").value_or(""_t);
-  default_language = value->getOpt("language").value_or("en"_t);
-  theme_name = value->getOpt("theme").value_or("default"_t);
+  website_url = value->get_opt("url").value_or("https://localhost/");
+  website_title = value->get_opt("title").value_or(""_t);
+  copyright_notice = value->get_opt("copyright").value_or(""_t);
+  default_language = value->get_opt("language").value_or("en"_t);
+  theme_name = value->get_opt("theme").value_or("default"_t);
 }
 
 void Settings::log_abstract() const {

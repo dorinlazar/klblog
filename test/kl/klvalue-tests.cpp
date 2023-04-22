@@ -33,9 +33,9 @@ TEST(klvalue, test_value_list) {
   v.add(kl::Value::create_scalar("400"_t));
   EXPECT_TRUE(v.size() == 5);
   EXPECT_TRUE(v[0].is_scalar());
-  EXPECT_TRUE(v[0].getValue() == "100"_t);
+  EXPECT_TRUE(v[0].get_value() == "100"_t);
   EXPECT_TRUE(v[1].is_scalar());
-  EXPECT_TRUE(v[1].getValue() == "200"_t);
+  EXPECT_TRUE(v[1].get_value() == "200"_t);
   EXPECT_TRUE(v[2].is_list());
   auto& list2 = v[2];
   list2.add(kl::Value::create_scalar("210"_t));
@@ -44,15 +44,15 @@ TEST(klvalue, test_value_list) {
   list2.add(kl::Value::create_scalar("240"_t));
   list2.add(kl::Value::create_scalar("250"_t));
   EXPECT_TRUE(v[3].is_scalar());
-  EXPECT_TRUE(v[3].getValue() == "300"_t);
+  EXPECT_TRUE(v[3].get_value() == "300"_t);
   EXPECT_TRUE(v[4].is_scalar());
-  EXPECT_TRUE(v[4].getValue() == "400"_t);
+  EXPECT_TRUE(v[4].get_value() == "400"_t);
   EXPECT_TRUE(v[2].size() == 5);
-  EXPECT_TRUE(v[2][0].getValue() == "210"_t);
-  EXPECT_TRUE(v[2][1].getValue() == "220"_t);
-  EXPECT_TRUE(v[2][2].getValue() == "230"_t);
-  EXPECT_TRUE(v[2][3].getValue() == "240"_t);
-  EXPECT_TRUE(v[2][4].getValue() == "250"_t);
+  EXPECT_TRUE(v[2][0].get_value() == "210"_t);
+  EXPECT_TRUE(v[2][1].get_value() == "220"_t);
+  EXPECT_TRUE(v[2][2].get_value() == "230"_t);
+  EXPECT_TRUE(v[2][3].get_value() == "240"_t);
+  EXPECT_TRUE(v[2][4].get_value() == "250"_t);
   EXPECT_THROW(v[10], std::out_of_range);
 }
 
@@ -78,7 +78,7 @@ TEST(klvalue, test_value_map) {
   m.add("m03", "m03_value");
 
   EXPECT_TRUE(v["test"].is_scalar());
-  EXPECT_TRUE(v["test"].getValue() == "test_value");
+  EXPECT_TRUE(v["test"].get_value() == "test_value");
 
   EXPECT_TRUE(v["list"].is_list());
   EXPECT_TRUE(v["list"].size() == 4);
@@ -107,19 +107,19 @@ TEST(klvalue, test_value_getopt) {
   m->add("deep2", kl::Value::create_scalar("dv2"_t));
   m->add("deep3", kl::Value::create_scalar("dv3"_t));
 
-  EXPECT_TRUE(root->getOpt("test") == "test_value");
-  EXPECT_TRUE(root->getOpt("/test/") == "test_value");
-  EXPECT_TRUE(root->getOpt("test2") == "value2");
-  EXPECT_TRUE(root->getOpt("map/path1") == "tv1");
-  EXPECT_TRUE(root->getOpt("map/path3") == "tv3");
-  EXPECT_TRUE(root->getOpt("map/path3/") == "tv3");
-  EXPECT_TRUE(root->getOpt("map/path2/deep1") == "dv1");
-  EXPECT_TRUE(root->getOpt("map/path2/deep2") == "dv2");
-  EXPECT_TRUE(root->getOpt("map/path2/deep3") == "dv3");
-  EXPECT_TRUE(root->getOpt("map/path2/deep3/") == "dv3");
+  EXPECT_TRUE(root->get_opt("test") == "test_value");
+  EXPECT_TRUE(root->get_opt("/test/") == "test_value");
+  EXPECT_TRUE(root->get_opt("test2") == "value2");
+  EXPECT_TRUE(root->get_opt("map/path1") == "tv1");
+  EXPECT_TRUE(root->get_opt("map/path3") == "tv3");
+  EXPECT_TRUE(root->get_opt("map/path3/") == "tv3");
+  EXPECT_TRUE(root->get_opt("map/path2/deep1") == "dv1");
+  EXPECT_TRUE(root->get_opt("map/path2/deep2") == "dv2");
+  EXPECT_TRUE(root->get_opt("map/path2/deep3") == "dv3");
+  EXPECT_TRUE(root->get_opt("map/path2/deep3/") == "dv3");
 
-  EXPECT_TRUE(!root->getOpt("map/path1/deep3").has_value());
-  EXPECT_TRUE(!root->getOpt("map2/path1/deep3").has_value());
-  EXPECT_TRUE(!root->getOpt("map/path2").has_value());
-  EXPECT_TRUE(!root->getOpt("map/").has_value());
+  EXPECT_TRUE(!root->get_opt("map/path1/deep3").has_value());
+  EXPECT_TRUE(!root->get_opt("map2/path1/deep3").has_value());
+  EXPECT_TRUE(!root->get_opt("map/path2").has_value());
+  EXPECT_TRUE(!root->get_opt("map/").has_value());
 }
