@@ -24,25 +24,25 @@ public:
   Value(const Text& value);
   Value();
 
-  static PValue createNull();
-  static PValue createScalar(const Text& value = ""_t);
-  static PValue createMap();
+  static PValue create_null();
+  static PValue create_scalar(const Text& value = ""_t);
+  static PValue create_map();
   static PValue create_list();
 
-  bool isNull() const;
-  bool isScalar() const;
-  bool isMap() const;
-  bool isList() const;
+  bool is_null() const;
+  bool is_scalar() const;
+  bool is_map() const;
+  bool is_list() const;
 
-  MapValue& asMap();
-  ListValue& asList();
-  const MapValue& asMap() const;
-  const ListValue& asList() const;
-  Text asScalar() const;
+  MapValue& as_map();
+  ListValue& as_list();
+  const MapValue& as_map() const;
+  const ListValue& as_list() const;
+  Text as_scalar() const;
 
 public:
   ValueType type() const;
-  TextChain toString() const;
+  TextChain to_string() const;
 
 public:
   void setValue(const Text& txt);

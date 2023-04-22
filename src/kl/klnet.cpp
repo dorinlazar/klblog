@@ -12,7 +12,7 @@
 namespace kl {
 
 static int connect_to_server(const Text& server, uint16_t port) {
-  std::string server_str = server.toString();
+  std::string server_str = server.to_string();
   addrinfo hints;
   memset(&hints, 0, sizeof(addrinfo));
   hints.ai_flags = AI_ADDRCONFIG | AI_PASSIVE | AI_ALL | AI_NUMERICSERV;
@@ -20,7 +20,7 @@ static int connect_to_server(const Text& server, uint16_t port) {
   hints.ai_socktype = SOCK_STREAM;
 
   addrinfo* addresses = nullptr;
-  auto callres = ::getaddrinfo(server.toString().c_str(), std::to_string(port).c_str(), &hints, &addresses);
+  auto callres = ::getaddrinfo(server.to_string().c_str(), std::to_string(port).c_str(), &hints, &addresses);
   if (0 != callres) {
     throw IOException(gai_strerror(callres));
   }

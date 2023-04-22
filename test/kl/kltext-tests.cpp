@@ -7,23 +7,23 @@ using namespace kl::literals;
 TEST(kltext, test_text_construction) {
   Text txt("Hello world");
   auto t2 = Text(txt, 4, 20);
-  EXPECT_EQ(t2.toString(), "o world"s);
+  EXPECT_EQ(t2.to_string(), "o world"s);
   EXPECT_EQ(t2.size(), 7);
 
   Text tnull(nullptr, 2, 4);
   EXPECT_EQ(tnull.size(), 0);
-  EXPECT_EQ(tnull.toString(), ""s);
+  EXPECT_EQ(tnull.to_string(), ""s);
   auto tn2 = Text(tnull, 2, 4);
   EXPECT_EQ(tn2.size(), 0);
-  EXPECT_EQ(tn2.toString(), ""s);
+  EXPECT_EQ(tn2.to_string(), ""s);
 
   Text tempty(""s);
   EXPECT_EQ(tempty.size(), 0);
-  EXPECT_EQ(tempty.toString(), ""s);
+  EXPECT_EQ(tempty.to_string(), ""s);
 
   Text t1("Hello World", 2);
   EXPECT_EQ(t1.size(), 2);
-  EXPECT_EQ(t1.toString(), "He"s);
+  EXPECT_EQ(t1.to_string(), "He"s);
 
   Text t3("Hello World\0", 12);
   EXPECT_EQ(t3.size(), 12);
@@ -37,19 +37,19 @@ TEST(kltext, test_text_construction) {
 
 TEST(kltext, test_trimming) {
   Text txt(" \t hello   \n ");
-  EXPECT_EQ(txt.trim().toString(), "hello"s);
-  EXPECT_EQ(txt.trim_left().toString(), "hello   \n "s);
-  EXPECT_EQ(txt.trim_right().toString(), " \t hello"s);
+  EXPECT_EQ(txt.trim().to_string(), "hello"s);
+  EXPECT_EQ(txt.trim_left().to_string(), "hello   \n "s);
+  EXPECT_EQ(txt.trim_right().to_string(), " \t hello"s);
 
   Text txt2("hello");
-  EXPECT_EQ(txt2.trim().toString(), "hello"s);
-  EXPECT_EQ(txt2.trim_left().toString(), "hello"s);
-  EXPECT_EQ(txt2.trim_right().toString(), "hello"s);
+  EXPECT_EQ(txt2.trim().to_string(), "hello"s);
+  EXPECT_EQ(txt2.trim_left().to_string(), "hello"s);
+  EXPECT_EQ(txt2.trim_right().to_string(), "hello"s);
 
   Text txt3;
-  EXPECT_EQ(txt3.trim().toString(), ""s);
-  EXPECT_EQ(txt3.trim_left().toString(), ""s);
-  EXPECT_EQ(txt3.trim_right().toString(), ""s);
+  EXPECT_EQ(txt3.trim().to_string(), ""s);
+  EXPECT_EQ(txt3.trim_left().to_string(), ""s);
+  EXPECT_EQ(txt3.trim_right().to_string(), ""s);
 }
 
 TEST(kltext, test_starts_with) {

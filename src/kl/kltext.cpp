@@ -438,11 +438,11 @@ size_t Text::size() const { return m_end - m_start; }
 const char* Text::begin() const { return m_memblock->text_data() + m_start; }
 const char* Text::end() const { return m_memblock->text_data() + m_end; }
 
-std::string Text::toString() const { return std::string(begin(), size()); }
+std::string Text::to_string() const { return std::string(begin(), size()); }
 std::string_view Text::toView() const { return std::string_view(begin(), size()); }
 TextView Text::toTextView() const { return TextView(toView()); }
 std::span<uint8_t> Text::toRawData() const { return {(uint8_t*)begin(), (uint8_t*)end()}; }
-int64_t Text::toInt() const { return std::stoll(toString()); }
+int64_t Text::toInt() const { return std::stoll(to_string()); }
 
 Text Text::trim() const { return trim_left().trim_right(); }
 Text Text::trim_left() const { return skip(WHITESPACE); }

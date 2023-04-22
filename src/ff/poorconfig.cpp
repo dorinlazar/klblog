@@ -64,7 +64,7 @@ public:
   }
 
   PValue read_map(uint32_t minIndent = 0) {
-    auto value = Value::createMap();
+    auto value = Value::create_map();
     std::optional<uint32_t> indentLevel;
     while (!m_scanner.empty()) {
       if (_useless_line()) {

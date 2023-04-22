@@ -4,48 +4,48 @@
 using namespace kl::literals;
 
 TEST(klvalue, test_value_null) {
-  auto v = kl::Value::createNull();
-  EXPECT_TRUE(v->isNull());
-  EXPECT_TRUE(!v->isScalar());
-  EXPECT_TRUE(!v->isMap());
-  EXPECT_TRUE(!v->isList());
+  auto v = kl::Value::create_null();
+  EXPECT_TRUE(v->is_null());
+  EXPECT_TRUE(!v->is_scalar());
+  EXPECT_TRUE(!v->is_map());
+  EXPECT_TRUE(!v->is_list());
 }
 
 TEST(klvalue, test_value_scalar) {
-  auto v = kl::Value::createScalar("Hello world"_t);
-  EXPECT_TRUE(!v->isNull());
-  EXPECT_TRUE(v->isScalar());
-  EXPECT_TRUE(!v->isMap());
-  EXPECT_TRUE(!v->isList());
+  auto v = kl::Value::create_scalar("Hello world"_t);
+  EXPECT_TRUE(!v->is_null());
+  EXPECT_TRUE(v->is_scalar());
+  EXPECT_TRUE(!v->is_map());
+  EXPECT_TRUE(!v->is_list());
 }
 
 TEST(klvalue, test_value_list) {
   auto pv = kl::Value::create_list();
   auto& v = *pv;
-  EXPECT_TRUE(!v.isNull());
-  EXPECT_TRUE(!v.isScalar());
-  EXPECT_TRUE(!v.isMap());
-  EXPECT_TRUE(v.isList());
-  v.add(kl::Value::createScalar("100"_t));
-  v.add(kl::Value::createScalar("200"_t));
+  EXPECT_TRUE(!v.is_null());
+  EXPECT_TRUE(!v.is_scalar());
+  EXPECT_TRUE(!v.is_map());
+  EXPECT_TRUE(v.is_list());
+  v.add(kl::Value::create_scalar("100"_t));
+  v.add(kl::Value::create_scalar("200"_t));
   v.add(kl::Value::create_list());
-  v.add(kl::Value::createScalar("300"_t));
-  v.add(kl::Value::createScalar("400"_t));
+  v.add(kl::Value::create_scalar("300"_t));
+  v.add(kl::Value::create_scalar("400"_t));
   EXPECT_TRUE(v.size() == 5);
-  EXPECT_TRUE(v[0].isScalar());
+  EXPECT_TRUE(v[0].is_scalar());
   EXPECT_TRUE(v[0].getValue() == "100"_t);
-  EXPECT_TRUE(v[1].isScalar());
+  EXPECT_TRUE(v[1].is_scalar());
   EXPECT_TRUE(v[1].getValue() == "200"_t);
-  EXPECT_TRUE(v[2].isList());
+  EXPECT_TRUE(v[2].is_list());
   auto& list2 = v[2];
-  list2.add(kl::Value::createScalar("210"_t));
-  list2.add(kl::Value::createScalar("220"_t));
-  list2.add(kl::Value::createScalar("230"_t));
-  list2.add(kl::Value::createScalar("240"_t));
-  list2.add(kl::Value::createScalar("250"_t));
-  EXPECT_TRUE(v[3].isScalar());
+  list2.add(kl::Value::create_scalar("210"_t));
+  list2.add(kl::Value::create_scalar("220"_t));
+  list2.add(kl::Value::create_scalar("230"_t));
+  list2.add(kl::Value::create_scalar("240"_t));
+  list2.add(kl::Value::create_scalar("250"_t));
+  EXPECT_TRUE(v[3].is_scalar());
   EXPECT_TRUE(v[3].getValue() == "300"_t);
-  EXPECT_TRUE(v[4].isScalar());
+  EXPECT_TRUE(v[4].is_scalar());
   EXPECT_TRUE(v[4].getValue() == "400"_t);
   EXPECT_TRUE(v[2].size() == 5);
   EXPECT_TRUE(v[2][0].getValue() == "210"_t);
@@ -57,16 +57,16 @@ TEST(klvalue, test_value_list) {
 }
 
 TEST(klvalue, test_value_map) {
-  auto pv = kl::Value::createMap();
+  auto pv = kl::Value::create_map();
   auto& v = *pv;
-  EXPECT_TRUE(!v.isNull());
-  EXPECT_TRUE(!v.isScalar());
-  EXPECT_TRUE(v.isMap());
-  EXPECT_TRUE(!v.isList());
+  EXPECT_TRUE(!v.is_null());
+  EXPECT_TRUE(!v.is_scalar());
+  EXPECT_TRUE(v.is_map());
+  EXPECT_TRUE(!v.is_list());
 
-  v.add("test"_t, kl::Value::createScalar("test_value"_t));
+  v.add("test"_t, kl::Value::create_scalar("test_value"_t));
   v.add("list"_t, kl::Value::create_list());
-  v.add("map"_t, kl::Value::createMap());
+  v.add("map"_t, kl::Value::create_map());
   auto& lst = v["list"_t];
   auto& m = v["map"_t];
   lst.add("100"_t);
@@ -77,10 +77,10 @@ TEST(klvalue, test_value_map) {
   m.add("m02", "m02_value");
   m.add("m03", "m03_value");
 
-  EXPECT_TRUE(v["test"].isScalar());
+  EXPECT_TRUE(v["test"].is_scalar());
   EXPECT_TRUE(v["test"].getValue() == "test_value");
 
-  EXPECT_TRUE(v["list"].isList());
+  EXPECT_TRUE(v["list"].is_list());
   EXPECT_TRUE(v["list"].size() == 4);
   EXPECT_TRUE(v["list"][0] == "100");
   EXPECT_TRUE(v["list"][1] == "200");
@@ -94,18 +94,18 @@ TEST(klvalue, test_value_map) {
 }
 
 TEST(klvalue, test_value_getopt) {
-  auto root = kl::Value::createMap();
-  root->add("test"_t, kl::Value::createScalar("test_value"_t));
-  root->add("map"_t, kl::Value::createMap());
-  root->add("test2"_t, kl::Value::createScalar("value2"_t));
+  auto root = kl::Value::create_map();
+  root->add("test"_t, kl::Value::create_scalar("test_value"_t));
+  root->add("map"_t, kl::Value::create_map());
+  root->add("test2"_t, kl::Value::create_scalar("value2"_t));
   auto m = root->get("map"_t);
-  m->add("path1", kl::Value::createScalar("tv1"_t));
-  m->add("path2", kl::Value::createMap());
-  m->add("path3", kl::Value::createScalar("tv3"_t));
+  m->add("path1", kl::Value::create_scalar("tv1"_t));
+  m->add("path2", kl::Value::create_map());
+  m->add("path3", kl::Value::create_scalar("tv3"_t));
   m = m->get("path2");
-  m->add("deep1", kl::Value::createScalar("dv1"_t));
-  m->add("deep2", kl::Value::createScalar("dv2"_t));
-  m->add("deep3", kl::Value::createScalar("dv3"_t));
+  m->add("deep1", kl::Value::create_scalar("dv1"_t));
+  m->add("deep2", kl::Value::create_scalar("dv2"_t));
+  m->add("deep3", kl::Value::create_scalar("dv3"_t));
 
   EXPECT_TRUE(root->getOpt("test") == "test_value");
   EXPECT_TRUE(root->getOpt("/test/") == "test_value");

@@ -161,7 +161,7 @@ public:
   bool ends_with(const Text& tv) const;
   bool ends_with(char c) const;
 
-  std::string toString() const;
+  std::string to_string() const;
   std::string_view toView() const;
   TextView toTextView() const;
   std::span<uint8_t> toRawData() const;

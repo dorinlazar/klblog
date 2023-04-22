@@ -2,7 +2,7 @@
 
 namespace kl {
 ParsingError::ParsingError(const Text& why, uint32_t line, uint32_t column)
-    : std::logic_error((why + "@"_t + std::to_string(line) + ":" + std::to_string(column)).toText().toString()),
+    : std::logic_error((why + "@"_t + std::to_string(line) + ":" + std::to_string(column)).toText().to_string()),
       _line(line), _column(column) {}
 
 uint32_t ParsingError::line() const { return _line; }
