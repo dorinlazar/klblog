@@ -2,6 +2,7 @@
 #include "ff/poorconfig.hpp"
 
 namespace kl {
+
 Document::Document(const Text& content) {
   TextScanner scanner(content);
   m_metadata.read(scanner);

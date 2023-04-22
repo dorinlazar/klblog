@@ -34,10 +34,10 @@ public:
   TextView trim_left() const;
   TextView trim_right() const;
 
-  bool startsWith(char c) const;
-  bool startsWith(const TextView& tv) const;
-  bool endsWith(char c) const;
-  bool endsWith(const TextView& tv) const;
+  bool starts_with(char c) const;
+  bool starts_with(const TextView& tv) const;
+  bool ends_with(char c) const;
+  bool ends_with(const TextView& tv) const;
 
   char operator[](size_t index) const;
 
@@ -61,7 +61,7 @@ public:
 
   TextView skip(const TextView& skippables) const;
   TextView skip(size_t n) const;
-  TextView skipBOM() const;
+  TextView skip_bom() const;
 
   // substring position based. The string will contain the character from ending position too.
   TextView subpos(size_t start, size_t end) const;
@@ -72,24 +72,24 @@ public:
   // occurence is one based - so first occurence is 1;
   std::optional<size_t> pos(char c, size_t occurence = 1) const;
   std::optional<size_t> pos(const TextView& t, size_t occurence = 1) const;
-  std::optional<size_t> lastPos(char c) const;
+  std::optional<size_t> last_pos(char c) const;
 
-  std::pair<TextView, TextView> splitPos(ssize_t where) const;
-  std::pair<TextView, TextView> splitNextChar(char c, SplitDirection direction = SplitDirection::Discard) const;
-  std::pair<TextView, TextView> splitNextLine() const;
-  List<TextView> splitLines(SplitEmpty onEmpty = SplitEmpty::Keep) const;
-  List<TextView> splitByChar(char c, SplitEmpty onEmpty = SplitEmpty::Discard) const;
-  List<TextView> splitByText(const TextView& t, SplitEmpty onEmpty = SplitEmpty::Discard) const;
+  std::pair<TextView, TextView> split_pos(ssize_t where) const;
+  std::pair<TextView, TextView> split_next_char(char c, SplitDirection direction = SplitDirection::Discard) const;
+  std::pair<TextView, TextView> split_next_line() const;
+  List<TextView> split_lines(SplitEmpty onEmpty = SplitEmpty::Keep) const;
+  List<TextView> split_by_char(char c, SplitEmpty onEmpty = SplitEmpty::Discard) const;
+  List<TextView> split_by_text(const TextView& t, SplitEmpty onEmpty = SplitEmpty::Discard) const;
 
   // returns a value that skips the starting text
   std::optional<TextView> expect(const TextView& t) const;
   // returns a value that skips the whitespace in the text
-  std::optional<TextView> expectws(const TextView& t) const;
+  std::optional<TextView> expect_ws(const TextView& t) const;
 
   // returns text after <indentLevel> whitespaces, or empty;
-  std::optional<TextView> skipIndent(size_t indentLevel) const;
+  std::optional<TextView> skip_indent(size_t indentLevel) const;
   // returns whitespace indent level
-  size_t getIndent() const;
+  size_t get_indent() const;
   // how many times the character c appears in the text
   size_t count(char c) const;
 
@@ -155,11 +155,11 @@ public:
   Text trim_left() const;
   Text trim_right() const;
 
-  bool startsWith(const Text& tv) const;
-  bool startsWith(const char*) const;
-  bool startsWith(char c) const;
-  bool endsWith(const Text& tv) const;
-  bool endsWith(char c) const;
+  bool starts_with(const Text& tv) const;
+  bool starts_with(const char*) const;
+  bool starts_with(char c) const;
+  bool ends_with(const Text& tv) const;
+  bool ends_with(char c) const;
 
   std::string toString() const;
   std::string_view toView() const;
@@ -170,7 +170,7 @@ public:
   bool contains(char c) const;
   Text skip(std::string_view skippables) const;
   Text skip(size_t n) const;
-  Text skipBOM() const;
+  Text skip_bom() const;
 
   // substring position based. The string will contain the character from ending position too.
   Text subpos(size_t start, size_t end) const;
@@ -181,24 +181,24 @@ public:
   // occurence is one based - so first occurence is 1;
   std::optional<size_t> pos(char c, size_t occurence = 1) const;
   std::optional<size_t> pos(Text t, size_t occurence = 1) const;
-  std::optional<size_t> lastPos(char c) const;
+  std::optional<size_t> last_pos(char c) const;
 
-  std::pair<Text, Text> splitPos(ssize_t where) const;
-  std::pair<Text, Text> splitNextChar(char c, SplitDirection direction = SplitDirection::Discard) const;
-  std::pair<Text, Text> splitNextLine() const;
-  List<Text> splitLines(SplitEmpty onEmpty = SplitEmpty::Keep) const;
-  List<Text> splitByChar(char c, SplitEmpty onEmpty = SplitEmpty::Discard) const;
-  List<Text> splitByText(const Text& t, SplitEmpty onEmpty = SplitEmpty::Discard) const;
+  std::pair<Text, Text> split_pos(ssize_t where) const;
+  std::pair<Text, Text> split_next_char(char c, SplitDirection direction = SplitDirection::Discard) const;
+  std::pair<Text, Text> split_next_line() const;
+  List<Text> split_lines(SplitEmpty onEmpty = SplitEmpty::Keep) const;
+  List<Text> split_by_char(char c, SplitEmpty onEmpty = SplitEmpty::Discard) const;
+  List<Text> split_by_text(const Text& t, SplitEmpty onEmpty = SplitEmpty::Discard) const;
 
   // returns a value that skips the starting text
   std::optional<Text> expect(const Text& t) const;
   // returns a value that skips the whitespace in the text
-  std::optional<Text> expectws(const Text& t) const;
+  std::optional<Text> expect_ws(const Text& t) const;
 
   // returns text after <indentLevel> whitespaces, or empty;
-  std::optional<Text> skipIndent(size_t indentLevel) const;
+  std::optional<Text> skip_indent(size_t indentLevel) const;
   // returns whitespace indent level
-  size_t getIndent() const;
+  size_t get_indent() const;
 
   // fills a C buffer, preallocated with bufsize bytes;
   void fill_c_buffer(char* dest, size_t bufsize) const;
@@ -214,7 +214,7 @@ class TextChain {
   uint32_t _length = 0;
   List<Text> _chain;
 
-  void _updateLength();
+  void _update_length();
 
 public:
   TextChain() = default;

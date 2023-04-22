@@ -17,7 +17,7 @@ Text DISCARDABLE_FOLDERS[] = {"."_t, ".."_t};
 Text FOLDER_SEPARATOR("/");
 
 static Text read_file_impl(const Text& filename) {
-  fs::path p = filename.startsWith(FOLDER_SEPARATOR[0]) ? filename.toView() : fs::current_path() / filename.toView();
+  fs::path p = filename.starts_with(FOLDER_SEPARATOR[0]) ? filename.toView() : fs::current_path() / filename.toView();
   auto size = fs::file_size(p); // throws if error;
 
   if (size > 0x8FFFFFFFULL) [[unlikely]] {
@@ -81,15 +81,15 @@ static Text _normalize_path(const Text& filename) {
   }
   tc.add(filename.skip(last_pos));
   Text res = tc.toText();
-  if (res.startsWith("./") && res.size() > 2) {
+  if (res.starts_with("./") && res.size() > 2) {
     res = res.skip(2);
   }
   return res;
 }
 
 FilePath::FilePath(const Text& path) : m_full_name(_normalize_path(path)) {
-  m_last_slash_pos = m_full_name.lastPos(FOLDER_SEPARATOR[0]);
-  m_last_dot_pos = m_full_name.lastPos('.');
+  m_last_slash_pos = m_full_name.last_pos(FOLDER_SEPARATOR[0]);
+  m_last_dot_pos = m_full_name.last_pos('.');
   if (m_last_dot_pos.has_value() && (*m_last_dot_pos == 0 || m_full_name[*m_last_dot_pos - 1] == FOLDER_SEPARATOR[0])) {
     m_last_dot_pos = {};
   }
@@ -157,7 +157,7 @@ FilePath FilePath::replaceBaseFolder(const kl::Text& new_folder, uint32_t levels
 }
 
 uint32_t FilePath::depth() const {
-  return m_full_name.count(FOLDER_SEPARATOR[0]) - (m_full_name.startsWith(FOLDER_SEPARATOR[0]) ? 1 : 0);
+  return m_full_name.count(FOLDER_SEPARATOR[0]) - (m_full_name.starts_with(FOLDER_SEPARATOR[0]) ? 1 : 0);
 }
 uint32_t FilePath::folderDepth() const {
   if (m_full_name.size() == 0 || (m_full_name.size() == 1 && m_full_name[0] == '.')) {
@@ -166,7 +166,7 @@ uint32_t FilePath::folderDepth() const {
   return depth() + 1;
 }
 
-List<Text> FilePath::breadcrumbs() const { return m_full_name.splitByChar(FOLDER_SEPARATOR[0]); }
+List<Text> FilePath::breadcrumbs() const { return m_full_name.split_by_char(FOLDER_SEPARATOR[0]); }
 
 FilePath FilePath::add(const kl::Text& component) const {
   if (m_full_name.size() == 0 || (m_full_name.size() == 1 && m_full_name[0] == '.')) {
@@ -235,7 +235,7 @@ void FileSystem::navigate_tree(const Text& treeBase,
 
 Text FileSystem::executable_path(const Text& exename) {
   if (!exename.contains(FOLDER_SEPARATOR[0])) {
-    auto folders = Text(getenv("PATH")).splitByChar(':');
+    auto folders = Text(getenv("PATH")).split_by_char(':');
     for (const auto& f: folders) {
       FilePath fp(f + "/"_t + exename);
       if (FileSystem::exists(fp.fullPath())) {
@@ -247,22 +247,22 @@ Text FileSystem::executable_path(const Text& exename) {
 }
 
 bool FileSystem::make_directory(const Text& path) {
-  // TODO try to not do it like a lazy individual that we all know you are.
+  // TODO(dorin) try to not do it like a lazy individual that we all know you are.
   return std::filesystem::create_directories(path.toView());
 }
 
 bool FileSystem::is_directory(const Text& path) {
-  // TODO try to not do it like a lazy individual that we all know you are.
+  // TODO(dorin) try to not do it like a lazy individual that we all know you are.
   return std::filesystem::is_directory(path.toView());
 }
 
 bool FileSystem::is_file(const Text& path) {
-  // TODO try to not do it like a lazy individual that we all know you are.
+  // TODO(dorin) try to not do it like a lazy individual that we all know you are.
   return std::filesystem::is_regular_file(path.toView());
 }
 
 bool FileSystem::exists(const Text& path) {
-  // TODO try to not do it like a lazy individual that we all know you are.
+  // TODO(dorin) try to not do it like a lazy individual that we all know you are.
   return std::filesystem::exists(path.toView());
 }
 
@@ -270,7 +270,7 @@ FileReader::FileReader(const Text& name) { m_unread_content = read_file_impl(nam
 
 std::optional<Text> FileReader::read_line() {
   if (m_unread_content.size()) [[likely]] {
-    auto [res, next] = m_unread_content.splitNextLine();
+    auto [res, next] = m_unread_content.split_next_line();
     m_unread_content = next;
     return res;
   }
@@ -278,7 +278,7 @@ std::optional<Text> FileReader::read_line() {
 }
 
 List<Text> FileReader::read_all_lines(SplitEmpty onEmpty) {
-  auto res = m_unread_content.splitLines(onEmpty);
+  auto res = m_unread_content.split_lines(onEmpty);
   m_unread_content.reset();
   return res;
 }

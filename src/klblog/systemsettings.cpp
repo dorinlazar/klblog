@@ -13,7 +13,7 @@ SystemSettings::SystemSettings(int argc, char** argv, char** envp) {
     }
   }
   while (*envp != nullptr) {
-    auto [var, value] = kl::Text(*envp).splitNextChar('=');
+    auto [var, value] = kl::Text(*envp).split_next_char('=');
     environment.add(var, value);
     envp++;
   }

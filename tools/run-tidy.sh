@@ -1,6 +1,4 @@
 #!/bin/bash
-pushd build
-sed 's/c\+\+23/c\+\+2b/g' -i compile_commands.json
-popd
+sed 's/\+\+23/\+\+2b/g' -i build/compile_commands.json
 clang-tidy -p build/compile_commands.json `find src -name \*.\[hc\]pp`
 

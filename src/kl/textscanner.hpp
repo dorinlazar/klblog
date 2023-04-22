@@ -28,20 +28,20 @@ public:
   uint32_t line() const;
   uint32_t column() const;
 
-  void skipWhitespace(NewLineHandling handling = NewLineHandling::Skip);
+  void skip_whitespace(NewLineHandling handling = NewLineHandling::Skip);
   bool empty() const;
-  char topChar() const;
+  char top_char() const;
   ParsedCharacter read_char();
   ParsedCharacter readCharEscaped();
-  Text readQuotedString();
+  Text read_quoted_string();
   Text readUntil(char character);
   Text readWord();
   Text read_line();
   Text remainder() const;
   uint32_t readDigit();
   void expect(char character);
-  void expectws(char character, NewLineHandling handling = NewLineHandling::Keep);
-  bool startsWith(const Text& txt);
+  void expect_ws(char character, NewLineHandling handling = NewLineHandling::Keep);
+  bool starts_with(const Text& txt);
   void skip(uint32_t nChars);
   uint32_t getIndentationLevel() const;
 
@@ -59,7 +59,7 @@ public:
 
   void rewind();
   const DataLocation& location() const;
-  void restoreLocation(const DataLocation& location);
+  void restore_location(const DataLocation& location);
 
 public:
   void error(const Text& why) const;

@@ -8,7 +8,7 @@
 #include <functional>
 #include <optional>
 #include <memory>
-// TODO: switch to ranges.
+// TODO(dorin): switch to ranges.
 namespace kl {
 
 template <typename T>
@@ -83,7 +83,7 @@ public:
     return *this;
   }
 
-  // TODO UTs
+  // TODO(dorin) UTs
   void remove(const T& value) { _vec.erase(std::remove(_vec.begin(), _vec.end(), value), _vec.end()); }
   void removeAt(size_t index) {
     if (index < size()) {

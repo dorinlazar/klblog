@@ -20,7 +20,7 @@ TEST(klvalue, test_value_scalar) {
 }
 
 TEST(klvalue, test_value_list) {
-  auto pv = kl::Value::createList();
+  auto pv = kl::Value::create_list();
   auto& v = *pv;
   EXPECT_TRUE(!v.isNull());
   EXPECT_TRUE(!v.isScalar());
@@ -28,7 +28,7 @@ TEST(klvalue, test_value_list) {
   EXPECT_TRUE(v.isList());
   v.add(kl::Value::createScalar("100"_t));
   v.add(kl::Value::createScalar("200"_t));
-  v.add(kl::Value::createList());
+  v.add(kl::Value::create_list());
   v.add(kl::Value::createScalar("300"_t));
   v.add(kl::Value::createScalar("400"_t));
   EXPECT_TRUE(v.size() == 5);
@@ -65,7 +65,7 @@ TEST(klvalue, test_value_map) {
   EXPECT_TRUE(!v.isList());
 
   v.add("test"_t, kl::Value::createScalar("test_value"_t));
-  v.add("list"_t, kl::Value::createList());
+  v.add("list"_t, kl::Value::create_list());
   v.add("map"_t, kl::Value::createMap());
   auto& lst = v["list"_t];
   auto& m = v["map"_t];

@@ -54,7 +54,7 @@ Text StreamReader::read_line() {
     }
     auto _startOffset = m_offset;
     for (; m_offset < m_read_size; m_offset++) {
-      if (m_buffer[m_offset] == '\n') { // TODO identify newlines based on encoding.
+      if (m_buffer[m_offset] == '\n') { // TODO(dorin) identify newlines based on encoding.
         tc.add(Text((const char*)m_buffer.data() + _startOffset, m_offset - _startOffset));
         m_offset++;
         return tc.toText();
@@ -156,7 +156,7 @@ size_t PosixFileStream::read(std::span<uint8_t> where) {
 }
 
 void PosixFileStream::write(std::span<uint8_t> what) {
-  // TODO: write everything!
+  // TODO(dorin): write everything!
   size_t offset = 0;
   while (offset < what.size()) {
     auto bytes_written = ::write(_fd, what.data() + offset, what.size() - offset);

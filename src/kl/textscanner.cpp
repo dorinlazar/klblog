@@ -24,7 +24,7 @@ void TextScanner::rewind() {
 uint32_t TextScanner::line() const { return loc._line; }
 uint32_t TextScanner::column() const { return loc._column; }
 
-void TextScanner::skipWhitespace(NewLineHandling handling) {
+void TextScanner::skip_whitespace(NewLineHandling handling) {
   Text spaces = handling == NewLineHandling::Skip ? " \t\n\r"_t : " \t"_t;
   while (loc._current < _originalSource.end()) {
     char c = *loc._current;
@@ -52,7 +52,7 @@ void TextScanner::advance() {
 
 bool TextScanner::empty() const { return loc._dataLeft == 0; }
 
-char TextScanner::topChar() const {
+char TextScanner::top_char() const {
   if (empty()) [[unlikely]] {
     error("Requesting data from empty container");
   }
@@ -95,7 +95,7 @@ ParsedCharacter TextScanner::readCharEscaped() {
   return result;
 }
 
-Text TextScanner::readQuotedString() {
+Text TextScanner::read_quoted_string() {
   if (empty() || *loc._current != '"') [[unlikely]] {
     error("Unexpected character");
   }
@@ -140,7 +140,7 @@ Text TextScanner::readWord() {
   return _originalSource.subpos(start, loc._offset - 1);
 }
 
-// TODO make this smarter, to support the \rs as well
+// TODO(dorin) make this smarter, to support the \rs as well
 Text TextScanner::read_line() {
   auto start = loc._offset;
   while (!empty()) {
@@ -164,19 +164,19 @@ Text TextScanner::remainder() const {
 }
 
 void TextScanner::expect(char character) {
-  auto ch = topChar();
+  auto ch = top_char();
   if (ch != character) {
     error("Unexpected character: "_t + Text(ch) + " vs: " + Text(character));
   }
   advance();
 }
 
-void TextScanner::expectws(char character, NewLineHandling handling) {
-  skipWhitespace(handling);
+void TextScanner::expect_ws(char character, NewLineHandling handling) {
+  skip_whitespace(handling);
   expect(character);
 }
 
-bool TextScanner::startsWith(const Text& what) { return remainder().startsWith(what); }
+bool TextScanner::starts_with(const Text& what) { return remainder().starts_with(what); }
 void TextScanner::skip(uint32_t nChars) {
   if (nChars < 32) {
     for (uint32_t i = 0; i < nChars; i++) {
@@ -200,7 +200,7 @@ void TextScanner::skip(uint32_t nChars) {
 void TextScanner::error(const Text& why) const { throw ParsingError(why, loc._line, loc._column); }
 
 const TextScanner::DataLocation& TextScanner::location() const { return loc; }
-void TextScanner::restoreLocation(const TextScanner::DataLocation& location) { loc = location; }
+void TextScanner::restore_location(const TextScanner::DataLocation& location) { loc = location; }
 
 uint32_t TextScanner::getIndentationLevel() const {
   for (uint32_t i = 0; i < loc._dataLeft; i++) {

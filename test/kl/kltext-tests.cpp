@@ -54,29 +54,29 @@ TEST(kltext, test_trimming) {
 
 TEST(kltext, test_starts_with) {
   Text txt("Hello");
-  EXPECT_TRUE(txt.startsWith(""));
-  EXPECT_TRUE(txt.startsWith("H"));
-  EXPECT_TRUE(txt.startsWith("Hell"));
-  EXPECT_TRUE(txt.startsWith("Hello"));
-  EXPECT_FALSE(txt.startsWith("Hello world"));
-  EXPECT_FALSE(txt.startsWith("world"));
+  EXPECT_TRUE(txt.starts_with(""));
+  EXPECT_TRUE(txt.starts_with("H"));
+  EXPECT_TRUE(txt.starts_with("Hell"));
+  EXPECT_TRUE(txt.starts_with("Hello"));
+  EXPECT_FALSE(txt.starts_with("Hello world"));
+  EXPECT_FALSE(txt.starts_with("world"));
 
-  EXPECT_TRUE(txt.startsWith(""_t));
-  EXPECT_TRUE(txt.startsWith("H"_t));
-  EXPECT_TRUE(txt.startsWith("Hell"_t));
-  EXPECT_TRUE(txt.startsWith("Hello"_t));
-  EXPECT_FALSE(txt.startsWith("Hello world"_t));
-  EXPECT_FALSE(txt.startsWith("world"_t));
+  EXPECT_TRUE(txt.starts_with(""_t));
+  EXPECT_TRUE(txt.starts_with("H"_t));
+  EXPECT_TRUE(txt.starts_with("Hell"_t));
+  EXPECT_TRUE(txt.starts_with("Hello"_t));
+  EXPECT_FALSE(txt.starts_with("Hello world"_t));
+  EXPECT_FALSE(txt.starts_with("world"_t));
 }
 
 TEST(kltext, test_ends_with) {
   Text txt("Hello");
-  EXPECT_TRUE(txt.endsWith(""));
-  EXPECT_TRUE(txt.endsWith("o"));
-  EXPECT_TRUE(txt.endsWith("ello"));
-  EXPECT_TRUE(txt.endsWith("Hello"));
-  EXPECT_FALSE(txt.endsWith("Hello world"));
-  EXPECT_FALSE(txt.endsWith("world"));
+  EXPECT_TRUE(txt.ends_with(""));
+  EXPECT_TRUE(txt.ends_with("o"));
+  EXPECT_TRUE(txt.ends_with("ello"));
+  EXPECT_TRUE(txt.ends_with("Hello"));
+  EXPECT_FALSE(txt.ends_with("Hello world"));
+  EXPECT_FALSE(txt.ends_with("world"));
 }
 
 TEST(kltext, test_comparisons) {
@@ -121,28 +121,28 @@ TEST(kltext, test_comparisons) {
 
 TEST(kltext, test_split) {
   Text txt("hello");
-  EXPECT_EQ(get<0>(txt.splitPos(0)), "");
-  EXPECT_EQ(get<1>(txt.splitPos(0)), "hello");
-  EXPECT_EQ(get<0>(txt.splitPos(1)), "h");
-  EXPECT_EQ(get<1>(txt.splitPos(1)), "ello");
-  EXPECT_EQ(get<0>(txt.splitPos(2)), "he");
-  EXPECT_EQ(get<1>(txt.splitPos(2)), "llo");
-  EXPECT_EQ(get<0>(txt.splitPos(-2)), "hel");
-  EXPECT_EQ(get<1>(txt.splitPos(-2)), "lo");
-  EXPECT_EQ(get<0>(txt.splitPos(-1)), "hell");
-  EXPECT_EQ(get<1>(txt.splitPos(-1)), "o");
+  EXPECT_EQ(get<0>(txt.split_pos(0)), "");
+  EXPECT_EQ(get<1>(txt.split_pos(0)), "hello");
+  EXPECT_EQ(get<0>(txt.split_pos(1)), "h");
+  EXPECT_EQ(get<1>(txt.split_pos(1)), "ello");
+  EXPECT_EQ(get<0>(txt.split_pos(2)), "he");
+  EXPECT_EQ(get<1>(txt.split_pos(2)), "llo");
+  EXPECT_EQ(get<0>(txt.split_pos(-2)), "hel");
+  EXPECT_EQ(get<1>(txt.split_pos(-2)), "lo");
+  EXPECT_EQ(get<0>(txt.split_pos(-1)), "hell");
+  EXPECT_EQ(get<1>(txt.split_pos(-1)), "o");
 
-  EXPECT_EQ(get<0>(txt.splitPos(-5)), "");
-  EXPECT_EQ(get<1>(txt.splitPos(-5)), "hello");
-  EXPECT_EQ(get<0>(txt.splitPos(-10)), "");
-  EXPECT_EQ(get<1>(txt.splitPos(-10)), "hello");
+  EXPECT_EQ(get<0>(txt.split_pos(-5)), "");
+  EXPECT_EQ(get<1>(txt.split_pos(-5)), "hello");
+  EXPECT_EQ(get<0>(txt.split_pos(-10)), "");
+  EXPECT_EQ(get<1>(txt.split_pos(-10)), "hello");
 
-  EXPECT_EQ(get<0>(txt.splitPos(5)), "hello");
-  EXPECT_EQ(get<1>(txt.splitPos(5)), "");
-  EXPECT_EQ(get<0>(txt.splitPos(15)), "hello");
-  EXPECT_EQ(get<1>(txt.splitPos(15)), "");
-  EXPECT_EQ(get<0>(""_t.splitPos(15)), "");
-  EXPECT_EQ(get<1>(""_t.splitPos(15)), "");
+  EXPECT_EQ(get<0>(txt.split_pos(5)), "hello");
+  EXPECT_EQ(get<1>(txt.split_pos(5)), "");
+  EXPECT_EQ(get<0>(txt.split_pos(15)), "hello");
+  EXPECT_EQ(get<1>(txt.split_pos(15)), "");
+  EXPECT_EQ(get<0>(""_t.split_pos(15)), "");
+  EXPECT_EQ(get<1>(""_t.split_pos(15)), "");
 }
 
 TEST(kltext, test_contains) {
@@ -202,7 +202,7 @@ TEST(kltext, test_pos) {
 
 TEST(kltext, test_split_char) {
   Text t1("My,CSV,text,with,,an,ending,,");
-  auto sp1 = t1.splitByChar(',');
+  auto sp1 = t1.split_by_char(',');
 
   EXPECT_EQ(sp1.size(), 6);
   EXPECT_EQ(sp1[0], "My"_t);
@@ -213,7 +213,7 @@ TEST(kltext, test_split_char) {
   EXPECT_EQ(sp1[5], "ending"_t);
 
   kl::log("Splitting {}", t1);
-  auto sp2 = t1.splitByChar(',', SplitEmpty::Keep);
+  auto sp2 = t1.split_by_char(',', SplitEmpty::Keep);
   EXPECT_EQ(sp2.size(), 9);
   EXPECT_EQ(sp2[0], "My"_t);
   EXPECT_EQ(sp2[1], "CSV"_t);
@@ -225,17 +225,17 @@ TEST(kltext, test_split_char) {
   EXPECT_EQ(sp2[7], ""_t);
   EXPECT_EQ(sp2[8], ""_t);
 
-  auto sp3 = "Hello World"_t.splitByChar(' ');
+  auto sp3 = "Hello World"_t.split_by_char(' ');
   EXPECT_EQ(sp3.size(), 2);
   EXPECT_EQ(sp3[0], "Hello"_t);
   EXPECT_EQ(sp3[1], "World"_t);
 
-  sp3 = "   Hello World"_t.splitByChar(' ');
+  sp3 = "   Hello World"_t.split_by_char(' ');
   EXPECT_EQ(sp3.size(), 2);
   EXPECT_EQ(sp3[0], "Hello"_t);
   EXPECT_EQ(sp3[1], "World"_t);
 
-  sp3 = "   Hello World"_t.splitByChar(' ', SplitEmpty::Keep);
+  sp3 = "   Hello World"_t.split_by_char(' ', SplitEmpty::Keep);
   EXPECT_EQ(sp3.size(), 5);
   EXPECT_EQ(sp3[0], ""_t);
   EXPECT_EQ(sp3[1], ""_t);
@@ -243,14 +243,14 @@ TEST(kltext, test_split_char) {
   EXPECT_EQ(sp3[3], "Hello"_t);
   EXPECT_EQ(sp3[4], "World"_t);
 
-  auto sp4 = "Hello_World"_t.splitByChar(' ');
+  auto sp4 = "Hello_World"_t.split_by_char(' ');
   EXPECT_EQ(sp4.size(), 1);
   EXPECT_EQ(sp4[0], "Hello_World"_t);
 }
 
 TEST(kltext, test_split_text) {
   Text t1("This||is||||||some||text||||");
-  auto sp1 = t1.splitByText("||"_t);
+  auto sp1 = t1.split_by_text("||"_t);
 
   EXPECT_EQ(sp1.size(), 4);
   EXPECT_EQ(sp1[0], "This"_t);
@@ -258,7 +258,7 @@ TEST(kltext, test_split_text) {
   EXPECT_EQ(sp1[2], "some"_t);
   EXPECT_EQ(sp1[3], "text"_t);
 
-  auto sp2 = t1.splitByText("||"_t, SplitEmpty::Keep);
+  auto sp2 = t1.split_by_text("||"_t, SplitEmpty::Keep);
   EXPECT_EQ(sp2.size(), 8);
   EXPECT_EQ(sp2[0], "This"_t);
   EXPECT_EQ(sp2[1], "is"_t);
@@ -269,17 +269,17 @@ TEST(kltext, test_split_text) {
   EXPECT_EQ(sp2[6], ""_t);
   EXPECT_EQ(sp2[7], ""_t);
 
-  auto sp3 = "Hello World"_t.splitByText(" "_t);
+  auto sp3 = "Hello World"_t.split_by_text(" "_t);
   EXPECT_EQ(sp3.size(), 2);
   EXPECT_EQ(sp3[0], "Hello"_t);
   EXPECT_EQ(sp3[1], "World"_t);
 
-  sp3 = "   Hello World"_t.splitByText(" "_t);
+  sp3 = "   Hello World"_t.split_by_text(" "_t);
   EXPECT_EQ(sp3.size(), 2);
   EXPECT_EQ(sp3[0], "Hello"_t);
   EXPECT_EQ(sp3[1], "World"_t);
 
-  sp3 = "   Hello World "_t.splitByText(" "_t, SplitEmpty::Keep);
+  sp3 = "   Hello World "_t.split_by_text(" "_t, SplitEmpty::Keep);
   EXPECT_EQ(sp3.size(), 6);
   EXPECT_EQ(sp3[0], ""_t);
   EXPECT_EQ(sp3[1], ""_t);
@@ -288,142 +288,142 @@ TEST(kltext, test_split_text) {
   EXPECT_EQ(sp3[4], "World"_t);
   EXPECT_EQ(sp3[5], ""_t);
 
-  auto sp4 = "Hello_World"_t.splitByText(" "_t);
+  auto sp4 = "Hello_World"_t.split_by_text(" "_t);
   EXPECT_EQ(sp4.size(), 1);
   EXPECT_EQ(sp4[0], "Hello_World"_t);
 
-  sp4 = "Hello"_t.splitByText("HelloWorld"_t);
+  sp4 = "Hello"_t.split_by_text("HelloWorld"_t);
   EXPECT_EQ(sp4.size(), 1);
   EXPECT_EQ(sp4[0], "Hello"_t);
 
-  sp4 = "Hello"_t.splitByText("Hello"_t);
+  sp4 = "Hello"_t.split_by_text("Hello"_t);
   EXPECT_EQ(sp4.size(), 0);
 
-  sp4 = "Hello"_t.splitByText(""_t);
+  sp4 = "Hello"_t.split_by_text(""_t);
   EXPECT_EQ(sp4.size(), 1);
   EXPECT_EQ(sp4[0], "Hello"_t);
 
-  sp4 = "ttttt"_t.splitByText("tt"_t);
+  sp4 = "ttttt"_t.split_by_text("tt"_t);
   EXPECT_EQ(sp4.size(), 1);
   EXPECT_EQ(sp4[0], "t"_t);
 }
 
 TEST(kltext, test_split_next_char) {
   auto sp1 = "This is some bad text  "_t;
-  auto [first, next] = sp1.splitNextChar(' ', SplitDirection::KeepLeft);
+  auto [first, next] = sp1.split_next_char(' ', SplitDirection::KeepLeft);
   EXPECT_EQ(first, "This ");
   EXPECT_EQ(next, "is some bad text  ");
-  std::tie(first, next) = next.splitNextChar(' ', SplitDirection::KeepLeft);
+  std::tie(first, next) = next.split_next_char(' ', SplitDirection::KeepLeft);
   EXPECT_EQ(first, "is ");
   EXPECT_EQ(next, "some bad text  ");
-  std::tie(first, next) = next.splitNextChar(' ', SplitDirection::KeepLeft);
+  std::tie(first, next) = next.split_next_char(' ', SplitDirection::KeepLeft);
   EXPECT_EQ(first, "some ");
   EXPECT_EQ(next, "bad text  ");
-  std::tie(first, next) = next.splitNextChar(' ', SplitDirection::KeepLeft);
+  std::tie(first, next) = next.split_next_char(' ', SplitDirection::KeepLeft);
   EXPECT_EQ(first, "bad ");
   EXPECT_EQ(next, "text  ");
-  std::tie(first, next) = next.splitNextChar(' ', SplitDirection::KeepLeft);
+  std::tie(first, next) = next.split_next_char(' ', SplitDirection::KeepLeft);
   EXPECT_EQ(first, "text ");
   EXPECT_EQ(next, " ");
-  std::tie(first, next) = next.splitNextChar(' ', SplitDirection::KeepLeft);
+  std::tie(first, next) = next.split_next_char(' ', SplitDirection::KeepLeft);
   EXPECT_EQ(first, " ");
   EXPECT_EQ(next.size(), 0);
 
-  std::tie(first, next) = sp1.splitNextChar(' ', SplitDirection::KeepRight);
+  std::tie(first, next) = sp1.split_next_char(' ', SplitDirection::KeepRight);
   EXPECT_EQ(first, "This");
   EXPECT_EQ(next, " is some bad text  ");
-  std::tie(first, next) = next.splitNextChar(' ', SplitDirection::KeepRight);
+  std::tie(first, next) = next.split_next_char(' ', SplitDirection::KeepRight);
   EXPECT_EQ(first, "");
   EXPECT_EQ(next, " is some bad text  ");
-  std::tie(first, next) = next.skip(1).splitNextChar(' ', SplitDirection::KeepRight);
+  std::tie(first, next) = next.skip(1).split_next_char(' ', SplitDirection::KeepRight);
   EXPECT_EQ(first, "is");
   EXPECT_EQ(next, " some bad text  ");
-  std::tie(first, next) = next.skip(1).splitNextChar(' ', SplitDirection::KeepRight);
+  std::tie(first, next) = next.skip(1).split_next_char(' ', SplitDirection::KeepRight);
   EXPECT_EQ(first, "some");
   EXPECT_EQ(next, " bad text  ");
-  std::tie(first, next) = next.skip(1).splitNextChar(' ', SplitDirection::KeepRight);
+  std::tie(first, next) = next.skip(1).split_next_char(' ', SplitDirection::KeepRight);
   EXPECT_EQ(first, "bad");
   EXPECT_EQ(next, " text  ");
-  std::tie(first, next) = next.skip(1).splitNextChar(' ', SplitDirection::KeepRight);
+  std::tie(first, next) = next.skip(1).split_next_char(' ', SplitDirection::KeepRight);
   EXPECT_EQ(first, "text");
   EXPECT_EQ(next, "  ");
-  std::tie(first, next) = next.skip(1).splitNextChar(' ', SplitDirection::KeepRight);
+  std::tie(first, next) = next.skip(1).split_next_char(' ', SplitDirection::KeepRight);
   EXPECT_EQ(first, "");
   EXPECT_EQ(next, " ");
-  std::tie(first, next) = next.skip(1).splitNextChar(' ', SplitDirection::KeepRight);
+  std::tie(first, next) = next.skip(1).split_next_char(' ', SplitDirection::KeepRight);
   EXPECT_EQ(first, "");
   EXPECT_EQ(next, "");
 
-  std::tie(first, next) = sp1.splitNextChar(' ', SplitDirection::Discard);
+  std::tie(first, next) = sp1.split_next_char(' ', SplitDirection::Discard);
   EXPECT_EQ(first, "This");
   EXPECT_EQ(next, "is some bad text  ");
-  std::tie(first, next) = next.splitNextChar(' ', SplitDirection::Discard);
+  std::tie(first, next) = next.split_next_char(' ', SplitDirection::Discard);
   EXPECT_EQ(first, "is");
   EXPECT_EQ(next, "some bad text  ");
-  std::tie(first, next) = next.splitNextChar(' ', SplitDirection::Discard);
+  std::tie(first, next) = next.split_next_char(' ', SplitDirection::Discard);
   EXPECT_EQ(first, "some");
   EXPECT_EQ(next, "bad text  ");
-  std::tie(first, next) = next.splitNextChar(' ', SplitDirection::Discard);
+  std::tie(first, next) = next.split_next_char(' ', SplitDirection::Discard);
   EXPECT_EQ(first, "bad");
   EXPECT_EQ(next, "text  ");
-  std::tie(first, next) = next.splitNextChar(' ', SplitDirection::Discard);
+  std::tie(first, next) = next.split_next_char(' ', SplitDirection::Discard);
   EXPECT_EQ(first, "text");
   EXPECT_EQ(next, " ");
-  std::tie(first, next) = next.splitNextChar(' ', SplitDirection::Discard);
+  std::tie(first, next) = next.split_next_char(' ', SplitDirection::Discard);
   EXPECT_EQ(first, "");
   EXPECT_EQ(next, "");
 
-  std::tie(first, next) = ""_t.splitNextChar(' ', SplitDirection::KeepLeft);
+  std::tie(first, next) = ""_t.split_next_char(' ', SplitDirection::KeepLeft);
   EXPECT_EQ(first, "");
   EXPECT_EQ(next, "");
 
-  std::tie(first, next) = ""_t.splitNextChar(' ', SplitDirection::KeepRight);
+  std::tie(first, next) = ""_t.split_next_char(' ', SplitDirection::KeepRight);
   EXPECT_EQ(first, "");
   EXPECT_EQ(next, "");
 
-  std::tie(first, next) = ""_t.splitNextChar(' ', SplitDirection::Discard);
+  std::tie(first, next) = ""_t.split_next_char(' ', SplitDirection::Discard);
   EXPECT_EQ(first, "");
   EXPECT_EQ(next, "");
 }
 
 TEST(kltext, test_split_next_line) {
   auto sp1 = "This\nis\r\nsome\r\nbad\ntext\n\n"_t;
-  auto [first, next] = sp1.splitNextLine();
+  auto [first, next] = sp1.split_next_line();
   EXPECT_EQ(first, "This");
   EXPECT_EQ(next, "is\r\nsome\r\nbad\ntext\n\n");
-  std::tie(first, next) = next.splitNextLine();
+  std::tie(first, next) = next.split_next_line();
   EXPECT_EQ(first, "is");
   EXPECT_EQ(next, "some\r\nbad\ntext\n\n");
-  std::tie(first, next) = next.splitNextLine();
+  std::tie(first, next) = next.split_next_line();
   EXPECT_EQ(first, "some");
   EXPECT_EQ(next, "bad\ntext\n\n");
-  std::tie(first, next) = next.splitNextLine();
+  std::tie(first, next) = next.split_next_line();
   EXPECT_EQ(first, "bad");
   EXPECT_EQ(next, "text\n\n");
-  std::tie(first, next) = next.splitNextLine();
+  std::tie(first, next) = next.split_next_line();
   EXPECT_EQ(first, "text");
   EXPECT_EQ(next, "\n");
-  std::tie(first, next) = next.splitNextLine();
+  std::tie(first, next) = next.split_next_line();
   EXPECT_EQ(first.size(), 0);
   EXPECT_EQ(next.size(), 0);
 
   auto sp2 = "A bad example"_t;
-  std::tie(first, next) = sp2.splitNextLine();
+  std::tie(first, next) = sp2.split_next_line();
   EXPECT_EQ(first, sp2);
   EXPECT_EQ(next.size(), 0);
 
   auto sp3 = "A simple\nexample"_t;
-  std::tie(first, next) = sp3.splitNextLine();
+  std::tie(first, next) = sp3.split_next_line();
   EXPECT_EQ(first, "A simple");
   EXPECT_EQ(next, "example");
 
-  std::tie(first, next) = ""_t.splitNextLine();
+  std::tie(first, next) = ""_t.split_next_line();
   EXPECT_EQ(first, "");
   EXPECT_EQ(next, "");
 }
 
 TEST(kltext, test_split_lines) {
-  auto sp1 = "This\nis\nsome\ntext\n"_t.splitLines();
+  auto sp1 = "This\nis\nsome\ntext\n"_t.split_lines();
   EXPECT_EQ(sp1.size(), 5);
   EXPECT_EQ(sp1[0], "This"_t);
   EXPECT_EQ(sp1[1], "is"_t);
@@ -431,14 +431,14 @@ TEST(kltext, test_split_lines) {
   EXPECT_EQ(sp1[3], "text"_t);
   EXPECT_EQ(sp1[4], ""_t);
 
-  sp1 = "This\nis\nsome\ntext\n"_t.splitLines(SplitEmpty::Discard);
+  sp1 = "This\nis\nsome\ntext\n"_t.split_lines(SplitEmpty::Discard);
   EXPECT_EQ(sp1.size(), 4);
   EXPECT_EQ(sp1[0], "This"_t);
   EXPECT_EQ(sp1[1], "is"_t);
   EXPECT_EQ(sp1[2], "some"_t);
   EXPECT_EQ(sp1[3], "text"_t);
 
-  auto sp2 = "\n\nThis\n\nis\n\n\nsome\ntext"_t.splitLines();
+  auto sp2 = "\n\nThis\n\nis\n\n\nsome\ntext"_t.split_lines();
   EXPECT_EQ(sp2.size(), 9);
   EXPECT_EQ(sp2[0], ""_t);
   EXPECT_EQ(sp2[1], ""_t);
@@ -450,7 +450,7 @@ TEST(kltext, test_split_lines) {
   EXPECT_EQ(sp2[7], "some"_t);
   EXPECT_EQ(sp2[8], "text"_t);
 
-  sp2 = "\r\n\r\nThis\r\n\r\nis\r\n\r\n\nsome\ntext"_t.splitLines();
+  sp2 = "\r\n\r\nThis\r\n\r\nis\r\n\r\n\nsome\ntext"_t.split_lines();
   EXPECT_EQ(sp2.size(), 9);
   EXPECT_EQ(sp2[0], ""_t);
   EXPECT_EQ(sp2[1], ""_t);
@@ -462,7 +462,7 @@ TEST(kltext, test_split_lines) {
   EXPECT_EQ(sp2[7], "some"_t);
   EXPECT_EQ(sp2[8], "text"_t);
 
-  sp2 = "\r\n\r\nThis\r\n\r\nis\r\n\r\n\r\nsome\r\ntext"_t.splitLines();
+  sp2 = "\r\n\r\nThis\r\n\r\nis\r\n\r\n\r\nsome\r\ntext"_t.split_lines();
   EXPECT_EQ(sp2.size(), 9);
   EXPECT_EQ(sp2[0], ""_t);
   EXPECT_EQ(sp2[1], ""_t);
@@ -474,16 +474,16 @@ TEST(kltext, test_split_lines) {
   EXPECT_EQ(sp2[7], "some"_t);
   EXPECT_EQ(sp2[8], "text"_t);
 
-  sp2 = "Hello\r\n"_t.splitLines();
+  sp2 = "Hello\r\n"_t.split_lines();
   EXPECT_EQ(sp2.size(), 2);
   EXPECT_EQ(sp2[0], "Hello"_t);
   EXPECT_EQ(sp2[1], ""_t);
 
-  sp2 = "Hello\r\n"_t.splitLines(SplitEmpty::Discard);
+  sp2 = "Hello\r\n"_t.split_lines(SplitEmpty::Discard);
   EXPECT_EQ(sp2.size(), 1);
   EXPECT_EQ(sp2[0], "Hello"_t);
 
-  sp2 = "\r\n\r\nThis\r\n\r\nis\r\n\r\n\r\nsome\r\ntext"_t.splitLines(SplitEmpty::Discard);
+  sp2 = "\r\n\r\nThis\r\n\r\nis\r\n\r\n\r\nsome\r\ntext"_t.split_lines(SplitEmpty::Discard);
   EXPECT_EQ(sp2.size(), 4);
   EXPECT_EQ(sp2[0], "This"_t);
   EXPECT_EQ(sp2[1], "is"_t);
@@ -493,11 +493,11 @@ TEST(kltext, test_split_lines) {
 
 TEST(kltext, test_last_pos) {
   auto filename = "/123456/89.1234"_t;
-  EXPECT_EQ(filename.lastPos('.'), 10);
-  EXPECT_EQ(filename.lastPos('/'), 7);
-  EXPECT_EQ(filename.lastPos('4'), 14);
-  EXPECT_EQ(filename.lastPos('9'), 9);
-  EXPECT_FALSE(filename.lastPos('+').has_value());
+  EXPECT_EQ(filename.last_pos('.'), 10);
+  EXPECT_EQ(filename.last_pos('/'), 7);
+  EXPECT_EQ(filename.last_pos('4'), 14);
+  EXPECT_EQ(filename.last_pos('9'), 9);
+  EXPECT_FALSE(filename.last_pos('+').has_value());
 }
 
 TEST(kltext, test_sublen_subpos) {
@@ -546,26 +546,26 @@ TEST(kltext, test_fill_c_buff) {
 }
 
 TEST(kltext, test_indent) {
-  EXPECT_EQ(""_t.getIndent(), 0);
-  EXPECT_EQ("  "_t.getIndent(), 2);
-  EXPECT_EQ("  xxx"_t.getIndent(), 2);
-  EXPECT_EQ(" x "_t.getIndent(), 1);
+  EXPECT_EQ(""_t.get_indent(), 0);
+  EXPECT_EQ("  "_t.get_indent(), 2);
+  EXPECT_EQ("  xxx"_t.get_indent(), 2);
+  EXPECT_EQ(" x "_t.get_indent(), 1);
 
-  EXPECT_FALSE(""_t.skipIndent(2).has_value());
-  EXPECT_TRUE(""_t.skipIndent(0).has_value());
-  EXPECT_EQ(""_t.skipIndent(0), ""_t);
-  EXPECT_TRUE("  "_t.skipIndent(1).has_value());
-  EXPECT_EQ("  "_t.skipIndent(1), " "_t);
-  EXPECT_TRUE("  "_t.skipIndent(2).has_value());
-  EXPECT_EQ("  "_t.skipIndent(2), ""_t);
-  EXPECT_FALSE("  "_t.skipIndent(3).has_value());
-  EXPECT_FALSE("  "_t.skipIndent(100).has_value());
-  EXPECT_FALSE("  xxx"_t.skipIndent(3).has_value());
-  EXPECT_EQ("  xxx"_t.skipIndent(2), "xxx"_t);
-  EXPECT_EQ("  xxx"_t.skipIndent(1), " xxx"_t);
-  EXPECT_EQ("  xxx"_t.skipIndent(0), "  xxx"_t);
-  EXPECT_FALSE(" x "_t.skipIndent(3).has_value());
-  EXPECT_FALSE(" x "_t.skipIndent(2).has_value());
-  EXPECT_EQ(" x "_t.skipIndent(1), "x "_t);
-  EXPECT_EQ(" x "_t.skipIndent(0), " x "_t);
+  EXPECT_FALSE(""_t.skip_indent(2).has_value());
+  EXPECT_TRUE(""_t.skip_indent(0).has_value());
+  EXPECT_EQ(""_t.skip_indent(0), ""_t);
+  EXPECT_TRUE("  "_t.skip_indent(1).has_value());
+  EXPECT_EQ("  "_t.skip_indent(1), " "_t);
+  EXPECT_TRUE("  "_t.skip_indent(2).has_value());
+  EXPECT_EQ("  "_t.skip_indent(2), ""_t);
+  EXPECT_FALSE("  "_t.skip_indent(3).has_value());
+  EXPECT_FALSE("  "_t.skip_indent(100).has_value());
+  EXPECT_FALSE("  xxx"_t.skip_indent(3).has_value());
+  EXPECT_EQ("  xxx"_t.skip_indent(2), "xxx"_t);
+  EXPECT_EQ("  xxx"_t.skip_indent(1), " xxx"_t);
+  EXPECT_EQ("  xxx"_t.skip_indent(0), "  xxx"_t);
+  EXPECT_FALSE(" x "_t.skip_indent(3).has_value());
+  EXPECT_FALSE(" x "_t.skip_indent(2).has_value());
+  EXPECT_EQ(" x "_t.skip_indent(1), "x "_t);
+  EXPECT_EQ(" x "_t.skip_indent(0), " x "_t);
 }

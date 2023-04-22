@@ -16,7 +16,7 @@ Value::Value() { _value = NullValue(); }
 PValue Value::createNull() { return std::make_shared<Value>(); }
 PValue Value::createScalar(const Text& value) { return std::make_shared<Value>(value); }
 PValue Value::createMap() { return std::make_shared<Value>(ValueType::Map); }
-PValue Value::createList() { return std::make_shared<Value>(ValueType::List); }
+PValue Value::create_list() { return std::make_shared<Value>(ValueType::List); }
 
 bool Value::isNull() const { return _value.index() == (size_t)ValueType::Null; }
 bool Value::isScalar() const { return _value.index() == (size_t)ValueType::Scalar; }
@@ -31,7 +31,7 @@ MapValue& Value::asMap() {
 }
 ListValue& Value::asList() {
   if (isNull()) {
-    createList();
+    create_list();
   }
   return std::get<(int)ValueType::List>(_value);
 }

@@ -27,7 +27,7 @@ public:
   static PValue createNull();
   static PValue createScalar(const Text& value = ""_t);
   static PValue createMap();
-  static PValue createList();
+  static PValue create_list();
 
   bool isNull() const;
   bool isScalar() const;

@@ -24,10 +24,10 @@ TextView TextView::trim_right() const {
   return m_view.substr(0, position + 1);
 }
 
-bool TextView::startsWith(char c) const { return m_view.size() > 0 && m_view.front() == c; }
-bool TextView::startsWith(const TextView& tv) const { return m_view.starts_with(tv.m_view); }
-bool TextView::endsWith(char c) const { return m_view.size() > 0 && m_view.back() == c; }
-bool TextView::endsWith(const TextView& tv) const { return m_view.ends_with(tv.m_view); }
+bool TextView::starts_with(char c) const { return m_view.size() > 0 && m_view.front() == c; }
+bool TextView::starts_with(const TextView& tv) const { return m_view.starts_with(tv.m_view); }
+bool TextView::ends_with(char c) const { return m_view.size() > 0 && m_view.back() == c; }
+bool TextView::ends_with(const TextView& tv) const { return m_view.ends_with(tv.m_view); }
 
 char TextView::operator[](size_t index) const {
   if (index >= size()) [[unlikely]] {
@@ -60,7 +60,7 @@ TextView TextView::skip(const TextView& skippables) const {
   return v;
 }
 TextView TextView::skip(size_t size) const { return m_view.substr(size); }
-TextView TextView::skipBOM() const {
+TextView TextView::skip_bom() const {
   if (size() >= 3) {
     auto buf = begin();
     if (buf[0] == (char)0xEF && buf[1] == (char)0xBB && buf[2] == (char)0xBF) {
@@ -120,7 +120,7 @@ std::optional<size_t> TextView::pos(const TextView& t, size_t occurence) const {
   return std::nullopt;
 }
 
-std::optional<size_t> TextView::lastPos(char c) const {
+std::optional<size_t> TextView::last_pos(char c) const {
   auto res = m_view.find_last_of(c);
   if (res != std::string_view::npos) {
     return res;
@@ -128,13 +128,13 @@ std::optional<size_t> TextView::lastPos(char c) const {
   return std::nullopt;
 }
 
-std::pair<TextView, TextView> TextView::splitPos(ssize_t where) const {
+std::pair<TextView, TextView> TextView::split_pos(ssize_t where) const {
   size_t pos = where > 0 ? std::min(size(), static_cast<size_t>(where))
                          : (size() - std::min(static_cast<size_t>(-where), size()));
   return {m_view.substr(0, pos), m_view.substr(pos)};
 }
 
-std::pair<TextView, TextView> TextView::splitNextChar(char c, SplitDirection direction) const {
+std::pair<TextView, TextView> TextView::split_next_char(char c, SplitDirection direction) const {
   auto pos = m_view.find_first_of(c);
   if (pos == std::string_view::npos) {
     return {m_view, {}};
@@ -148,7 +148,7 @@ std::pair<TextView, TextView> TextView::splitNextChar(char c, SplitDirection dir
   return {m_view.substr(0, pos), m_view.substr(pos)};
 }
 
-std::pair<TextView, TextView> TextView::splitNextLine() const {
+std::pair<TextView, TextView> TextView::split_next_line() const {
   auto pos = m_view.find_first_of('\n');
   if (pos == std::string_view::npos) {
     return {m_view, {}};
@@ -159,12 +159,12 @@ std::pair<TextView, TextView> TextView::splitNextLine() const {
   return {m_view.substr(0, pos), m_view.substr(pos + 1)};
 }
 
-List<TextView> TextView::splitLines(SplitEmpty onEmpty) const {
+List<TextView> TextView::split_lines(SplitEmpty onEmpty) const {
   List<TextView> res;
   TextView view = *this;
   TextView first_line;
   while (view.size() > 0) {
-    std::tie(first_line, view) = view.splitNextLine();
+    std::tie(first_line, view) = view.split_next_line();
     if (first_line.size() > 0 || onEmpty == SplitEmpty::Keep) {
       res.add(first_line);
     }
@@ -172,12 +172,12 @@ List<TextView> TextView::splitLines(SplitEmpty onEmpty) const {
   return res;
 }
 
-List<TextView> TextView::splitByChar(char c, SplitEmpty onEmpty) const {
+List<TextView> TextView::split_by_char(char c, SplitEmpty onEmpty) const {
   List<TextView> res;
   TextView view = *this;
   TextView first_line;
   while (view.size() > 0) {
-    std::tie(first_line, view) = view.splitNextChar(c);
+    std::tie(first_line, view) = view.split_next_char(c);
     if (first_line.size() > 0 || onEmpty == SplitEmpty::Keep) {
       res.add(first_line);
     }
@@ -185,7 +185,7 @@ List<TextView> TextView::splitByChar(char c, SplitEmpty onEmpty) const {
   return res;
 }
 
-List<TextView> TextView::splitByText(const TextView& t, SplitEmpty onEmpty) const {
+List<TextView> TextView::split_by_text(const TextView& t, SplitEmpty onEmpty) const {
   List<TextView> res;
   TextView view = *this;
   TextView first_line;
@@ -206,15 +206,15 @@ List<TextView> TextView::splitByText(const TextView& t, SplitEmpty onEmpty) cons
 }
 
 std::optional<TextView> TextView::expect(const TextView& t) const {
-  if (startsWith(t)) {
+  if (starts_with(t)) {
     return skip(t.size());
   }
   return {};
 }
 
-std::optional<TextView> TextView::expectws(const TextView& t) const { return trim_left().expect(t); }
+std::optional<TextView> TextView::expect_ws(const TextView& t) const { return trim_left().expect(t); }
 
-std::optional<TextView> TextView::skipIndent(size_t indentLevel) const {
+std::optional<TextView> TextView::skip_indent(size_t indentLevel) const {
   if (size() < indentLevel) [[unlikely]] {
     return {};
   }
@@ -228,7 +228,7 @@ std::optional<TextView> TextView::skipIndent(size_t indentLevel) const {
   return skip(indentLevel);
 }
 
-size_t TextView::getIndent() const {
+size_t TextView::get_indent() const {
   size_t level = 0;
   for (char c: *this) {
     if (c == ' ') {
@@ -454,17 +454,17 @@ Text Text::trim_right() const {
   return Text(*this, 0, position + 1);
 }
 
-bool Text::startsWith(const Text& tv) const { return toView().starts_with(tv.toView()); }
-bool Text::startsWith(const char* v) const {
+bool Text::starts_with(const Text& tv) const { return toView().starts_with(tv.toView()); }
+bool Text::starts_with(const char* v) const {
   if (v == nullptr) [[unlikely]] {
     return false;
   }
   return toView().starts_with(v);
 }
-bool Text::startsWith(char c) const { return size() > 0 && *begin() == c; }
+bool Text::starts_with(char c) const { return size() > 0 && *begin() == c; }
 
-bool Text::endsWith(const Text& tv) const { return toView().ends_with(tv.toView()); }
-bool Text::endsWith(char c) const {
+bool Text::ends_with(const Text& tv) const { return toView().ends_with(tv.toView()); }
+bool Text::ends_with(char c) const {
   if (size() > 0) {
     return c == *(begin() + size() - 1);
   }
@@ -486,9 +486,9 @@ std::optional<size_t> Text::pos(char c, size_t occurence) const { return toTextV
 
 std::optional<size_t> Text::pos(Text t, size_t occurence) const { return toTextView().pos(t.toTextView(), occurence); }
 
-std::optional<size_t> Text::lastPos(char c) const { return toTextView().lastPos(c); }
+std::optional<size_t> Text::last_pos(char c) const { return toTextView().last_pos(c); }
 
-std::pair<Text, Text> Text::splitPos(ssize_t where) const {
+std::pair<Text, Text> Text::split_pos(ssize_t where) const {
   auto maxn = size();
   if (where < 0) {
     where += maxn;
@@ -499,7 +499,7 @@ std::pair<Text, Text> Text::splitPos(ssize_t where) const {
   return {sublen(0, where), sublen(where, maxn)};
 }
 
-std::pair<Text, Text> Text::splitNextChar(char c, SplitDirection direction) const {
+std::pair<Text, Text> Text::split_next_char(char c, SplitDirection direction) const {
   auto position = pos(c, 1);
   if (!position.has_value()) {
     return {*this, {}};
@@ -511,20 +511,20 @@ std::pair<Text, Text> Text::splitNextChar(char c, SplitDirection direction) cons
   return {sublen(0, split_position), sublen(split_position, m_end)};
 }
 
-std::pair<Text, Text> Text::splitNextLine() const {
-  auto [left, right] = splitNextChar('\n', SplitDirection::Discard);
+std::pair<Text, Text> Text::split_next_line() const {
+  auto [left, right] = split_next_char('\n', SplitDirection::Discard);
   if (left.size() > 0 && left[-1] == '\r') {
     return {left.sublen(0, left.size() - 1), right};
   }
   return {left, right};
 }
 
-List<Text> Text::splitLines(SplitEmpty onEmpty) const {
+List<Text> Text::split_lines(SplitEmpty onEmpty) const {
   List<Text> res;
   auto right = *this;
   Text left;
   while (right.size() > 0) {
-    std::tie(left, right) = right.splitNextLine();
+    std::tie(left, right) = right.split_next_line();
     if (left.size() > 0 || onEmpty == SplitEmpty::Keep) {
       res.add(left);
     }
@@ -535,12 +535,12 @@ List<Text> Text::splitLines(SplitEmpty onEmpty) const {
   return res;
 }
 
-List<Text> Text::splitByChar(char c, SplitEmpty onEmpty) const {
+List<Text> Text::split_by_char(char c, SplitEmpty onEmpty) const {
   List<Text> res;
   auto right = *this;
   Text left;
   while (right.size() > 0) {
-    std::tie(left, right) = right.splitNextChar(c, SplitDirection::Discard);
+    std::tie(left, right) = right.split_next_char(c, SplitDirection::Discard);
     if (left.size() > 0 || onEmpty == SplitEmpty::Keep) {
       res.add(left);
     }
@@ -552,7 +552,7 @@ List<Text> Text::splitByChar(char c, SplitEmpty onEmpty) const {
   return res;
 }
 
-List<Text> Text::splitByText(const Text& t, SplitEmpty onEmpty) const {
+List<Text> Text::split_by_text(const Text& t, SplitEmpty onEmpty) const {
   if (t.size() == 0) {
     return {*this};
   }
@@ -591,15 +591,15 @@ Text Text::sublen(size_t start, size_t len) const {
 }
 
 std::optional<Text> Text::expect(const Text& t) const {
-  if (startsWith(t)) {
+  if (starts_with(t)) {
     return skip(t.size());
   }
   return {};
 }
 
-std::optional<Text> Text::expectws(const Text& t) const { return trim_left().expect(t); }
+std::optional<Text> Text::expect_ws(const Text& t) const { return trim_left().expect(t); }
 
-std::optional<Text> Text::skipIndent(size_t indentLevel) const {
+std::optional<Text> Text::skip_indent(size_t indentLevel) const {
   if (size() < indentLevel) [[unlikely]] {
     return {};
   }
@@ -613,7 +613,7 @@ std::optional<Text> Text::skipIndent(size_t indentLevel) const {
   return skip(indentLevel);
 }
 
-size_t Text::getIndent() const {
+size_t Text::get_indent() const {
   size_t level = 0;
   for (char c: *this) {
     if (c == ' ') {
@@ -663,16 +663,16 @@ Text Text::quote_escaped() const {
   return Text(memblock, length);
 }
 
-void TextChain::_updateLength() {
+void TextChain::_update_length() {
   _length = 0;
   for (const auto& t: _chain) {
     _length += t.size();
   }
 }
 
-TextChain::TextChain(std::initializer_list<Text> l) : _chain(l) { _updateLength(); }
-TextChain::TextChain(List<Text>&& l) : _chain(l) { _updateLength(); }
-TextChain::TextChain(const List<Text>& l) : _chain(l) { _updateLength(); }
+TextChain::TextChain(std::initializer_list<Text> l) : _chain(l) { _update_length(); }
+TextChain::TextChain(List<Text>&& l) : _chain(l) { _update_length(); }
+TextChain::TextChain(const List<Text>& l) : _chain(l) { _update_length(); }
 const List<Text>& TextChain::chain() const { return _chain; }
 void TextChain::operator+=(const Text& text) {
   _chain.add(text);
@@ -761,7 +761,7 @@ void TextChain::clear() {
   _length = 0;
 }
 
-Text Text::skipBOM() const {
+Text Text::skip_bom() const {
   if (size() >= 3) {
     const auto* buf = begin();
     // NOLINTNEXTLINE(readability-magic-numbers): BOM is 0xEFBBBF for UTF8

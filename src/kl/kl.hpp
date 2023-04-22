@@ -5,7 +5,7 @@
 #include <fmt/format.h>
 #include <fmt/ranges.h>
 
-// TODO: use fmt::print
+// TODO(dorin): use fmt::print
 
 namespace kl {
 template <typename... Args>

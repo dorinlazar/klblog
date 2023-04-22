@@ -49,7 +49,7 @@ Date DateTime::date() const {
 }
 
 DateTime DateTime::now() {
-  // auto n = std::chrono::utc_clock::now(); TODO FIX THIS WHEN THE COMPILER IMPLEMENTS utc_clock
+  // auto n = std::chrono::utc_clock::now(); TODO(dorin) FIX THIS WHEN THE COMPILER IMPLEMENTS utc_clock
   auto n = std::chrono::system_clock::now();
   int64_t nanos = std::chrono::duration_cast<std::chrono::nanoseconds>(n.time_since_epoch()).count();
   return DateTime(nanos / 1'000'000'000, nanos % 1'000'000'000);
@@ -116,7 +116,7 @@ DateTime DateTime::operator+(TimeSpan ts) { return fromTicks(_ticks + ts.ticks);
 std::ostream& operator<<(std::ostream& os, kl::DateTime t) {
   auto date = t.date();
   auto time = t.timeOfDay();
-  // TODO when gcc implements std::format
+  // TODO(dorin) when gcc implements std::format
   // os << std::format("{:0>4}-{:0>2}-{:0>2} {:0>2}:{:0>2}:{:0>2}.{:0>3}", date.year, date.month, date.day, time.hour,
   //                   time.min, time.sec, time.nanos / 1'000'000);
   char buffer[128];
@@ -135,7 +135,7 @@ std::ostream& operator<<(std::ostream& os, TimeSpan t) {
   uint32_t minutes = t.minutes();
   uint32_t seconds = t.seconds();
   uint32_t millis = t.milliseconds();
-  // TODO when gcc implements std::format
+  // TODO(dorin) when gcc implements std::format
   // os << std::format("{:0>4}-{:0>2}-{:0>2} {:0>2}:{:0>2}:{:0>2}.{:0>3}", date.year, date.month, date.day, time.hour,
   //                   time.min, time.sec, time.nanos / 1'000'000);
   if (days != 0) {
@@ -156,7 +156,7 @@ inline std::tuple<uint32_t, uint32_t, uint32_t> _readDate(TextScanner& sc) {
   year += sc.readDigit() * 10;
   year += sc.readDigit();
 
-  bool hasSplitter = sc.topChar() == '-';
+  bool hasSplitter = sc.top_char() == '-';
 
   if (hasSplitter) {
     sc.expect('-');
@@ -182,7 +182,7 @@ inline std::tuple<uint32_t, uint32_t, uint32_t, uint64_t> _readTime(TextScanner&
     return {hh, mm, ss, ff};
   }
 
-  if (sc.topChar() == 'T' || sc.topChar() == ' ') [[likely]] {
+  if (sc.top_char() == 'T' || sc.top_char() == ' ') [[likely]] {
     sc.read_char();
   } else {
     sc.error("Expected Date-Time split");
@@ -193,16 +193,16 @@ inline std::tuple<uint32_t, uint32_t, uint32_t, uint64_t> _readTime(TextScanner&
   if (sc.empty()) {
     return {hh, mm, ss, ff};
   }
-  bool hasSplitter = sc.topChar() == ':';
+  bool hasSplitter = sc.top_char() == ':';
   if (hasSplitter) {
     sc.expect(':');
-  } else if (sc.topChar() == '+' || sc.topChar() == '-' || sc.topChar() == 'Z') {
+  } else if (sc.top_char() == '+' || sc.top_char() == '-' || sc.top_char() == 'Z') {
     return {hh, mm, ss, ff};
   }
 
   mm += sc.readDigit() * 10;
   mm += sc.readDigit();
-  if (sc.empty() || sc.topChar() == '+' || sc.topChar() == '-' || sc.topChar() == 'Z') {
+  if (sc.empty() || sc.top_char() == '+' || sc.top_char() == '-' || sc.top_char() == 'Z') {
     return {hh, mm, ss, ff};
   }
   if (hasSplitter) {
@@ -211,7 +211,7 @@ inline std::tuple<uint32_t, uint32_t, uint32_t, uint64_t> _readTime(TextScanner&
 
   ss += sc.readDigit() * 10;
   ss += sc.readDigit();
-  if (sc.empty() || sc.topChar() == '+' || sc.topChar() == '-' || sc.topChar() == 'Z') {
+  if (sc.empty() || sc.top_char() == '+' || sc.top_char() == '-' || sc.top_char() == 'Z') {
     return {hh, mm, ss, ff};
   }
 
@@ -219,7 +219,7 @@ inline std::tuple<uint32_t, uint32_t, uint32_t, uint64_t> _readTime(TextScanner&
   ff += sc.readDigit() * 100;
   ff += sc.readDigit() * 10;
   ff += sc.readDigit();
-  if (!sc.empty() && sc.topChar() >= '0' && sc.topChar() <= '9') {
+  if (!sc.empty() && sc.top_char() >= '0' && sc.top_char() <= '9') {
     ff *= 1000;
     ff += sc.readDigit() * 100;
     ff += sc.readDigit() * 10;
@@ -235,7 +235,7 @@ std::tuple<bool, uint32_t, uint32_t> _readTimeZone(TextScanner& sc) {
   int32_t tshours = 0, tsminutes = 0;
   bool plus = false;
   if (!sc.empty()) {
-    if (sc.topChar() == '+' || sc.topChar() == '-') {
+    if (sc.top_char() == '+' || sc.top_char() == '-') {
       plus = sc.read_char().character == '+';
       tshours += sc.readDigit() * 10;
       tshours += sc.readDigit();
