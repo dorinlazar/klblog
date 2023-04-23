@@ -96,27 +96,23 @@ DateTime::DateTime(uint32_t year, uint32_t month, uint32_t day, uint32_t hour, u
   day--;
   // This isn't constexpr in C++20 :( auto years = std::div(year - 1, 400);
   // ldiv_t years{.quot = year / 400, .rem = year % 400};
-  auto years = std::div(year, 400); // NOLINT(readability-magic-numbers)
-  auto& monthsizes = _month_sizes(years.rem + 1);
+  const auto years = std::div(year, 400); // NOLINT(readability-magic-numbers)
+  const auto& monthsizes = _month_sizes(years.rem + 1);
   if (day >= monthsizes[month]) [[unlikely]] {
     m_ticks = 0;
     return;
   }
-  auto seconds = sec + minute * 60 + hour * 3600; // NOLINT(readability-magic-numbers)
-  auto days = DeltaMonths[years.rem * 12 + month] + day +
-              years.quot * TimeLimits::DAYS_IN_400_YEARS; // NOLINT(readability-magic-numbers)
-  m_ticks = nsec / 100;                                   // NOLINT(readability-magic-numbers)
+  const auto seconds = sec + minute * 60 + hour * 3600; // NOLINT(readability-magic-numbers)
+  const auto days = DeltaMonths[years.rem * 12 + month] + day +
+                    years.quot * TimeLimits::DAYS_IN_400_YEARS; // NOLINT(readability-magic-numbers)
+  m_ticks = nsec / 100;                                         // NOLINT(readability-magic-numbers)
   m_ticks += seconds * TimeLimits::TICKS_PER_SECOND;
   m_ticks += days * TimeLimits::TICKS_PER_DAY;
 }
 
-const DateTime& DateTime::operator=(const DateTime d) {
-  m_ticks = d.m_ticks;
-  return *this;
-}
-TimeSpan DateTime::operator-(const DateTime d) { return {.ticks = m_ticks - d.m_ticks}; }
-DateTime DateTime::operator-(TimeSpan ts) { return fromTicks(m_ticks - ts.ticks); }
-DateTime DateTime::operator+(TimeSpan ts) { return fromTicks(m_ticks + ts.ticks); }
+TimeSpan DateTime::operator-(const DateTime d) const { return {.ticks = m_ticks - d.m_ticks}; }
+DateTime DateTime::operator-(TimeSpan ts) const { return fromTicks(m_ticks - ts.ticks); }
+DateTime DateTime::operator+(TimeSpan ts) const { return fromTicks(m_ticks + ts.ticks); }
 
 std::ostream& operator<<(std::ostream& os, kl::DateTime t) {
   auto date = t.date();
@@ -130,11 +126,11 @@ std::ostream& operator<<(std::ostream& os, TimeSpan t) {
     os << "-";
     t.ticks = -t.ticks;
   }
-  uint32_t days = t.days();
-  uint32_t hours = t.hours();
-  uint32_t minutes = t.minutes();
-  uint32_t seconds = t.seconds();
-  uint32_t millis = t.milliseconds();
+  const uint32_t days = t.days();
+  const uint32_t hours = t.hours();
+  const uint32_t minutes = t.minutes();
+  const uint32_t seconds = t.seconds();
+  const uint32_t millis = t.milliseconds();
   if (days != 0) [[unlikely]] {
     os << days << "d ";
   }
@@ -148,7 +144,7 @@ inline std::tuple<uint32_t, uint32_t, uint32_t> kltime_read_date(TextScanner& sc
   year += sc.read_digit() * 10;           // NOLINT(readability-magic-numbers)
   year += sc.read_digit();
 
-  bool has_splitter = sc.top_char() == '-';
+  const bool has_splitter = sc.top_char() == '-';
 
   if (has_splitter) {
     sc.expect('-');
@@ -167,7 +163,9 @@ inline std::tuple<uint32_t, uint32_t, uint32_t> kltime_read_date(TextScanner& sc
 }
 
 inline std::tuple<uint32_t, uint32_t, uint32_t, uint64_t> kltime_read_time(TextScanner& sc) {
-  uint32_t hh = 0, mm = 0, ss = 0;
+  uint32_t hh = 0;
+  uint32_t mm = 0;
+  uint32_t ss = 0;
   uint64_t ff = 0;
 
   if (sc.empty()) {
@@ -212,10 +210,10 @@ inline std::tuple<uint32_t, uint32_t, uint32_t, uint64_t> kltime_read_time(TextS
   ff += static_cast<uint64_t>(sc.read_digit() * 10);  // NOLINT(readability-magic-numbers)
   ff += static_cast<uint64_t>(sc.read_digit());
   if (!sc.empty() && sc.top_char() >= '0' && sc.top_char() <= '9') {
-    ff *= 1000;                  // NOLINT(readability-magic-numbers)
-    ff += sc.read_digit() * 100; // NOLINT(readability-magic-numbers)
-    ff += sc.read_digit() * 10;  // NOLINT(readability-magic-numbers)
-    ff += sc.read_digit();
+    ff *= 1000;                                         // NOLINT(readability-magic-numbers)
+    ff += static_cast<uint64_t>(sc.read_digit() * 100); // NOLINT(readability-magic-numbers)
+    ff += static_cast<uint64_t>(sc.read_digit() * 10);  // NOLINT(readability-magic-numbers)
+    ff += static_cast<uint64_t>(sc.read_digit());
     ff *= 1000; // NOLINT(readability-magic-numbers)
   } else {
     ff *= 1'000'000; // NOLINT(readability-magic-numbers)
@@ -224,7 +222,8 @@ inline std::tuple<uint32_t, uint32_t, uint32_t, uint64_t> kltime_read_time(TextS
 }
 
 std::tuple<bool, uint32_t, uint32_t> kltime_read_timezone(TextScanner& sc) {
-  uint32_t ts_hours = 0, ts_minutes = 0;
+  uint32_t ts_hours = 0;
+  uint32_t ts_minutes = 0;
   bool plus = false;
   if (!sc.empty()) {
     if (sc.top_char() == '+' || sc.top_char() == '-') {
@@ -245,7 +244,8 @@ std::tuple<bool, uint32_t, uint32_t> kltime_read_timezone(TextScanner& sc) {
 // Allowed formats:
 // YYYY-?MM-?DD[T ]hh:mm:ss.fff{fff}?
 DateTime DateTime::parse(const Text& src) {
-  if (src.size() < 8) [[unlikely]] {
+  const size_t MIN_DATE_LENGTH = 8;
+  if (src.size() < MIN_DATE_LENGTH) [[unlikely]] {
     throw InvalidInputData(src, "A valid date has at least 8 characters"_t);
   }
   TextScanner sc(src);
