@@ -241,11 +241,11 @@ std::tuple<bool, uint32_t, uint32_t> kltime_read_timezone(TextScanner& sc) {
   return {plus, ts_hours, ts_minutes};
 }
 
+const size_t MIN_DATE_LENGTH = 8;
 // Limited date parsing.
 // Allowed formats:
 // YYYY-?MM-?DD[T ]hh:mm:ss.fff{fff}?
 DateTime DateTime::parse(const Text& src) {
-  const size_t MIN_DATE_LENGTH = 8;
   if (src.size() < MIN_DATE_LENGTH) [[unlikely]] {
     throw InvalidInputData(src, "A valid date has at least 8 characters"_t);
   }
@@ -254,7 +254,7 @@ DateTime DateTime::parse(const Text& src) {
   const auto [hh, mm, ss, ff] = kltime_read_time(sc);
   const auto [plus, ts_hours, ts_minutes] = kltime_read_timezone(sc);
 
-  DateTime dt(year, month, day, hh, mm, ss, ff);
+  const DateTime dt(year, month, day, hh, mm, ss, ff);
   const auto ts = TimeSpan::fromMinutes(ts_hours * TimeLimits::MINUTES_PER_HOUR + ts_minutes);
   if (plus) {
     return dt - ts; // timezones with + are behind UTC
