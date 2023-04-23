@@ -13,19 +13,21 @@ static constexpr bool _leap_year(uint32_t year) { // Leap year, for one-based 1-
 static constexpr std::array<uint32_t, 12> MSIZES = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 static constexpr std::array<uint32_t, 12> MSIZES_LEAP = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
-static constexpr const std::array<uint32_t, 12>& _month_sizes(int32_t year) { // year in the interval 1-400.
+static constexpr const std::array<uint32_t, 12>& kltime_month_sizes(int32_t year) { // year in the interval 1-400.
   return _leap_year(year) ? MSIZES_LEAP : MSIZES;
 }
 
-static constexpr std::array<int32_t, 400 * 12 + 1> _calculateDeltaMonths() {
-  std::array<int32_t, 400 * 12 + 1> res; // NOLINT(readability-magic-numbers)
+using delta_months_array_t = std::array<int32_t, TimeLimits::REGULAR_YEARS_OFFSET * TimeLimits::MONTHS_IN_YEAR + 1>;
+
+static constexpr delta_months_array_t kltime_calculate_delta_months() {
+  delta_months_array_t res;
   int32_t total_days = 0;
   res[0] = 0;
   int32_t index = 1;
 
-  for (int32_t y = 0; y < 400; y++) { // NOLINT(readability-magic-numbers)
-    auto& sizes = _month_sizes(y + 1);
-    for (int32_t m = 0; m < 12; m++, index++) { // NOLINT(readability-magic-numbers)
+  for (int32_t y = 0; y < TimeLimits::REGULAR_YEARS_OFFSET; y++) {
+    auto& sizes = kltime_month_sizes(y + 1);
+    for (int32_t m = 0; m < TimeLimits::MONTHS_IN_YEAR; m++, index++) {
       total_days += sizes[m];
       res[index] = total_days;
     }
@@ -33,7 +35,7 @@ static constexpr std::array<int32_t, 400 * 12 + 1> _calculateDeltaMonths() {
   return res;
 }
 
-static const std::array<int32_t, 400 * 12 + 1> DeltaMonths = _calculateDeltaMonths();
+static const delta_months_array_t DeltaMonths = kltime_calculate_delta_months();
 
 const DateTime DateTime::UnixEpoch(1970, 1, 1);
 const DateTime DateTime::MAX = DateTime::fromTicks(TimeLimits::MAX_TICKS);
@@ -43,18 +45,18 @@ Date DateTime::date() const {
   auto d = m_ticks / TimeLimits::TICKS_PER_DAY;
   auto fh = std::lldiv(d, TimeLimits::DAYS_IN_400_YEARS);
   auto it = std::lower_bound(DeltaMonths.begin(), DeltaMonths.end(), fh.rem + 1) - 1;
-  auto mo =
-      std::div(static_cast<uint32_t>(std::distance(DeltaMonths.begin(), it)), 12); // NOLINT(readability-magic-numbers)
-  return Date{.year = static_cast<uint32_t>(fh.quot) * 400 + mo.quot + 1,          // NOLINT(readability-magic-numbers)
-              .month = static_cast<uint32_t>(mo.rem) + 1,
+  auto delta_months = std::distance(DeltaMonths.begin(), it);
+  auto delta_years = delta_months / TimeLimits::MONTHS_IN_YEAR;
+  auto leftover_months = delta_months % TimeLimits::MONTHS_IN_YEAR;
+  return Date{.year = static_cast<uint32_t>(fh.quot * TimeLimits::REGULAR_YEARS_OFFSET + delta_years + 1),
+              .month = static_cast<uint32_t>(leftover_months) + 1,
               .day = 1 + static_cast<uint32_t>(fh.rem) - *it};
 }
 
 DateTime DateTime::now() {
-  // auto n = std::chrono::utc_clock::now(); TODO(dorin) FIX THIS WHEN THE COMPILER IMPLEMENTS utc_clock
   auto n = std::chrono::system_clock::now();
   int64_t nanos = std::chrono::duration_cast<std::chrono::nanoseconds>(n.time_since_epoch()).count();
-  return DateTime(nanos / 1'000'000'000, nanos % 1'000'000'000); // NOLINT(readability-magic-numbers)
+  return DateTime(nanos / TimeLimits::NANOSECONDS_PER_SECOND, nanos % TimeLimits::NANOSECONDS_PER_SECOND);
 }
 
 int64_t DateTime::ticks() const { return m_ticks; }
@@ -62,12 +64,12 @@ int32_t DateTime::days() const { return m_ticks / TimeLimits::TICKS_PER_DAY; }
 TimeOfDay DateTime::timeOfDay() const {
   int64_t day_ticks = m_ticks % TimeLimits::TICKS_PER_DAY;
   auto sec = lldiv(day_ticks, TimeLimits::TICKS_PER_SECOND);
-  auto mn = div(sec.quot, 60); // NOLINT(readability-magic-numbers)
-  auto hr = div(mn.quot, 60);  // NOLINT(readability-magic-numbers)
+  auto mn = div(sec.quot, TimeLimits::SECONDS_PER_MINUTE);
+  auto hr = div(mn.quot, TimeLimits::MINUTES_PER_HOUR);
   return {.hour = static_cast<uint32_t>(hr.quot),
           .min = static_cast<uint32_t>(hr.rem),
           .sec = static_cast<uint32_t>(mn.rem),
-          .nanos = static_cast<uint32_t>(sec.rem) * 100}; // NOLINT(readability-magic-numbers)
+          .nanos = static_cast<uint32_t>(sec.rem * TimeLimits::NANOSECONDS_PER_TICK)};
 }
 
 DateTime DateTime::fromTicks(int64_t ticks) {
@@ -79,33 +81,32 @@ DateTime DateTime::fromTicks(int64_t ticks) {
 }
 
 DateTime::DateTime(time_t seconds, int32_t nsec) {
-  // NOLINTNEXTLINE(readability-magic-numbers)
-  m_ticks = DateTime::UnixEpoch.ticks() + seconds * TimeLimits::TICKS_PER_SECOND + nsec / 100;
+  m_ticks =
+      DateTime::UnixEpoch.ticks() + seconds * TimeLimits::TICKS_PER_SECOND + nsec / TimeLimits::NANOSECONDS_PER_TICK;
 }
 
 DateTime::DateTime(uint32_t year, uint32_t month, uint32_t day, uint32_t hour, uint32_t minute, uint32_t sec,
                    uint32_t nsec) {
-  // NOLINTNEXTLINE(readability-magic-numbers)
-  if (year < 1 || year > 9999 || month < 1 || month > 12 || day < 1 || nsec > 999'999'999ULL || sec > 59 ||
-      minute > 59 || hour > 23) [[unlikely]] {
+  if (year < TimeLimits::MIN_YEAR || year > TimeLimits::MAX_YEAR || month < 1 || month > TimeLimits::MONTHS_IN_YEAR ||
+      day < 1 || nsec >= TimeLimits::NANOSECONDS_PER_SECOND || sec >= TimeLimits::SECONDS_PER_MINUTE ||
+      minute >= TimeLimits::MINUTES_PER_HOUR || hour > TimeLimits::HOURS_PER_DAY) [[unlikely]] {
     m_ticks = 0;
     return;
   }
   year--;
   month--;
   day--;
-  // This isn't constexpr in C++20 :( auto years = std::div(year - 1, 400);
-  // ldiv_t years{.quot = year / 400, .rem = year % 400};
-  const auto years = std::div(year, 400); // NOLINT(readability-magic-numbers)
-  const auto& monthsizes = _month_sizes(years.rem + 1);
+  const auto regular_intervals = year / TimeLimits::REGULAR_YEARS_OFFSET;
+  const auto remaining_years = year % TimeLimits::REGULAR_YEARS_OFFSET;
+  const auto& monthsizes = kltime_month_sizes(remaining_years + 1);
   if (day >= monthsizes[month]) [[unlikely]] {
     m_ticks = 0;
     return;
   }
-  const auto seconds = sec + minute * 60 + hour * 3600; // NOLINT(readability-magic-numbers)
-  const auto days = DeltaMonths[years.rem * 12 + month] + day +
-                    years.quot * TimeLimits::DAYS_IN_400_YEARS; // NOLINT(readability-magic-numbers)
-  m_ticks = nsec / 100;                                         // NOLINT(readability-magic-numbers)
+  const auto seconds = sec + minute * TimeLimits::SECONDS_PER_MINUTE + hour * TimeLimits::SECONDS_PER_HOUR;
+  const auto days = DeltaMonths[remaining_years * TimeLimits::MONTHS_IN_YEAR + month] + day +
+                    regular_intervals * TimeLimits::DAYS_IN_400_YEARS;
+  m_ticks = nsec / TimeLimits::NANOSECONDS_PER_TICK;
   m_ticks += seconds * TimeLimits::TICKS_PER_SECOND;
   m_ticks += days * TimeLimits::TICKS_PER_DAY;
 }
@@ -118,7 +119,7 @@ std::ostream& operator<<(std::ostream& os, kl::DateTime t) {
   auto date = t.date();
   auto time = t.timeOfDay();
   return os << fmt::format("{:0>4}-{:0>2}-{:0>2} {:0>2}:{:0>2}:{:0>2}.{:0>3}", date.year, date.month, date.day,
-                           time.hour, time.min, time.sec, time.nanos / 1'000'000);
+                           time.hour, time.min, time.sec, time.nanos / TimeLimits::NANOSECONDS_PER_MILLISECOND);
 }
 
 std::ostream& operator<<(std::ostream& os, TimeSpan t) {
@@ -249,12 +250,12 @@ DateTime DateTime::parse(const Text& src) {
     throw InvalidInputData(src, "A valid date has at least 8 characters"_t);
   }
   TextScanner sc(src);
-  auto [year, month, day] = kltime_read_date(sc);
-  auto [hh, mm, ss, ff] = kltime_read_time(sc);
-  auto [plus, ts_hours, ts_minutes] = kltime_read_timezone(sc);
+  const auto [year, month, day] = kltime_read_date(sc);
+  const auto [hh, mm, ss, ff] = kltime_read_time(sc);
+  const auto [plus, ts_hours, ts_minutes] = kltime_read_timezone(sc);
 
   DateTime dt(year, month, day, hh, mm, ss, ff);
-  auto ts = TimeSpan::fromMinutes(ts_hours * 60 + ts_minutes); // NOLINT(readability-magic-numbers)
+  const auto ts = TimeSpan::fromMinutes(ts_hours * TimeLimits::MINUTES_PER_HOUR + ts_minutes);
   if (plus) {
     return dt - ts; // timezones with + are behind UTC
   }

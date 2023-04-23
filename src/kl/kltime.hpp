@@ -26,7 +26,13 @@ struct Date {
 struct TimeLimits {
   static constexpr int64_t MIN_TICKS = 0LL;                   // 0001-01-01 00:00:00 UTC (if that makes any sense)
   static constexpr int64_t MAX_TICKS = 3155378975999999999LL; // 9999-12-31 23:59:59 UTC
+
+  static constexpr int32_t MAX_YEAR = 9999;
+  static constexpr int32_t MIN_YEAR = 1;
+
+  static constexpr uint32_t REGULAR_YEARS_OFFSET = 400;
   static constexpr uint32_t DAYS_IN_400_YEARS = 365 * 400 + 97;
+  static constexpr uint32_t MONTHS_IN_YEAR = 12;
   static constexpr uint32_t MINUTES_PER_HOUR = 60;
   static constexpr uint32_t SECONDS_PER_MINUTE = 60;
   static constexpr uint32_t HOURS_PER_DAY = 24;
@@ -35,6 +41,8 @@ struct TimeLimits {
   static constexpr int64_t TICKS_PER_MILLISECOND = 10'000LL;
   static constexpr int64_t TICKS_PER_MICROSECOND = 10LL;
   static constexpr int64_t NANOSECONDS_PER_TICK = 100LL;
+  static constexpr int64_t NANOSECONDS_PER_SECOND = 1'000'000'000LL;
+  static constexpr int64_t NANOSECONDS_PER_MILLISECOND = 1'000'000LL;
   static constexpr int64_t TICKS_PER_MINUTE = TICKS_PER_SECOND * SECONDS_PER_MINUTE;
   static constexpr int64_t TICKS_PER_HOUR = TICKS_PER_SECOND * SECONDS_PER_HOUR;
   static constexpr int64_t TICKS_PER_DAY = TICKS_PER_HOUR * HOURS_PER_DAY;
