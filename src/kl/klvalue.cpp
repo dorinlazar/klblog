@@ -1,6 +1,8 @@
 #include "klvalue.hpp"
 #include "klfs.hpp"
 
+#include <utility>
+
 namespace kl {
 Value::Value(ValueType vt) {
   switch (vt) {
@@ -18,26 +20,26 @@ PValue Value::create_scalar(const Text& value) { return std::make_shared<Value>(
 PValue Value::create_map() { return std::make_shared<Value>(ValueType::Map); }
 PValue Value::create_list() { return std::make_shared<Value>(ValueType::List); }
 
-bool Value::is_null() const { return _value.index() == (size_t)ValueType::Null; }
-bool Value::is_scalar() const { return _value.index() == (size_t)ValueType::Scalar; }
-bool Value::is_map() const { return _value.index() == (size_t)ValueType::Map; }
-bool Value::is_list() const { return _value.index() == (size_t)ValueType::List; }
+bool Value::is_null() const { return _value.index() == std::to_underlying(ValueType::Null); }
+bool Value::is_scalar() const { return _value.index() == std::to_underlying(ValueType::Scalar); }
+bool Value::is_map() const { return _value.index() == std::to_underlying(ValueType::Map); }
+bool Value::is_list() const { return _value.index() == std::to_underlying(ValueType::List); }
 
 MapValue& Value::as_map() {
   if (is_null()) {
     create_map();
   }
-  return std::get<(int)ValueType::Map>(_value);
+  return std::get<std::to_underlying(ValueType::Map)>(_value);
 }
 ListValue& Value::as_list() {
   if (is_null()) {
     create_list();
   }
-  return std::get<(int)ValueType::List>(_value);
+  return std::get<std::to_underlying(ValueType::List)>(_value);
 }
-const MapValue& Value::as_map() const { return std::get<(int)ValueType::Map>(_value); }
-const ListValue& Value::as_list() const { return std::get<(int)ValueType::List>(_value); }
-Text Value::as_scalar() const { return std::get<(int)ValueType::Scalar>(_value); }
+const MapValue& Value::as_map() const { return std::get<std::to_underlying(ValueType::Map)>(_value); }
+const ListValue& Value::as_list() const { return std::get<std::to_underlying(ValueType::List)>(_value); }
+Text Value::as_scalar() const { return std::get<std::to_underlying(ValueType::Scalar)>(_value); }
 
 ValueType Value::type() const { return ValueType(_value.index()); }
 void Value::set_value(const Text& txt) { _value = txt; }
@@ -72,10 +74,10 @@ size_t Value::size() const {
     return 1;
   }
   if (is_list()) {
-    return std::get<(size_t)ValueType::List>(_value).size();
+    return std::get<std::to_underlying(ValueType::List)>(_value).size();
   }
   if (is_map()) {
-    return std::get<(size_t)ValueType::Map>(_value).size();
+    return std::get<std::to_underlying(ValueType::Map)>(_value).size();
   }
   return 0;
 }
@@ -84,54 +86,64 @@ inline void Value::perform(std::function<void(NullValue&)> nullOp, std::function
                            std::function<void(MapValue&)> mapOp, std::function<void(ListValue&)> listOp) {
   if (is_null()) {
     if (nullOp) {
-      nullOp(std::get<(size_t)ValueType::Null>(_value));
+      nullOp(std::get<std::to_underlying(ValueType::Null)>(_value));
     }
   } else if (is_scalar()) {
     if (scalarOp) {
-      scalarOp(std::get<(size_t)ValueType::Scalar>(_value));
+      scalarOp(std::get<std::to_underlying(ValueType::Scalar)>(_value));
     }
   } else if (is_map()) {
     if (mapOp) {
-      mapOp(std::get<(size_t)ValueType::Map>(_value));
+      mapOp(std::get<std::to_underlying(ValueType::Map)>(_value));
     }
   } else if (is_list()) {
     if (listOp) {
-      listOp(std::get<(size_t)ValueType::List>(_value));
+      listOp(std::get<std::to_underlying(ValueType::List)>(_value));
     }
   }
 }
 
+// TODO(dorin): make this one text, and the others point to fragments of it.
+const Text NULL_TEXT{"null"};
+const Text QUOTE_TEXT{R"(")"};
+const Text OPEN_ARRAY{"["};
+const Text CLOSE_ARRAY{"]"};
+const Text OPEN_CURLY{"{"};
+const Text CLOSE_CURLY{"}"};
+const Text COMMA_TEXT{","};
+const Text COLON_TEXT{":"};
+
 TextChain Value::to_string() const {
   TextChain tc;
-  bool commaNeeded = false;
+  bool comma_needed = false;
   switch (type()) {
-  case ValueType::Null: return {"null"_t};
-  case ValueType::Scalar: return {"\""_t, as_scalar(), "\""_t};
+  case ValueType::Null: return {NULL_TEXT};
+  case ValueType::Scalar: return {QUOTE_TEXT, as_scalar(), QUOTE_TEXT};
   case ValueType::List:
-    tc.add("["_t);
+    tc.add(OPEN_ARRAY);
     for (const auto& v: as_list()) {
-      if (commaNeeded) {
-        tc.add(","_t);
+      if (comma_needed) {
+        tc.add(COMMA_TEXT);
       } else {
-        commaNeeded = true;
+        comma_needed = true;
       }
       tc.add(v->to_string());
     }
-    tc.add("]"_t);
+    tc.add(CLOSE_ARRAY);
     break;
   case ValueType::Map:
-    tc.add("{"_t);
+    tc.add(OPEN_CURLY);
     for (const auto& [k, v]: as_map()) {
-      if (commaNeeded) {
-        tc.add(","_t);
+      if (comma_needed) {
+        tc.add(COMMA_TEXT);
       } else {
-        commaNeeded = true;
+        comma_needed = true;
       }
       tc.add(k);
-      tc.add(":"_t);
+      tc.add(COLON_TEXT);
       tc.add(v->to_string());
     }
-    tc.add("}"_t);
+    tc.add(CLOSE_CURLY);
     break;
   }
   return tc;

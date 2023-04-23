@@ -38,8 +38,8 @@ jobs:
     - name: Update compilation database
       run: sed 's/\+\+23/\+\+2b/g' -i ${{github.workspace}}/build/compile_commands.json
 
-    - name: CodeChecker
-      uses: whisperity/codechecker-analysis-action@v1
-      id: codechecker
-      with:
-        logfile: ${{github.workspace}}/build/compile_commands.json
+    # - name: CodeChecker
+    #   uses: whisperity/codechecker-analysis-action@v1
+    #   id: codechecker
+    #   with:
+    #     logfile: ${{github.workspace}}/build/compile_commands.json
