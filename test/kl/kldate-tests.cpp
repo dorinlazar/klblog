@@ -3,15 +3,15 @@
 #include <gtest/gtest.h>
 
 TEST(kldate, sanity_checks) {
-  EXPECT_EQ((25 * kl::TimeLimits::DAYS_IN_400_YEARS - 366) * kl::TimeLimits::TICKS_PER_DAY,
-            kl::TimeLimits::MAX_TICKS + 1);
+  EXPECT_EQ((25 * kl::TimeLimits::DaysInRegularInterval - 366) * kl::TimeLimits::TicksPerDay,
+            kl::TimeLimits::MaxTicks + 1);
 }
 
 TEST(kldate, test_ticks) {
-  EXPECT_EQ(kl::DateTime::fromTicks(kl::TimeLimits::MIN_TICKS - 100).ticks(), kl::TimeLimits::MIN_TICKS);
-  EXPECT_EQ(kl::DateTime::fromTicks(kl::TimeLimits::MIN_TICKS).ticks(), kl::TimeLimits::MIN_TICKS);
-  EXPECT_EQ(kl::DateTime::fromTicks(kl::TimeLimits::MAX_TICKS).ticks(), kl::TimeLimits::MAX_TICKS);
-  EXPECT_EQ(kl::DateTime::fromTicks(kl::TimeLimits::MAX_TICKS + 1000).ticks(), kl::TimeLimits::MAX_TICKS);
+  EXPECT_EQ(kl::DateTime::fromTicks(kl::TimeLimits::MinTicks - 100).ticks(), kl::TimeLimits::MinTicks);
+  EXPECT_EQ(kl::DateTime::fromTicks(kl::TimeLimits::MinTicks).ticks(), kl::TimeLimits::MinTicks);
+  EXPECT_EQ(kl::DateTime::fromTicks(kl::TimeLimits::MaxTicks).ticks(), kl::TimeLimits::MaxTicks);
+  EXPECT_EQ(kl::DateTime::fromTicks(kl::TimeLimits::MaxTicks + 1000).ticks(), kl::TimeLimits::MaxTicks);
 }
 
 void check_year(uint32_t year) {
@@ -57,7 +57,7 @@ void check_year(uint32_t year) {
 
 TEST(kldate, test_date_time) {
   auto dt = kl::DateTime(9999, 12, 31, 23, 59, 59, 999999999);
-  EXPECT_EQ(dt.ticks(), kl::TimeLimits::MAX_TICKS);
+  EXPECT_EQ(dt.ticks(), kl::TimeLimits::MaxTicks);
   EXPECT_EQ(dt.days(), 3652058);
   auto d = dt.date();
   EXPECT_EQ(d.year, 9999);

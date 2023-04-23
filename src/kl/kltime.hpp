@@ -24,28 +24,28 @@ struct Date {
 };
 
 struct TimeLimits {
-  static constexpr int64_t MIN_TICKS = 0LL;                   // 0001-01-01 00:00:00 UTC (if that makes any sense)
-  static constexpr int64_t MAX_TICKS = 3155378975999999999LL; // 9999-12-31 23:59:59 UTC
+  static constexpr int64_t MinTicks = 0LL;                   // 0001-01-01 00:00:00 UTC (if that makes any sense)
+  static constexpr int64_t MaxTicks = 3155378975999999999LL; // 9999-12-31 23:59:59 UTC
 
-  static constexpr int32_t MAX_YEAR = 9999;
-  static constexpr int32_t MIN_YEAR = 1;
+  static constexpr int32_t MaxYear = 9999;
+  static constexpr int32_t MinYear = 1;
 
-  static constexpr uint32_t REGULAR_YEARS_OFFSET = 400;
-  static constexpr uint32_t DAYS_IN_400_YEARS = 365 * 400 + 97;
-  static constexpr uint32_t MONTHS_IN_YEAR = 12;
-  static constexpr uint32_t MINUTES_PER_HOUR = 60;
-  static constexpr uint32_t SECONDS_PER_MINUTE = 60;
-  static constexpr uint32_t HOURS_PER_DAY = 24;
-  static constexpr uint32_t SECONDS_PER_HOUR = SECONDS_PER_MINUTE * MINUTES_PER_HOUR;
-  static constexpr int64_t TICKS_PER_SECOND = 10'000'000LL;
-  static constexpr int64_t TICKS_PER_MILLISECOND = 10'000LL;
-  static constexpr int64_t TICKS_PER_MICROSECOND = 10LL;
-  static constexpr int64_t NANOSECONDS_PER_TICK = 100LL;
-  static constexpr int64_t NANOSECONDS_PER_SECOND = 1'000'000'000LL;
-  static constexpr int64_t NANOSECONDS_PER_MILLISECOND = 1'000'000LL;
-  static constexpr int64_t TICKS_PER_MINUTE = TICKS_PER_SECOND * SECONDS_PER_MINUTE;
-  static constexpr int64_t TICKS_PER_HOUR = TICKS_PER_SECOND * SECONDS_PER_HOUR;
-  static constexpr int64_t TICKS_PER_DAY = TICKS_PER_HOUR * HOURS_PER_DAY;
+  static constexpr uint32_t RegularYearsOffset = 400;
+  static constexpr uint32_t DaysInRegularInterval = 365 * 400 + 97;
+  static constexpr uint32_t MonthsPerYear = 12;
+  static constexpr uint32_t MinutesPerHour = 60;
+  static constexpr uint32_t SecondsPerMinute = 60;
+  static constexpr uint32_t HoursPerDay = 24;
+  static constexpr uint32_t SecondsPerHour = SecondsPerMinute * MinutesPerHour;
+  static constexpr int64_t TicksPerSecond = 10'000'000LL;
+  static constexpr int64_t TicksPerMillisecond = 10'000LL;
+  static constexpr int64_t TicksPerMicrosecond = 10LL;
+  static constexpr int64_t NanosecondsPerTick = 100LL;
+  static constexpr int64_t NanosecondsPerSecond = 1'000'000'000LL;
+  static constexpr int64_t NanosecondsPerMillisecond = 1'000'000LL;
+  static constexpr int64_t TicksPerMinute = TicksPerSecond * SecondsPerMinute;
+  static constexpr int64_t TicksPerHour = TicksPerSecond * SecondsPerHour;
+  static constexpr int64_t TicksPerDay = TicksPerHour * HoursPerDay;
 };
 
 // Interface inspired after the C# Timespan
@@ -53,29 +53,29 @@ struct TimeSpan {
   int64_t ticks;
 
   static constexpr TimeSpan fromHours(int64_t h) {
-    return {.ticks = h * TimeLimits::SECONDS_PER_HOUR * TimeLimits::TICKS_PER_SECOND};
+    return {.ticks = h * TimeLimits::SecondsPerHour * TimeLimits::TicksPerSecond};
   }
-  static constexpr TimeSpan fromMinutes(int64_t m) { return {.ticks = m * TimeLimits::TICKS_PER_MINUTE}; }
-  static constexpr TimeSpan fromSeconds(int64_t s) { return {.ticks = s * TimeLimits::TICKS_PER_SECOND}; }
-  static constexpr TimeSpan fromDays(int64_t d) { return {.ticks = d * TimeLimits::TICKS_PER_DAY}; }
-  static constexpr TimeSpan fromNanos(int64_t d) { return {.ticks = d / TimeLimits::NANOSECONDS_PER_TICK}; }
+  static constexpr TimeSpan fromMinutes(int64_t m) { return {.ticks = m * TimeLimits::TicksPerMinute}; }
+  static constexpr TimeSpan fromSeconds(int64_t s) { return {.ticks = s * TimeLimits::TicksPerSecond}; }
+  static constexpr TimeSpan fromDays(int64_t d) { return {.ticks = d * TimeLimits::TicksPerDay}; }
+  static constexpr TimeSpan fromNanos(int64_t d) { return {.ticks = d / TimeLimits::NanosecondsPerTick}; }
   static constexpr TimeSpan fromTimeval(struct timeval tv) {
-    return {.ticks = (int64_t)tv.tv_sec * TimeLimits::TICKS_PER_SECOND +
-                     (int64_t)tv.tv_usec * TimeLimits::TICKS_PER_MICROSECOND};
+    return {.ticks = (int64_t)tv.tv_sec * TimeLimits::TicksPerSecond +
+                     (int64_t)tv.tv_usec * TimeLimits::TicksPerMicrosecond};
   }
 
-  constexpr int64_t totalHours() const { return ticks / TimeLimits::TICKS_PER_HOUR; }
-  constexpr int64_t totalMinutes() const { return ticks / (TimeLimits::TICKS_PER_MINUTE); }
-  constexpr int64_t totalSeconds() const { return ticks / TimeLimits::TICKS_PER_SECOND; }
-  constexpr int64_t totalMilliseconds() const { return ticks / (TimeLimits::TICKS_PER_MILLISECOND); }
-  constexpr int64_t hours() const { return (ticks / (TimeLimits::TICKS_PER_HOUR)) % 24; }
-  constexpr int64_t minutes() const { return (ticks / (TimeLimits::TICKS_PER_MINUTE)) % TimeLimits::MINUTES_PER_HOUR; }
-  constexpr int64_t seconds() const { return (ticks / TimeLimits::TICKS_PER_SECOND) % TimeLimits::SECONDS_PER_MINUTE; }
-  constexpr int64_t days() const { return ticks / TimeLimits::TICKS_PER_DAY; }
-  constexpr int64_t milliseconds() const { return (ticks / TimeLimits::TICKS_PER_MILLISECOND) % 1000; }
+  constexpr int64_t totalHours() const { return ticks / TimeLimits::TicksPerHour; }
+  constexpr int64_t totalMinutes() const { return ticks / (TimeLimits::TicksPerMinute); }
+  constexpr int64_t totalSeconds() const { return ticks / TimeLimits::TicksPerSecond; }
+  constexpr int64_t totalMilliseconds() const { return ticks / (TimeLimits::TicksPerMillisecond); }
+  constexpr int64_t hours() const { return (ticks / (TimeLimits::TicksPerHour)) % 24; }
+  constexpr int64_t minutes() const { return (ticks / (TimeLimits::TicksPerMinute)) % TimeLimits::MinutesPerHour; }
+  constexpr int64_t seconds() const { return (ticks / TimeLimits::TicksPerSecond) % TimeLimits::SecondsPerMinute; }
+  constexpr int64_t days() const { return ticks / TimeLimits::TicksPerDay; }
+  constexpr int64_t milliseconds() const { return (ticks / TimeLimits::TicksPerMillisecond) % 1000; }
   constexpr struct timeval timeval() const {
     return {.tv_sec = totalSeconds(),
-            .tv_usec = (ticks % TimeLimits::TICKS_PER_SECOND) / TimeLimits::TICKS_PER_MICROSECOND};
+            .tv_usec = (ticks % TimeLimits::TicksPerSecond) / TimeLimits::TicksPerMicrosecond};
   }
 
   auto operator<=>(const TimeSpan&) const = default;
@@ -86,7 +86,7 @@ struct TimeSpan {
 // Interface inspired after the C# Datetime
 class DateTime {
   // One Tick represents 100 nanoseconds.
-  int64_t m_ticks = TimeLimits::MIN_TICKS;
+  int64_t m_ticks = TimeLimits::MinTicks;
 
 public:
   int64_t ticks() const;
@@ -115,8 +115,8 @@ public:
   friend bool operator!=(const kl::DateTime& x, const kl::DateTime& y) = default;
 
   static const DateTime UnixEpoch;
-  static const DateTime MAX;
-  static const DateTime MIN;
+  static const DateTime Max;
+  static const DateTime Min;
   static DateTime now();
 };
 
