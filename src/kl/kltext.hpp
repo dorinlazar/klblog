@@ -131,7 +131,7 @@ public:
   Text(TextRefCounter* buffer, size_t length);
 
 public:
-  void reset();
+  void clear();
   // This is useful when we don't want to keep the big source text like when we're parsing some file
   // for a small bit of information and we want to free that piece of memory.
   Text copy() const;

@@ -63,8 +63,8 @@ public:
   std::optional<Text> get_opt(const kl::Text& path);
 
 public:
-  inline void perform(std::function<void(NullValue&)> nullOp, std::function<void(Text&)> scalarOp,
-                      std::function<void(MapValue&)> mapOp, std::function<void(ListValue&)> listOp);
+  void perform(const std::function<void(NullValue&)>& null_op, const std::function<void(Text&)>& scalar_op,
+               const std::function<void(MapValue&)>& map_op, const std::function<void(ListValue&)>& list_op);
 };
 
 using PValue = Value::PValue;

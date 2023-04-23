@@ -69,7 +69,7 @@ struct TimeSpan {
 // Interface inspired after the C# Datetime
 class DateTime {
   // One Tick represents 100 nanoseconds.
-  int64_t _ticks = TimeLimits::MIN_TICKS;
+  int64_t m_ticks = TimeLimits::MIN_TICKS;
 
 public:
   int64_t ticks() const;

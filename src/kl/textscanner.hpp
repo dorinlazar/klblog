@@ -38,7 +38,7 @@ public:
   Text read_word();
   Text read_line();
   Text remainder() const;
-  uint32_t readDigit();
+  uint32_t read_digit();
   void expect(char character);
   void expect_ws(char character, NewLineHandling handling = NewLineHandling::Keep);
   bool starts_with(const Text& txt);

@@ -270,7 +270,7 @@ TextRefCounter TextRefCounter::s_empty;
 
 Text::Text() : m_memblock(&TextRefCounter::s_empty) {}
 
-Text::~Text() { reset(); }
+Text::~Text() { clear(); }
 
 Text::Text(const Text& value) : m_memblock(value.m_memblock->acquire()), m_start(value.m_start), m_end(value.m_end) {}
 
@@ -279,7 +279,7 @@ Text::Text(Text&& dying) noexcept
       m_end(std::exchange(dying.m_end, 0)) {}
 
 Text& Text::operator=(const Text& value) {
-  reset();
+  clear();
   if (value.size() > 0) {
     m_memblock = value.m_memblock->acquire();
     m_start = value.m_start;
@@ -289,7 +289,7 @@ Text& Text::operator=(const Text& value) {
 }
 
 Text& Text::operator=(Text&& dying) noexcept {
-  reset();
+  clear();
   if (dying.size() > 0) {
     m_memblock = std::exchange(dying.m_memblock, &TextRefCounter::s_empty);
     m_start = std::exchange(dying.m_start, 0);
@@ -349,7 +349,7 @@ Text::Text(const Text& t, size_t start, size_t length) {
 
 Text::Text(TextRefCounter* buffer, size_t length) : m_memblock(buffer), m_end(length) {}
 
-void Text::reset() {
+void Text::clear() {
   if (m_start < m_end) {
     if (m_memblock->release()) {
       free(m_memblock);

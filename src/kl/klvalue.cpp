@@ -41,7 +41,7 @@ const MapValue& Value::as_map() const { return std::get<std::to_underlying(Value
 const ListValue& Value::as_list() const { return std::get<std::to_underlying(ValueType::List)>(_value); }
 Text Value::as_scalar() const { return std::get<std::to_underlying(ValueType::Scalar)>(_value); }
 
-ValueType Value::type() const { return ValueType(_value.index()); }
+ValueType Value::type() const { return static_cast<ValueType>(_value.index()); }
 void Value::set_value(const Text& txt) { _value = txt; }
 Text Value::get_value() const { return as_scalar(); }
 List<Text> Value::get_array_value() const {
@@ -57,7 +57,7 @@ void Value::add(const Text& txt) { as_list().add(create_scalar(txt)); }
 void Value::add(const Text& txt, const Text& v) { as_map().add(txt, create_scalar(v)); }
 void Value::clear() {
   perform(
-      nullptr, [](Text& textv) { textv = ""_t; }, [](MapValue& mapv) { mapv.clear(); },
+      {}, [](Text& textv) { textv.clear(); }, [](MapValue& mapv) { mapv.clear(); },
       [](ListValue& listv) { listv.clear(); });
 }
 Value& Value::operator[](int index) const { return *as_list()[index]; }
@@ -82,23 +82,24 @@ size_t Value::size() const {
   return 0;
 }
 
-inline void Value::perform(std::function<void(NullValue&)> nullOp, std::function<void(Text&)> scalarOp,
-                           std::function<void(MapValue&)> mapOp, std::function<void(ListValue&)> listOp) {
+inline void Value::perform(const std::function<void(NullValue&)>& null_op, const std::function<void(Text&)>& scalar_op,
+                           const std::function<void(MapValue&)>& map_op,
+                           const std::function<void(ListValue&)>& list_op) {
   if (is_null()) {
-    if (nullOp) {
-      nullOp(std::get<std::to_underlying(ValueType::Null)>(_value));
+    if (null_op) {
+      null_op(std::get<std::to_underlying(ValueType::Null)>(_value));
     }
   } else if (is_scalar()) {
-    if (scalarOp) {
-      scalarOp(std::get<std::to_underlying(ValueType::Scalar)>(_value));
+    if (scalar_op) {
+      scalar_op(std::get<std::to_underlying(ValueType::Scalar)>(_value));
     }
   } else if (is_map()) {
-    if (mapOp) {
-      mapOp(std::get<std::to_underlying(ValueType::Map)>(_value));
+    if (map_op) {
+      map_op(std::get<std::to_underlying(ValueType::Map)>(_value));
     }
   } else if (is_list()) {
-    if (listOp) {
-      listOp(std::get<std::to_underlying(ValueType::List)>(_value));
+    if (list_op) {
+      list_op(std::get<std::to_underlying(ValueType::List)>(_value));
     }
   }
 }

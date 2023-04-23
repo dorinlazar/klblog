@@ -211,7 +211,7 @@ uint32_t TextScanner::get_indent_level() const {
   return loc._dataLeft;
 }
 
-uint32_t TextScanner::readDigit() {
+uint32_t TextScanner::read_digit() {
   if (empty()) [[unlikely]] {
     error("Reading from empty data");
   }

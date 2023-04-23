@@ -13,12 +13,13 @@
 namespace kl {
 namespace fs = std::filesystem;
 
-const std::array<Text, 2> DISCARDABLE_FOLDERS {"."_t, ".."_t};
+const std::array<Text, 2> DISCARDABLE_FOLDERS{"."_t, ".."_t};
 const Text FOLDER_SEPARATOR("/");
 const std::size_t LARGEST_SUPPORTED_FILE = 0x8FFFFFFFULL;
 
 Text klfs_read_file_impl(const Text& filename) {
-  const fs::path p = filename.starts_with(FOLDER_SEPARATOR[0]) ? filename.toView() : fs::current_path() / filename.toView();
+  const fs::path p =
+      filename.starts_with(FOLDER_SEPARATOR[0]) ? filename.toView() : fs::current_path() / filename.toView();
   auto size = fs::file_size(p); // throws if error;
 
   if (size > LARGEST_SUPPORTED_FILE) [[unlikely]] {
@@ -43,7 +44,7 @@ Text klfs_read_file_impl(const Text& filename) {
     }
   }
   if (size > 0) {
-    auto *memblock = TextRefCounter::allocate(size);
+    auto* memblock = TextRefCounter::allocate(size);
     is.read(memblock->text_data(), size);
     return {memblock, size};
   }
@@ -178,7 +179,7 @@ FilePath FilePath::add(const kl::Text& component) const {
 std::strong_ordering FilePath::operator<=>(const FilePath& fp) const { return m_full_name <=> fp.m_full_name; }
 bool FilePath::operator==(const FilePath& fp) const { return m_full_name == fp.m_full_name; }
 
-const std::size_t MAX_PATH_SIZE=1024;
+const std::size_t MAX_PATH_SIZE = 1024;
 
 std::vector<FileSystemEntryInfo> klfs_get_directory_entries(const Text& folder) {
   std::vector<FileSystemEntryInfo> res;
@@ -281,13 +282,13 @@ std::optional<Text> FileReader::read_line() {
 
 List<Text> FileReader::read_all_lines(SplitEmpty onEmpty) {
   auto res = m_unread_content.split_lines(onEmpty);
-  m_unread_content.reset();
+  m_unread_content.clear();
   return res;
 }
 
 Text FileReader::read_all() {
   auto res = m_unread_content;
-  m_unread_content.reset();
+  m_unread_content.clear();
   return res;
 }
 

@@ -14,7 +14,9 @@ Checks: >
   -misc-no-recursion,
   -readability-function-cognitive-complexity,
   -modernize-pass-by-value,
-  -modernize-return-braced-init-list
+  -modernize-return-braced-init-list,
+  -performance-unnecessary-value-param,
+  
 # Turn all the warnings from the checks above into errors.
 # WarningsAsErrors: "*"
 
