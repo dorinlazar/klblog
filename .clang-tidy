@@ -18,6 +18,7 @@ Checks: >
   -performance-unnecessary-value-param,
   -misc-use-anonymous-namespace,
   -readability-qualified-auto,
+  -readability-redundant-access-specifiers,
 # Turn all the warnings from the checks above into errors.
 # WarningsAsErrors: "*"
 

@@ -30,16 +30,17 @@ struct TimeLimits {
   static constexpr int32_t MaxYear = 9999;
   static constexpr int32_t MinYear = 1;
 
-  static constexpr uint32_t RegularYearsOffset = 400;
-  static constexpr uint32_t DaysInRegularInterval = 365 * 400 + 97;
+  static constexpr int32_t RegularYearsOffset = 400;
+  static constexpr int32_t DaysInRegularInterval = 365 * 400 + 97;
   static constexpr int32_t MonthsPerYear = 12;
-  static constexpr uint32_t MinutesPerHour = 60;
-  static constexpr uint32_t SecondsPerMinute = 60;
-  static constexpr uint32_t HoursPerDay = 24;
-  static constexpr uint32_t SecondsPerHour = SecondsPerMinute * MinutesPerHour;
+  static constexpr int32_t MinutesPerHour = 60;
+  static constexpr int32_t SecondsPerMinute = 60;
+  static constexpr int32_t HoursPerDay = 24;
+  static constexpr int32_t SecondsPerHour = SecondsPerMinute * MinutesPerHour;
   static constexpr int64_t TicksPerSecond = 10'000'000LL;
   static constexpr int64_t TicksPerMillisecond = 10'000LL;
   static constexpr int64_t TicksPerMicrosecond = 10LL;
+  static constexpr int32_t MillisecondsPerSecond = 1000;
   static constexpr int64_t NanosecondsPerTick = 100LL;
   static constexpr int64_t NanosecondsPerSecond = 1'000'000'000LL;
   static constexpr int64_t NanosecondsPerMillisecond = 1'000'000LL;
@@ -52,29 +53,37 @@ struct TimeLimits {
 struct TimeSpan {
   int64_t ticks;
 
-  static constexpr TimeSpan fromHours(int64_t h) {
+  static constexpr TimeSpan from_hours(int64_t h) {
     return {.ticks = h * TimeLimits::SecondsPerHour * TimeLimits::TicksPerSecond};
   }
-  static constexpr TimeSpan fromMinutes(int64_t m) { return {.ticks = m * TimeLimits::TicksPerMinute}; }
-  static constexpr TimeSpan fromSeconds(int64_t s) { return {.ticks = s * TimeLimits::TicksPerSecond}; }
-  static constexpr TimeSpan fromDays(int64_t d) { return {.ticks = d * TimeLimits::TicksPerDay}; }
-  static constexpr TimeSpan fromNanos(int64_t d) { return {.ticks = d / TimeLimits::NanosecondsPerTick}; }
-  static constexpr TimeSpan fromTimeval(struct timeval tv) {
-    return {.ticks = (int64_t)tv.tv_sec * TimeLimits::TicksPerSecond +
-                     (int64_t)tv.tv_usec * TimeLimits::TicksPerMicrosecond};
+  static constexpr TimeSpan from_minutes(int64_t m) { return {.ticks = m * TimeLimits::TicksPerMinute}; }
+  static constexpr TimeSpan from_seconds(int64_t s) { return {.ticks = s * TimeLimits::TicksPerSecond}; }
+  static constexpr TimeSpan from_days(int64_t d) { return {.ticks = d * TimeLimits::TicksPerDay}; }
+  static constexpr TimeSpan from_nanos(int64_t d) { return {.ticks = d / TimeLimits::NanosecondsPerTick}; }
+  static constexpr TimeSpan from_timeval(struct timeval tv) {
+    return {.ticks = static_cast<int64_t>(tv.tv_sec) * TimeLimits::TicksPerSecond +
+                     static_cast<int64_t>(tv.tv_usec) * TimeLimits::TicksPerMicrosecond};
   }
 
-  constexpr int64_t totalHours() const { return ticks / TimeLimits::TicksPerHour; }
-  constexpr int64_t totalMinutes() const { return ticks / (TimeLimits::TicksPerMinute); }
-  constexpr int64_t totalSeconds() const { return ticks / TimeLimits::TicksPerSecond; }
-  constexpr int64_t totalMilliseconds() const { return ticks / (TimeLimits::TicksPerMillisecond); }
-  constexpr int64_t hours() const { return (ticks / (TimeLimits::TicksPerHour)) % 24; }
-  constexpr int64_t minutes() const { return (ticks / (TimeLimits::TicksPerMinute)) % TimeLimits::MinutesPerHour; }
-  constexpr int64_t seconds() const { return (ticks / TimeLimits::TicksPerSecond) % TimeLimits::SecondsPerMinute; }
-  constexpr int64_t days() const { return ticks / TimeLimits::TicksPerDay; }
-  constexpr int64_t milliseconds() const { return (ticks / TimeLimits::TicksPerMillisecond) % 1000; }
-  constexpr struct timeval timeval() const {
-    return {.tv_sec = totalSeconds(),
+  [[nodiscard]] constexpr int64_t total_hours() const { return ticks / TimeLimits::TicksPerHour; }
+  [[nodiscard]] constexpr int64_t total_minutes() const { return ticks / (TimeLimits::TicksPerMinute); }
+  [[nodiscard]] constexpr int64_t total_seconds() const { return ticks / TimeLimits::TicksPerSecond; }
+  [[nodiscard]] constexpr int64_t total_milliseconds() const { return ticks / (TimeLimits::TicksPerMillisecond); }
+  [[nodiscard]] constexpr int64_t hours() const {
+    return (ticks / (TimeLimits::TicksPerHour)) % TimeLimits::HoursPerDay;
+  }
+  [[nodiscard]] constexpr int64_t minutes() const {
+    return (ticks / (TimeLimits::TicksPerMinute)) % TimeLimits::MinutesPerHour;
+  }
+  [[nodiscard]] constexpr int64_t seconds() const {
+    return (ticks / TimeLimits::TicksPerSecond) % TimeLimits::SecondsPerMinute;
+  }
+  [[nodiscard]] constexpr int64_t days() const { return ticks / TimeLimits::TicksPerDay; }
+  [[nodiscard]] constexpr int64_t milliseconds() const {
+    return (ticks / TimeLimits::TicksPerMillisecond) % TimeLimits::MillisecondsPerSecond;
+  }
+  [[nodiscard]] constexpr struct timeval timeval() const {
+    return {.tv_sec = total_seconds(),
             .tv_usec = (ticks % TimeLimits::TicksPerSecond) / TimeLimits::TicksPerMicrosecond};
   }
 
@@ -89,16 +98,16 @@ class DateTime {
   int64_t m_ticks = TimeLimits::MinTicks;
 
 public:
-  int64_t ticks() const;
-  int32_t days() const;
-  TimeOfDay timeOfDay() const;
-  Date date() const;
-  static DateTime fromTicks(int64_t ticks);
+  [[nodiscard]] int64_t ticks() const;
+  [[nodiscard]] int32_t days() const;
+  [[nodiscard]] TimeOfDay time_of_day() const;
+  [[nodiscard]] Date date() const;
+  static DateTime from_ticks(int64_t ticks);
   static DateTime parse(const kl::Text& src);
 
 public:
   DateTime() = default;
-  DateTime(time_t seconds, int32_t nsec = 0);
+  explicit DateTime(time_t seconds, int32_t nsec = 0);
   DateTime(uint32_t year, uint32_t month, uint32_t day, uint32_t hour = 0, uint32_t minute = 0, uint32_t sec = 0,
            uint32_t nsec = 0);
   DateTime(const DateTime&) = default;
@@ -107,7 +116,7 @@ public:
   ~DateTime() = default;
 
 public:
-  TimeSpan operator-(const DateTime d) const;
+  TimeSpan operator-(DateTime d) const;
   DateTime operator-(TimeSpan ts) const;
   DateTime operator+(TimeSpan ts) const;
   friend std::strong_ordering operator<=>(const kl::DateTime& x, const kl::DateTime& y) = default;
@@ -124,8 +133,10 @@ public:
 
 template <>
 struct fmt::formatter<kl::TimeSpan> {
+  // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
   constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
-    auto it = ctx.begin(), end = ctx.end();
+    auto it = ctx.begin();
+    auto end = ctx.end();
     if (it != end && *it != '}') {
       throw fmt::format_error("invalid format");
     }
@@ -163,8 +174,10 @@ struct fmt::formatter<kl::TimeSpan> {
 
 template <>
 struct fmt::formatter<kl::DateTime> {
+  // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
   constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
-    auto it = ctx.begin(), end = ctx.end();
+    auto it = ctx.begin();
+    auto end = ctx.end();
     if (it != end && *it != '}') {
       throw fmt::format_error("invalid format");
     }
@@ -173,8 +186,8 @@ struct fmt::formatter<kl::DateTime> {
   template <typename FormatContext>
   auto format(const kl::DateTime& dt, FormatContext& ctx) const -> decltype(ctx.out()) {
     auto d = dt.date();
-    auto t = dt.timeOfDay();
+    auto t = dt.time_of_day();
     return fmt::format_to(ctx.out(), "{:0>4}.{:0>2}.{:0>2}T{:0>2}:{:0>2}:{:0>2}.{:0>3}Z", d.year, d.month, d.day,
-                          t.hour, t.min, t.sec, t.nanos / 1'000'000);
+                          t.hour, t.min, t.sec, t.nanos / kl::TimeLimits::NanosecondsPerMillisecond);
   }
 };

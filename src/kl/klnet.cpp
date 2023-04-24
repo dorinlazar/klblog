@@ -68,7 +68,7 @@ TimeSpan TcpClient::readTimeout() {
   if (getsockopt(_fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, &length) < 0) {
     return {};
   }
-  return TimeSpan::fromTimeval(timeout);
+  return TimeSpan::from_timeval(timeout);
 }
 
 void TcpClient::setReadTimeout(TimeSpan ts) {
@@ -82,7 +82,7 @@ TimeSpan TcpClient::writeTimeout() {
   if (getsockopt(_fd, SOL_SOCKET, SO_SNDTIMEO, &timeout, &length) < 0) {
     return {};
   }
-  return TimeSpan::fromTimeval(timeout);
+  return TimeSpan::from_timeval(timeout);
 }
 
 void TcpClient::setWriteTimeout(TimeSpan ts) {

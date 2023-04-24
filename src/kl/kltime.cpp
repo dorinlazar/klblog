@@ -44,8 +44,8 @@ static constexpr delta_months_array_t kltime_calculate_delta_months() {
 static const delta_months_array_t DeltaMonths = kltime_calculate_delta_months();
 
 const DateTime DateTime::UnixEpoch(1970, 1, 1);
-const DateTime DateTime::Max = DateTime::fromTicks(TimeLimits::MaxTicks);
-const DateTime DateTime::Min = DateTime::fromTicks(TimeLimits::MinTicks);
+const DateTime DateTime::Max = DateTime::from_ticks(TimeLimits::MaxTicks);
+const DateTime DateTime::Min = DateTime::from_ticks(TimeLimits::MinTicks);
 
 Date DateTime::date() const {
   const auto d = m_ticks / TimeLimits::TicksPerDay;
@@ -62,23 +62,24 @@ Date DateTime::date() const {
 DateTime DateTime::now() {
   const auto n = std::chrono::system_clock::now();
   const int64_t nanos = std::chrono::duration_cast<std::chrono::nanoseconds>(n.time_since_epoch()).count();
-  return DateTime(nanos / TimeLimits::NanosecondsPerSecond, nanos % TimeLimits::NanosecondsPerSecond);
+  const auto second_split = lldiv(nanos, TimeLimits::NanosecondsPerSecond);
+  return DateTime(second_split.quot, static_cast<int32_t>(second_split.rem));
 }
 
 int64_t DateTime::ticks() const { return m_ticks; }
 int32_t DateTime::days() const { return static_cast<int32_t>(m_ticks / TimeLimits::TicksPerDay); }
-TimeOfDay DateTime::timeOfDay() const {
+TimeOfDay DateTime::time_of_day() const {
   const int64_t day_ticks = m_ticks % TimeLimits::TicksPerDay;
-  auto sec = lldiv(day_ticks, TimeLimits::TicksPerSecond);
-  auto mn = div(static_cast<uint32_t>(sec.quot), TimeLimits::SecondsPerMinute);
-  auto hr = div(mn.quot, TimeLimits::MinutesPerHour);
+  const auto sec = lldiv(day_ticks, TimeLimits::TicksPerSecond);
+  const auto mn = div(static_cast<int32_t>(sec.quot), TimeLimits::SecondsPerMinute);
+  const auto hr = div(mn.quot, TimeLimits::MinutesPerHour);
   return {.hour = static_cast<uint32_t>(hr.quot),
           .min = static_cast<uint32_t>(hr.rem),
           .sec = static_cast<uint32_t>(mn.rem),
           .nanos = static_cast<uint32_t>(sec.rem * TimeLimits::NanosecondsPerTick)};
 }
 
-DateTime DateTime::fromTicks(int64_t ticks) {
+DateTime DateTime::from_ticks(int64_t ticks) {
   DateTime dt;
   dt.m_ticks = ticks < TimeLimits::MinTicks   ? TimeLimits::MinTicks
                : ticks > TimeLimits::MaxTicks ? TimeLimits::MaxTicks
@@ -117,12 +118,12 @@ DateTime::DateTime(uint32_t year, uint32_t month, uint32_t day, uint32_t hour, u
 }
 
 TimeSpan DateTime::operator-(const DateTime d) const { return {.ticks = m_ticks - d.m_ticks}; }
-DateTime DateTime::operator-(TimeSpan ts) const { return fromTicks(m_ticks - ts.ticks); }
-DateTime DateTime::operator+(TimeSpan ts) const { return fromTicks(m_ticks + ts.ticks); }
+DateTime DateTime::operator-(TimeSpan ts) const { return from_ticks(m_ticks - ts.ticks); }
+DateTime DateTime::operator+(TimeSpan ts) const { return from_ticks(m_ticks + ts.ticks); }
 
 std::ostream& operator<<(std::ostream& os, kl::DateTime t) {
   auto date = t.date();
-  auto time = t.timeOfDay();
+  auto time = t.time_of_day();
   return os << fmt::format("{:0>4}-{:0>2}-{:0>2} {:0>2}:{:0>2}:{:0>2}.{:0>3}", date.year, date.month, date.day,
                            time.hour, time.min, time.sec, time.nanos / TimeLimits::NanosecondsPerMillisecond);
 }
@@ -260,7 +261,7 @@ DateTime DateTime::parse(const Text& src) {
   const auto [plus, ts_hours, ts_minutes] = kltime_read_timezone(sc);
 
   const DateTime dt(year, month, day, hh, mm, ss, ff);
-  const auto ts = TimeSpan::fromMinutes(ts_hours * TimeLimits::MinutesPerHour + ts_minutes);
+  const auto ts = TimeSpan::from_minutes(ts_hours * TimeLimits::MinutesPerHour + ts_minutes);
   if (plus) {
     return dt - ts; // timezones with + are behind UTC
   }

@@ -8,10 +8,10 @@ TEST(kldate, sanity_checks) {
 }
 
 TEST(kldate, test_ticks) {
-  EXPECT_EQ(kl::DateTime::fromTicks(kl::TimeLimits::MinTicks - 100).ticks(), kl::TimeLimits::MinTicks);
-  EXPECT_EQ(kl::DateTime::fromTicks(kl::TimeLimits::MinTicks).ticks(), kl::TimeLimits::MinTicks);
-  EXPECT_EQ(kl::DateTime::fromTicks(kl::TimeLimits::MaxTicks).ticks(), kl::TimeLimits::MaxTicks);
-  EXPECT_EQ(kl::DateTime::fromTicks(kl::TimeLimits::MaxTicks + 1000).ticks(), kl::TimeLimits::MaxTicks);
+  EXPECT_EQ(kl::DateTime::from_ticks(kl::TimeLimits::MinTicks - 100).ticks(), kl::TimeLimits::MinTicks);
+  EXPECT_EQ(kl::DateTime::from_ticks(kl::TimeLimits::MinTicks).ticks(), kl::TimeLimits::MinTicks);
+  EXPECT_EQ(kl::DateTime::from_ticks(kl::TimeLimits::MaxTicks).ticks(), kl::TimeLimits::MaxTicks);
+  EXPECT_EQ(kl::DateTime::from_ticks(kl::TimeLimits::MaxTicks + 1000).ticks(), kl::TimeLimits::MaxTicks);
 }
 
 void check_year(uint32_t year) {
@@ -21,7 +21,7 @@ void check_year(uint32_t year) {
     for (uint32_t day = 0; day < months[month]; day++) {
       auto dt = kl::DateTime(year, month + 1, day + 1);
       auto d = dt.date();
-      auto t = dt.timeOfDay();
+      auto t = dt.time_of_day();
       EXPECT_EQ(d.year, year);
       EXPECT_EQ(d.month, month + 1);
       EXPECT_EQ(d.day, day + 1);
@@ -32,7 +32,7 @@ void check_year(uint32_t year) {
 
       dt = kl::DateTime(year, month + 1, day + 1, 23, 59, 59, 999'999'999);
       d = dt.date();
-      t = dt.timeOfDay();
+      t = dt.time_of_day();
       EXPECT_EQ(d.year, year);
       EXPECT_EQ(d.month, month + 1);
       EXPECT_EQ(d.day, day + 1);
@@ -43,7 +43,7 @@ void check_year(uint32_t year) {
 
       dt = kl::DateTime(year, month + 1, day + 1, 14, 37, 21, 123'456'789);
       d = dt.date();
-      t = dt.timeOfDay();
+      t = dt.time_of_day();
       EXPECT_EQ(d.year, year);
       EXPECT_EQ(d.month, month + 1);
       EXPECT_EQ(d.day, day + 1);
