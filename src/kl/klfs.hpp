@@ -12,24 +12,24 @@ class FilePath {
 
 public:
   FilePath() = default;
-  FilePath(const Text& path);
-  Text folderName() const;
-  Text filename() const;
-  Text extension() const;
-  Text stem() const;
-  Text fullPath() const;
+  explicit FilePath(const Text& path);
+  [[nodiscard]] Text folder_name() const;
+  [[nodiscard]] Text filename() const;
+  [[nodiscard]] Text extension() const;
+  [[nodiscard]] Text stem() const;
+  [[nodiscard]] Text full_path() const;
 
-  FilePath replace_extension(const kl::Text& new_ext) const;
+  [[nodiscard]] FilePath replace_extension(const kl::Text& new_ext) const;
 
-  Text baseFolder(uint32_t levels = 1) const;
-  FilePath discardBaseFolder(uint32_t levels = 1) const;
-  FilePath replaceBaseFolder(const kl::Text& new_folder, uint32_t levels = 1) const;
+  [[nodiscard]] Text base_folder(uint32_t levels = 1) const;
+  [[nodiscard]] FilePath discard_base_folder(uint32_t levels = 1) const;
+  [[nodiscard]] FilePath replace_base_folder(const kl::Text& new_folder, uint32_t levels = 1) const;
 
-  uint32_t depth() const;
-  uint32_t folderDepth() const; // depth if path is folder (usually depth()+1).
+  [[nodiscard]] uint32_t depth() const;
+  [[nodiscard]] uint32_t folder_depth() const; // depth if path is folder (usually depth()+1).
 
-  List<Text> breadcrumbs() const;
-  FilePath add(const kl::Text& component) const;
+  [[nodiscard]] List<Text> breadcrumbs() const;
+  [[nodiscard]] FilePath add(const kl::Text& component) const;
 
   std::strong_ordering operator<=>(const FilePath& fp) const;
   bool operator==(const FilePath& fp) const;
@@ -55,20 +55,22 @@ struct FileSystem {
 };
 
 struct InputSource {
+  virtual ~InputSource() = default;
   virtual std::optional<Text> read_line() = 0;
   virtual std::optional<char> read_char() = 0;
-  virtual List<Text> read_all_lines(SplitEmpty onEmpty = SplitEmpty::Keep) = 0;
+  virtual List<Text> read_all_lines(SplitEmpty onEmpty) = 0;
   virtual Text read_all() = 0;
   virtual bool has_data() = 0;
 };
 
-struct FileReader : public InputSource {
-  FileReader(const Text& name);
-  std::optional<Text> read_line() override final;
-  std::optional<char> read_char() override final;
-  List<Text> read_all_lines(SplitEmpty onEmpty = SplitEmpty::Keep) override final;
-  Text read_all() override final;
-  bool has_data() override final;
+struct FileReader final : public InputSource {
+  explicit FileReader(const Text& name);
+  ~FileReader() override = default;
+  [[nodiscard]] std::optional<Text> read_line() override;
+  [[nodiscard]] std::optional<char> read_char() override;
+  [[nodiscard]] List<Text> read_all_lines(SplitEmpty onEmpty) override;
+  [[nodiscard]] Text read_all() override;
+  [[nodiscard]] bool has_data() override;
 
 private:
   Text m_unread_content; // we can do away with this.
@@ -86,12 +88,12 @@ public:
   Folder(const kl::Text& name, const kl::Text& path, const Folder* parent);
   void add_item(const kl::FileSystemEntryInfo& file, const kl::Text& path);
 
-  kl::ptr<Folder> get_folder(const kl::Text& folder);
-  kl::List<kl::ptr<Folder>> get_folders() const;
-  kl::ptr<Folder> create_folder(const kl::FilePath& path);
-  const kl::FilePath& fullPath() const;
-  const kl::List<kl::FileSystemEntryInfo>& files() const;
-  bool has_file(const kl::Text& file) const;
+  [[nodiscard]] kl::ptr<Folder> get_folder(const kl::Text& folder) const;
+  [[nodiscard]] kl::List<kl::ptr<Folder>> get_folders() const;
+  [[nodiscard]] kl::ptr<Folder> create_folder(const kl::FilePath& path);
+  [[nodiscard]] const kl::FilePath& full_path() const;
+  [[nodiscard]] const kl::List<kl::FileSystemEntryInfo>& files() const;
+  [[nodiscard]] bool has_file(const kl::Text& file) const;
 };
 
 struct DirectoryEntry {
@@ -110,9 +112,9 @@ public:
   Directory& operator=(const Directory&) = delete;
   ~Directory() = default;
 
-  kl::Text name() const;
-  const kl::List<kl::DirectoryEntry>& subdirectories() const;
-  const kl::List<kl::DirectoryEntry>& files() const;
+  [[nodiscard]] kl::Text name() const;
+  [[nodiscard]] const kl::List<kl::DirectoryEntry>& subdirectories() const;
+  [[nodiscard]] const kl::List<kl::DirectoryEntry>& files() const;
 };
 
 } // namespace kl
