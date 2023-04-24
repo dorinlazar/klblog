@@ -81,7 +81,7 @@ Text klfs_normalize_path(const Text& filename) {
     last_pos = filename.size();
   }
   tc.add(filename.skip(last_pos));
-  Text res = tc.toText();
+  Text res = tc.to_text();
   if (res.starts_with("./") && res.size() > 2) {
     res = res.skip(2);
   }

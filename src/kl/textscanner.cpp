@@ -2,7 +2,7 @@
 
 namespace kl {
 ParsingError::ParsingError(const Text& why, uint32_t line, uint32_t column)
-    : std::logic_error((why + "@"_t + std::to_string(line) + ":" + std::to_string(column)).toText().to_string()),
+    : std::logic_error((why + "@"_t + std::to_string(line) + ":" + std::to_string(column)).to_text().to_string()),
       _line(line), _column(column) {}
 
 uint32_t ParsingError::line() const { return _line; }
@@ -114,7 +114,7 @@ Text TextScanner::read_quoted_string() {
       break;
     }
   }
-  return tc.toText();
+  return tc.to_text();
 }
 
 Text TextScanner::readUntil(char character) {

@@ -211,10 +211,10 @@ public:
 };
 
 class TextChain {
-  uint32_t _length = 0;
-  List<Text> _chain;
+  uint32_t m_length = 0;
+  List<Text> m_chain;
 
-  void _update_length();
+  void update_length();
 
 public:
   TextChain() = default;
@@ -231,7 +231,7 @@ public:
   void operator+=(const TextChain& text);
   void add(const TextChain& text);
 
-  Text toText() const;
+  Text to_text() const;
   operator Text() const;
 
   const List<Text>& chain() const;

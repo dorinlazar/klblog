@@ -11,7 +11,7 @@ Checks: >
   -bugprone-easily-swappable-parameters,-modernize-use-trailing-return-type,-misc-non-private-member-variables-in-classes,
   -readability-identifier-length,-misc-no-recursion,-readability-function-cognitive-complexity,-modernize-pass-by-value,
   -modernize-return-braced-init-list,-performance-unnecessary-value-param,-misc-use-anonymous-namespace,
-  -readability-qualified-auto,-readability-redundant-access-specifiers,
+  -readability-qualified-auto,-readability-redundant-access-specifiers,-modernize-use-nodiscard,
 # Turn all the warnings from the checks above into errors.
 # WarningsAsErrors: "*"
 

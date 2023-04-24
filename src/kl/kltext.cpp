@@ -663,51 +663,51 @@ Text Text::quote_escaped() const {
   return Text(memblock, length);
 }
 
-void TextChain::_update_length() {
-  _length = 0;
-  for (const auto& t: _chain) {
-    _length += t.size();
+void TextChain::update_length() {
+  m_length = 0;
+  for (const auto& t: m_chain) {
+    m_length += t.size();
   }
 }
 
-TextChain::TextChain(std::initializer_list<Text> l) : _chain(l) { _update_length(); }
-TextChain::TextChain(List<Text>&& l) : _chain(l) { _update_length(); }
-TextChain::TextChain(const List<Text>& l) : _chain(l) { _update_length(); }
-const List<Text>& TextChain::chain() const { return _chain; }
+TextChain::TextChain(std::initializer_list<Text> l) : m_chain(l) { update_length(); }
+TextChain::TextChain(List<Text>&& l) : m_chain(l) { update_length(); }
+TextChain::TextChain(const List<Text>& l) : m_chain(l) { update_length(); }
+const List<Text>& TextChain::chain() const { return m_chain; }
 void TextChain::operator+=(const Text& text) {
-  _chain.add(text);
-  _length += text.size();
+  m_chain.add(text);
+  m_length += text.size();
 }
 
-Text TextChain::toText() const {
-  if (_chain.size() == 0) {
+Text TextChain::to_text() const {
+  if (m_chain.size() == 0) {
     return {};
   }
-  if (_chain.size() == 1) {
-    return _chain[0];
+  if (m_chain.size() == 1) {
+    return m_chain[0];
   }
 
-  auto memblock = TextRefCounter::allocate(_length);
+  auto memblock = TextRefCounter::allocate(m_length);
   char* ptr = memblock->text_data();
   uint32_t offset = 0;
-  for (const auto& tv: _chain) {
+  for (const auto& tv: m_chain) {
     std::copy(tv.begin(), tv.end(), ptr + offset);
     offset += tv.size();
   }
-  return Text(memblock, _length);
+  return Text(memblock, m_length);
 }
 
 Text TextChain::join(char splitchar) {
-  if (_length == 0) {
+  if (m_length == 0) {
     return ""_t;
   }
-  size_t size = _length + (splitchar != '\0' ? (_chain.size() - 1) : 0);
+  size_t size = m_length + (splitchar != '\0' ? (m_chain.size() - 1) : 0);
 
   auto memblock = TextRefCounter::allocate(size);
   char* ptr = memblock->text_data();
 
   size_t offset = 0;
-  for (const auto& t: _chain) {
+  for (const auto& t: m_chain) {
     if (splitchar && offset != 0) {
       ptr[offset] = splitchar;
       offset++;
@@ -719,17 +719,17 @@ Text TextChain::join(char splitchar) {
 }
 
 Text TextChain::join(kl::Text split_text) {
-  if (_length == 0) {
+  if (m_length == 0) {
     return ""_t;
   }
-  size_t size = _length + split_text.size() * (_chain.size() - 1);
+  size_t size = m_length + split_text.size() * (m_chain.size() - 1);
 
   auto memblock = TextRefCounter::allocate(size);
   char* ptr = memblock->text_data();
 
   size_t offset = 0;
   size_t split_size = split_text.size();
-  for (const auto& t: _chain) {
+  for (const auto& t: m_chain) {
     if (split_size > 0 && offset != 0) {
       std::copy(split_text.begin(), split_text.end(), ptr + offset);
       offset += split_size;
@@ -741,24 +741,24 @@ Text TextChain::join(kl::Text split_text) {
 }
 
 void TextChain::add(const Text& text) {
-  _chain.add(text);
-  _length += text.size();
+  m_chain.add(text);
+  m_length += text.size();
 };
 
 void TextChain::operator+=(const TextChain& text) {
-  _chain.add(text._chain);
-  _length += text._length;
+  m_chain.add(text.m_chain);
+  m_length += text.m_length;
 }
 
 void TextChain::add(const TextChain& text) {
-  _chain.add(text._chain);
-  _length += text._length;
+  m_chain.add(text.m_chain);
+  m_length += text.m_length;
 };
 
-TextChain::operator Text() const { return toText(); }
+TextChain::operator Text() const { return to_text(); }
 void TextChain::clear() {
-  _chain = {};
-  _length = 0;
+  m_chain = {};
+  m_length = 0;
 }
 
 Text Text::skip_bom() const {
@@ -778,7 +778,7 @@ Text operator"" _t(const char* p, size_t s) { return {p, s}; }
 
 std::ostream& operator<<(std::ostream& os, const TextView& tv) { return os << tv.view(); }
 std::ostream& operator<<(std::ostream& os, const Text& tv) { return os << tv.toView(); }
-std::ostream& operator<<(std::ostream& os, const TextChain& tv) { return os << tv.toText().toView(); }
+std::ostream& operator<<(std::ostream& os, const TextChain& tv) { return os << tv.to_text().toView(); }
 
 } // namespace kl
 

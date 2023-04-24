@@ -57,12 +57,12 @@ Text StreamReader::read_line() {
       if (m_buffer[m_offset] == '\n') { // TODO(dorin) identify newlines based on encoding.
         tc.add(Text((const char*)m_buffer.data() + _startOffset, m_offset - _startOffset));
         m_offset++;
-        return tc.toText();
+        return tc.to_text();
       }
     }
     tc.add(Text((const char*)m_buffer.data() + _startOffset, m_offset - _startOffset));
   }
-  return tc.toText();
+  return tc.to_text();
 }
 
 Text StreamReader::read_all() {
@@ -79,7 +79,7 @@ Text StreamReader::read_all() {
     m_read_size = 0;
     m_offset = 0;
   }
-  return tc.toText();
+  return tc.to_text();
 }
 
 bool StreamReader::end_of_stream() { return m_stream->end_of_stream(); }
@@ -93,7 +93,7 @@ void StreamWriter::write_line(const Text& what) {
   _stream->write(what.toRawData());
   _stream->write(std::span<uint8_t>((uint8_t*)&eol[0], 1));
 }
-void StreamWriter::write(const TextChain& what) { _stream->write(what.toText().toRawData()); }
+void StreamWriter::write(const TextChain& what) { _stream->write(what.to_text().toRawData()); }
 void StreamWriter::flush() { _stream->flush(); }
 
 PosixFileStream::PosixFileStream(int fd) : _fd(fd) {
