@@ -32,7 +32,7 @@ struct TimeLimits {
 
   static constexpr uint32_t RegularYearsOffset = 400;
   static constexpr uint32_t DaysInRegularInterval = 365 * 400 + 97;
-  static constexpr uint32_t MonthsPerYear = 12;
+  static constexpr int32_t MonthsPerYear = 12;
   static constexpr uint32_t MinutesPerHour = 60;
   static constexpr uint32_t SecondsPerMinute = 60;
   static constexpr uint32_t HoursPerDay = 24;

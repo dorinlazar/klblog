@@ -17,6 +17,7 @@ Checks: >
   -modernize-return-braced-init-list,
   -performance-unnecessary-value-param,
   -misc-use-anonymous-namespace,
+  -readability-qualified-auto,
 # Turn all the warnings from the checks above into errors.
 # WarningsAsErrors: "*"
 

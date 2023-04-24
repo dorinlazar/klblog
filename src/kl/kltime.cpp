@@ -14,7 +14,7 @@ static constexpr bool kltime_leap_year(int32_t year) { // Leap year, for one-bas
   return ((year & 0x03) == 0) && year != 100 && year != 200 && year != 300;
 }
 
-using month_size_t = std::array<uint32_t, TimeLimits::MonthsPerYear>;
+using month_size_t = std::array<int32_t, TimeLimits::MonthsPerYear>;
 
 static constexpr month_size_t MonthSizesArray = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 static constexpr month_size_t LeapMonthSizesArray = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
@@ -32,7 +32,7 @@ static constexpr delta_months_array_t kltime_calculate_delta_months() {
   int32_t index = 1;
 
   for (int32_t y = 0; y < TimeLimits::RegularYearsOffset; y++) {
-    auto& sizes = kltime_month_sizes(y + 1);
+    const auto& sizes = kltime_month_sizes(y + 1);
     for (int32_t m = 0; m < TimeLimits::MonthsPerYear; m++, index++) {
       total_days += sizes[m];
       res[index] = total_days;
@@ -48,20 +48,20 @@ const DateTime DateTime::Max = DateTime::fromTicks(TimeLimits::MaxTicks);
 const DateTime DateTime::Min = DateTime::fromTicks(TimeLimits::MinTicks);
 
 Date DateTime::date() const {
-  auto d = m_ticks / TimeLimits::TicksPerDay;
-  auto fh = std::lldiv(d, TimeLimits::DaysInRegularInterval);
-  auto it = std::lower_bound(DeltaMonths.begin(), DeltaMonths.end(), fh.rem + 1) - 1;
-  auto delta_months = std::distance(DeltaMonths.begin(), it);
-  auto delta_years = delta_months / TimeLimits::MonthsPerYear;
-  auto leftover_months = delta_months % TimeLimits::MonthsPerYear;
+  const auto d = m_ticks / TimeLimits::TicksPerDay;
+  const auto fh = std::lldiv(d, TimeLimits::DaysInRegularInterval);
+  const auto it = std::lower_bound(DeltaMonths.begin(), DeltaMonths.end(), fh.rem + 1) - 1;
+  const auto delta_months = std::distance(DeltaMonths.begin(), it);
+  const auto delta_years = delta_months / TimeLimits::MonthsPerYear;
+  const auto leftover_months = delta_months % TimeLimits::MonthsPerYear;
   return Date{.year = static_cast<uint32_t>(fh.quot * TimeLimits::RegularYearsOffset + delta_years + 1),
               .month = static_cast<uint32_t>(leftover_months) + 1,
               .day = 1 + static_cast<uint32_t>(fh.rem) - *it};
 }
 
 DateTime DateTime::now() {
-  auto n = std::chrono::system_clock::now();
-  int64_t nanos = std::chrono::duration_cast<std::chrono::nanoseconds>(n.time_since_epoch()).count();
+  const auto n = std::chrono::system_clock::now();
+  const int64_t nanos = std::chrono::duration_cast<std::chrono::nanoseconds>(n.time_since_epoch()).count();
   return DateTime(nanos / TimeLimits::NanosecondsPerSecond, nanos % TimeLimits::NanosecondsPerSecond);
 }
 
