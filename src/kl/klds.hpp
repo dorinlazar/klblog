@@ -19,52 +19,52 @@ using uptr = std::unique_ptr<T>;
 
 template <typename T>
 class List {
-  std::vector<T> _vec;
+  std::vector<T> m_vec;
 
 public:
-  List() {}
-  List(std::initializer_list<T> v) : _vec(v) {}
-  List(size_t size) { _vec.reserve(size); }
-  void clear() { _vec.clear(); }
-  T& operator[](size_t pos) {
-    if (pos >= _vec.size()) {
+  List() = default;
+  List(std::initializer_list<T> v) : m_vec(v) {}
+  explicit List(size_t size) { m_vec.reserve(size); }
+  void clear() { m_vec.clear(); }
+  [[nodiscard]] T& operator[](size_t pos) {
+    if (pos >= m_vec.size()) {
       throw std::out_of_range("Invalid index access");
     }
-    return _vec[pos];
+    return m_vec[pos];
   }
-  const T& operator[](size_t pos) const {
-    if (pos >= _vec.size()) {
+  [[nodiscard]] const T& operator[](size_t pos) const {
+    if (pos >= m_vec.size()) {
       throw std::out_of_range("Invalid index access");
     }
-    return _vec[pos];
+    return m_vec[pos];
   }
 
-  auto begin() { return _vec.begin(); }
-  auto end() { return _vec.end(); }
-  auto begin() const { return _vec.begin(); }
-  auto end() const { return _vec.end(); }
+  [[nodiscard]] auto begin() { return m_vec.begin(); }
+  [[nodiscard]] auto end() { return m_vec.end(); }
+  [[nodiscard]] auto begin() const { return m_vec.begin(); }
+  [[nodiscard]] auto end() const { return m_vec.end(); }
 
-  size_t size() const { return _vec.size(); }
+  [[nodiscard]] size_t size() const { return m_vec.size(); }
 
-  void add(T&& value) { _vec.emplace_back(std::move(value)); }
-  void add(const T& value) { _vec.push_back(value); }
+  void add(T&& value) { m_vec.emplace_back(std::move(value)); }
+  void add(const T& value) { m_vec.push_back(value); }
   void add(const List<T>& other) {
-    _vec.reserve(size() + other.size());
+    m_vec.reserve(size() + other.size());
     for (const auto& t: other) {
-      _vec.push_back(t);
+      m_vec.push_back(t);
     }
   }
   void add(std::initializer_list<T> other) {
-    _vec.reserve(size() + other.size());
+    m_vec.reserve(size() + other.size());
     for (const auto& t: other) {
-      _vec.push_back(t);
+      m_vec.push_back(t);
     }
   }
 
-  bool has(const T& value) const { return std::find(_vec.begin(), _vec.end(), value) != _vec.end(); }
+  [[nodiscard]] bool has(const T& value) const { return std::find(m_vec.begin(), m_vec.end(), value) != m_vec.end(); }
 
-  void forEach(std::function<void(const T&)> op) const {
-    for (const auto& item: _vec) {
+  void for_each(std::function<void(const T&)> op) const {
+    for (const auto& item: m_vec) {
       op(item);
     }
   }
@@ -72,88 +72,88 @@ public:
   template <typename U>
   List<U> transform(std::function<U(const T&)> tr) const {
     List<U> res(size());
-    for (const auto& item: _vec) {
+    for (const auto& item: m_vec) {
       res.add(tr(item));
     }
     return res;
   }
 
-  List<T>& sortInPlace() {
-    std::sort(_vec.begin(), _vec.end());
+  List<T>& sort_in_place() {
+    std::sort(m_vec.begin(), m_vec.end());
     return *this;
   }
 
   // TODO(dorin) UTs
-  void remove(const T& value) { _vec.erase(std::remove(_vec.begin(), _vec.end(), value), _vec.end()); }
-  void removeAt(size_t index) {
+  void remove(const T& value) { m_vec.erase(std::remove(m_vec.begin(), m_vec.end(), value), m_vec.end()); }
+  void remove_at(size_t index) {
     if (index < size()) {
-      auto it = _vec.begin() + index;
-      _vec.erase(it, it + 1);
+      auto it = m_vec.begin() + index;
+      m_vec.erase(it, it + 1);
     }
   }
-  void removeRange(size_t index, size_t rangeSize) {
+  void remove_range(size_t index, size_t rangeSize) {
     if (index < size() && rangeSize > 0) {
-      auto it = _vec.begin() + index;
+      auto it = m_vec.begin() + index;
       auto offset = index + rangeSize;
-      auto endit = offset >= _vec.size() ? _vec.end() : _vec.begin() + offset;
-      _vec.erase(it, endit);
+      auto endit = offset >= m_vec.size() ? m_vec.end() : m_vec.begin() + offset;
+      m_vec.erase(it, endit);
     }
   }
-  bool all(std::function<bool(const T&)> op) const { return std::all_of(_vec.begin(), _vec.end(), op); }
-  bool any(std::function<bool(const T&)> op) const { return std::any_of(_vec.begin(), _vec.end(), op); }
+  bool all(std::function<bool(const T&)> op) const { return std::all_of(m_vec.begin(), m_vec.end(), op); }
+  bool any(std::function<bool(const T&)> op) const { return std::any_of(m_vec.begin(), m_vec.end(), op); }
   List<T> select(std::function<bool(const T&)> op) const {
     List<T> res;
-    for (const auto& item: _vec) {
+    for (const auto& item: m_vec) {
       if (op(item)) {
         res.add(item);
       }
     }
     return res;
   }
-  T& last() { return _vec.back(); }
+  T& last() { return m_vec.back(); }
 };
 
 template <typename T1, typename T2>
 class Pair {
-  std::pair<T1, T2> _pair;
+  std::pair<T1, T2> m_pair;
 
 public:
-  Pair(T1&& t1, T2&& t2) : _pair(t1, t2) {}
-  Pair(T1 t1, T2 t2) : _pair(t1, t2) {}
-  Pair(Pair&&) = default;
+  Pair(T1&& t1, T2&& t2) : m_pair(t1, t2) {}
+  Pair(T1 t1, T2 t2) : m_pair(t1, t2) {}
+  Pair(Pair&&) noexcept = default;
   Pair(const Pair&) = default;
   ~Pair() = default;
 
-  auto first() { return _pair.first(); }
-  auto first() const { return _pair.first(); }
-  auto second() { return _pair.second(); }
-  auto second() const { return _pair.second(); }
+  auto first() { return m_pair.first(); }
+  auto first() const { return m_pair.first(); }
+  auto second() { return m_pair.second(); }
+  auto second() const { return m_pair.second(); }
 };
 
 template <typename T>
 class Queue {
-  std::deque<T> _queue;
+  std::deque<T> m_queue;
 
 public:
   Queue() = default;
-  void push(const T& elem) { _queue.push_back(elem); }
-  void push(T&& elem) { _queue.emplace_back(std::move(elem)); }
+  void push(const T& elem) { m_queue.push_back(elem); }
+  void push(T&& elem) { m_queue.emplace_back(std::move(elem)); }
   void push(const List<T>& elem) {
     for (const auto& item: elem) {
-      _queue.push_back(item);
+      m_queue.push_back(item);
     }
   }
   T pop() {
-    if (_queue.size() == 0) {
+    if (m_queue.empty()) {
       throw std::out_of_range("Pop on empty queue");
     }
-    T value = _queue.front();
-    _queue.pop_front();
+    T value = m_queue.front();
+    m_queue.pop_front();
     return value;
   }
-  bool empty() const { return _queue.size() == 0; }
-  bool has(const T& value) {
-    for (const auto& v: _queue) {
+  [[nodiscard]] bool empty() const { return m_queue.empty(); }
+  [[nodiscard]] bool has(const T& value) {
+    for (const auto& v: m_queue) {
       if (v == value) {
         return true;
       }
@@ -164,75 +164,75 @@ public:
 
 template <typename K, typename V>
 class Dict {
-  std::map<K, V> _map;
+  std::map<K, V> m_map;
 
 public:
-  Dict() {}
-  Dict(const List<Pair<K, V>>& pairList) {
-    _map.reserve(pairList.size());
+  Dict() = default;
+  explicit Dict(const List<Pair<K, V>>& pairList) {
+    m_map.reserve(pairList.size());
     for (const auto& it: pairList) {
       add(it.first(), it.second());
     }
   }
 
-  void clear() { _map.clear(); }
+  void clear() { m_map.clear(); }
 
-  auto begin() const { return _map.cbegin(); }
-  auto end() const { return _map.cend(); }
-  auto begin() { return _map.begin(); }
-  auto end() { return _map.end(); }
+  auto begin() const { return m_map.cbegin(); }
+  auto end() const { return m_map.cend(); }
+  auto begin() { return m_map.begin(); }
+  auto end() { return m_map.end(); }
 
-  size_t size() const { return _map.size(); }
+  [[nodiscard]] size_t size() const { return m_map.size(); }
 
   V& operator[](const K& key) {
-    auto it = _map.find(key);
-    if (it == _map.end()) {
+    auto it = m_map.find(key);
+    if (it == m_map.end()) {
       throw std::out_of_range("Invalid key");
     }
     return it->second;
   }
 
   const V& operator[](const K& key) const {
-    auto it = _map.find(key);
-    if (it == _map.end()) {
+    auto it = m_map.find(key);
+    if (it == m_map.end()) {
       throw std::out_of_range("Invalid key");
     }
     return it->second;
   }
 
   const V& get(const K& key, const V& default_value = V()) const {
-    auto it = _map.find(key);
-    if (it == _map.end()) {
+    auto it = m_map.find(key);
+    if (it == m_map.end()) {
       return default_value;
     }
     return it->second;
   }
 
-  const std::optional<V> get_opt(const K& key) const {
-    auto it = _map.find(key);
-    if (it == _map.end()) {
+  std::optional<V> get_opt(const K& key) const {
+    auto it = m_map.find(key);
+    if (it == m_map.end()) {
       return {};
     }
     return it->second;
   }
 
-  void add(const K& key, V&& value) { _map.insert_or_assign(key, std::move(value)); }
-  void add(const K& key, const V& value) { _map.insert_or_assign(key, value); }
+  void add(const K& key, V&& value) { m_map.insert_or_assign(key, std::move(value)); }
+  void add(const K& key, const V& value) { m_map.insert_or_assign(key, value); }
 
-  void remove(const K& key) { _map.erase(key); }
+  void remove(const K& key) { m_map.erase(key); }
 
-  bool has(const K& key) const { return _map.contains(key); }
+  bool has(const K& key) const { return m_map.contains(key); }
 
   List<K> keys() const {
-    List<K> list(_map.size());
-    for (const auto& [k, v]: _map) {
+    List<K> list(m_map.size());
+    for (const auto& [k, v]: m_map) {
       list.add(k);
     }
     return list;
   }
   List<V> values() const {
-    List<V> list(_map.size());
-    for (const auto& [k, v]: _map) {
+    List<V> list(m_map.size());
+    for (const auto& [k, v]: m_map) {
       list.add(v);
     }
     return list;
@@ -242,50 +242,50 @@ public:
 template <typename T1, typename T2>
 class List<Pair<T1, T2>> {
 public:
-  Dict<T1, T2> toDict() { return Dict(*this); }
+  Dict<T1, T2> to_dict() { return Dict(*this); }
 };
 
 template <typename T>
 class Set {
-  std::set<T> _data;
+  std::set<T> m_data;
 
 public:
-  Set() {}
-  Set(std::initializer_list<T> v) : _data(v) {}
+  Set() = default;
+  Set(std::initializer_list<T> v) : m_data(v) {}
 
-  auto begin() const { return _data.begin(); }
-  auto end() const { return _data.end(); }
-  auto begin() { return _data.begin(); }
-  auto end() { return _data.end(); }
+  auto begin() const { return m_data.begin(); }
+  auto end() const { return m_data.end(); }
+  auto begin() { return m_data.begin(); }
+  auto end() { return m_data.end(); }
 
-  size_t size() const { return _data.size(); }
+  [[nodiscard]] size_t size() const { return m_data.size(); }
 
-  void add(T&& value) { _data.insert(std::move(value)); }
-  void add(const T& value) { _data.insert(value); }
+  void add(T&& value) { m_data.insert(std::move(value)); }
+  void add(const T& value) { m_data.insert(value); }
   void add(const List<T>& other) {
     for (const auto& t: other) {
-      _data.insert(t);
+      m_data.insert(t);
     }
   }
   void add(const Set<T>& other) {
     for (const auto& t: other) {
-      _data.insert(t);
+      m_data.insert(t);
     }
   }
 
-  void remove(const T& value) { _data.erase(value); }
+  void remove(const T& value) { m_data.erase(value); }
 
-  bool has(const T& v) { return _data.contains(v); }
+  bool has(const T& v) { return m_data.contains(v); }
 
-  void forEach(std::function<void(const T&)> op) const {
-    for (const auto& item: _data) {
+  void for_each(std::function<void(const T&)> op) const {
+    for (const auto& item: m_data) {
       op(item);
     }
   }
 
-  List<T> toList() const {
+  List<T> to_list() const {
     List<T> lst(size());
-    for (const auto& item: _data) {
+    for (const auto& item: m_data) {
       lst.add(item);
     }
     return lst;
@@ -300,12 +300,12 @@ using PList = List<uptr<T>>;
 template <typename K, typename V>
 inline std::ostream& operator<<(std::ostream& os, const kl::Dict<K, V>& d) {
   os << "{";
-  bool commaNeeded = false;
+  bool comma_needed = false;
   for (const auto& [k, v]: d) {
-    if (commaNeeded) {
+    if (comma_needed) {
       os << ",";
     } else {
-      commaNeeded = true;
+      comma_needed = true;
     }
     os << k << ":" << v;
   }
@@ -315,12 +315,12 @@ inline std::ostream& operator<<(std::ostream& os, const kl::Dict<K, V>& d) {
 template <typename T>
 inline std::ostream& operator<<(std::ostream& os, const kl::List<T>& l) {
   os << "[";
-  bool commaNeeded = false;
+  bool comma_needed = false;
   for (const auto& t: l) {
-    if (commaNeeded) {
+    if (comma_needed) {
       os << ",";
     } else {
-      commaNeeded = true;
+      comma_needed = true;
     }
     os << t;
   }
@@ -330,12 +330,12 @@ inline std::ostream& operator<<(std::ostream& os, const kl::List<T>& l) {
 template <typename T>
 inline std::ostream& operator<<(std::ostream& os, const kl::Set<T>& l) {
   os << "[";
-  bool commaNeeded = false;
+  bool comma_needed = false;
   for (const auto& t: l) {
-    if (commaNeeded) {
+    if (comma_needed) {
       os << ",";
     } else {
-      commaNeeded = true;
+      comma_needed = true;
     }
     os << t;
   }

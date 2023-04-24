@@ -160,7 +160,7 @@ bool ProcessHorde::run(uint32_t nJobs, bool verbose) {
         auto task = m_waiting_queue[i];
         if (task->m_dependencies.all(
                 [](const kl::ExecutionNode* n) { return n->m_state == Process::State::Finished; })) {
-          m_waiting_queue.removeAt(i);
+          m_waiting_queue.remove_at(i);
           m_execution_queue.push(task);
         } else {
           i++;
