@@ -9,7 +9,7 @@ Document::Document(const Text& content) {
   m_content.read(scanner);
 }
 
-const DateTime DEFAULT_DATE(2020, 1, 1);
+const DateTime DefaultDate(2020, 1, 1);
 
 void DocumentMetadata::read(TextScanner& scanner) {
   m_properties = PoorConfig::parse(scanner);
@@ -18,7 +18,7 @@ void DocumentMetadata::read(TextScanner& scanner) {
   m_featured_image = m_properties->get_opt("image").value_or(""_t);
 
   auto pub_time = m_properties->get_opt("date");
-  m_published_time = pub_time.has_value() ? DateTime::parse(*pub_time) : DEFAULT_DATE;
+  m_published_time = pub_time.has_value() ? DateTime::parse(*pub_time) : DefaultDate;
 
   pub_time = m_properties->get_opt("updated");
   m_last_update = pub_time.has_value() ? DateTime::parse(*pub_time) : m_published_time;

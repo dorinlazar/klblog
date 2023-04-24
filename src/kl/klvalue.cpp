@@ -6,43 +6,43 @@
 namespace kl {
 Value::Value(ValueType vt) {
   switch (vt) {
-  case ValueType::Null: _value = NullValue(); break;
-  case ValueType::Scalar: _value = Text(); break;
-  case ValueType::Map: _value = MapValue(); break;
-  case ValueType::List: _value = ListValue(); break;
+  case ValueType::Null: m_value = NullValue(); break;
+  case ValueType::Scalar: m_value = Text(); break;
+  case ValueType::Map: m_value = MapValue(); break;
+  case ValueType::List: m_value = ListValue(); break;
   }
 }
-Value::Value(const Text& value) { _value = value; }
-Value::Value() { _value = NullValue(); }
+Value::Value(const Text& value) { m_value = value; }
+Value::Value() { m_value = NullValue(); }
 
 PValue Value::create_null() { return std::make_shared<Value>(); }
 PValue Value::create_scalar(const Text& value) { return std::make_shared<Value>(value); }
 PValue Value::create_map() { return std::make_shared<Value>(ValueType::Map); }
 PValue Value::create_list() { return std::make_shared<Value>(ValueType::List); }
 
-bool Value::is_null() const { return _value.index() == std::to_underlying(ValueType::Null); }
-bool Value::is_scalar() const { return _value.index() == std::to_underlying(ValueType::Scalar); }
-bool Value::is_map() const { return _value.index() == std::to_underlying(ValueType::Map); }
-bool Value::is_list() const { return _value.index() == std::to_underlying(ValueType::List); }
+bool Value::is_null() const { return m_value.index() == std::to_underlying(ValueType::Null); }
+bool Value::is_scalar() const { return m_value.index() == std::to_underlying(ValueType::Scalar); }
+bool Value::is_map() const { return m_value.index() == std::to_underlying(ValueType::Map); }
+bool Value::is_list() const { return m_value.index() == std::to_underlying(ValueType::List); }
 
 MapValue& Value::as_map() {
   if (is_null()) {
     create_map();
   }
-  return std::get<std::to_underlying(ValueType::Map)>(_value);
+  return std::get<std::to_underlying(ValueType::Map)>(m_value);
 }
 ListValue& Value::as_list() {
   if (is_null()) {
     create_list();
   }
-  return std::get<std::to_underlying(ValueType::List)>(_value);
+  return std::get<std::to_underlying(ValueType::List)>(m_value);
 }
-const MapValue& Value::as_map() const { return std::get<std::to_underlying(ValueType::Map)>(_value); }
-const ListValue& Value::as_list() const { return std::get<std::to_underlying(ValueType::List)>(_value); }
-Text Value::as_scalar() const { return std::get<std::to_underlying(ValueType::Scalar)>(_value); }
+const MapValue& Value::as_map() const { return std::get<std::to_underlying(ValueType::Map)>(m_value); }
+const ListValue& Value::as_list() const { return std::get<std::to_underlying(ValueType::List)>(m_value); }
+Text Value::as_scalar() const { return std::get<std::to_underlying(ValueType::Scalar)>(m_value); }
 
-ValueType Value::type() const { return static_cast<ValueType>(_value.index()); }
-void Value::set_value(const Text& txt) { _value = txt; }
+ValueType Value::type() const { return static_cast<ValueType>(m_value.index()); }
+void Value::set_value(const Text& txt) { m_value = txt; }
 Text Value::get_value() const { return as_scalar(); }
 List<Text> Value::get_array_value() const {
   if (is_scalar()) {
@@ -74,10 +74,10 @@ size_t Value::size() const {
     return 1;
   }
   if (is_list()) {
-    return std::get<std::to_underlying(ValueType::List)>(_value).size();
+    return std::get<std::to_underlying(ValueType::List)>(m_value).size();
   }
   if (is_map()) {
-    return std::get<std::to_underlying(ValueType::Map)>(_value).size();
+    return std::get<std::to_underlying(ValueType::Map)>(m_value).size();
   }
   return 0;
 }
@@ -87,64 +87,64 @@ inline void Value::perform(const std::function<void(NullValue&)>& null_op, const
                            const std::function<void(ListValue&)>& list_op) {
   if (is_null()) {
     if (null_op) {
-      null_op(std::get<std::to_underlying(ValueType::Null)>(_value));
+      null_op(std::get<std::to_underlying(ValueType::Null)>(m_value));
     }
   } else if (is_scalar()) {
     if (scalar_op) {
-      scalar_op(std::get<std::to_underlying(ValueType::Scalar)>(_value));
+      scalar_op(std::get<std::to_underlying(ValueType::Scalar)>(m_value));
     }
   } else if (is_map()) {
     if (map_op) {
-      map_op(std::get<std::to_underlying(ValueType::Map)>(_value));
+      map_op(std::get<std::to_underlying(ValueType::Map)>(m_value));
     }
   } else if (is_list()) {
     if (list_op) {
-      list_op(std::get<std::to_underlying(ValueType::List)>(_value));
+      list_op(std::get<std::to_underlying(ValueType::List)>(m_value));
     }
   }
 }
 
 // TODO(dorin): make this one text, and the others point to fragments of it.
-const Text NULL_TEXT{"null"};
-const Text QUOTE_TEXT{R"(")"};
-const Text OPEN_ARRAY{"["};
-const Text CLOSE_ARRAY{"]"};
-const Text OPEN_CURLY{"{"};
-const Text CLOSE_CURLY{"}"};
-const Text COMMA_TEXT{","};
-const Text COLON_TEXT{":"};
+const Text KlValueNullText{"null"};
+const Text KlValueQuoteText{R"(")"};
+const Text KlValueOpenArray{"["};
+const Text KlValueCloseArray{"]"};
+const Text KlValueOpenCurly{"{"};
+const Text KlValueCloseCurly{"}"};
+const Text KlValueComma{","};
+const Text KlValueColon{":"};
 
 TextChain Value::to_string() const {
   TextChain tc;
   bool comma_needed = false;
   switch (type()) {
-  case ValueType::Null: return {NULL_TEXT};
-  case ValueType::Scalar: return {QUOTE_TEXT, as_scalar(), QUOTE_TEXT};
+  case ValueType::Null: return {KlValueNullText};
+  case ValueType::Scalar: return {KlValueQuoteText, as_scalar(), KlValueQuoteText};
   case ValueType::List:
-    tc.add(OPEN_ARRAY);
+    tc.add(KlValueOpenArray);
     for (const auto& v: as_list()) {
       if (comma_needed) {
-        tc.add(COMMA_TEXT);
+        tc.add(KlValueComma);
       } else {
         comma_needed = true;
       }
       tc.add(v->to_string());
     }
-    tc.add(CLOSE_ARRAY);
+    tc.add(KlValueCloseArray);
     break;
   case ValueType::Map:
-    tc.add(OPEN_CURLY);
+    tc.add(KlValueOpenCurly);
     for (const auto& [k, v]: as_map()) {
       if (comma_needed) {
-        tc.add(COMMA_TEXT);
+        tc.add(KlValueComma);
       } else {
         comma_needed = true;
       }
       tc.add(k);
-      tc.add(COLON_TEXT);
+      tc.add(KlValueColon);
       tc.add(v->to_string());
     }
-    tc.add(CLOSE_CURLY);
+    tc.add(KlValueCloseCurly);
     break;
   }
   return tc;

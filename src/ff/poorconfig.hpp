@@ -8,7 +8,7 @@ class PoorConfig {
 
 public:
   explicit PoorConfig(const Text& filename);
-  PValue top() const;
+  [[nodiscard]] PValue top() const;
 
 public:
   static PValue parse(const Text& fragment, char split = ':');

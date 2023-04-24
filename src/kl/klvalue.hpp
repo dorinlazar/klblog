@@ -17,11 +17,11 @@ public:
   using NullValue = struct {};
 
 private:
-  std::variant<NullValue, Text, MapValue, ListValue> _value;
+  std::variant<NullValue, Text, MapValue, ListValue> m_value;
 
 public:
-  Value(ValueType vt);
-  Value(const Text& value);
+  explicit Value(ValueType vt);
+  explicit Value(const Text& value);
   Value();
 
   static PValue create_null();
@@ -29,25 +29,25 @@ public:
   static PValue create_map();
   static PValue create_list();
 
-  bool is_null() const;
-  bool is_scalar() const;
-  bool is_map() const;
-  bool is_list() const;
+  [[nodiscard]] bool is_null() const;
+  [[nodiscard]] bool is_scalar() const;
+  [[nodiscard]] bool is_map() const;
+  [[nodiscard]] bool is_list() const;
 
-  MapValue& as_map();
-  ListValue& as_list();
-  const MapValue& as_map() const;
-  const ListValue& as_list() const;
-  Text as_scalar() const;
+  [[nodiscard]] MapValue& as_map();
+  [[nodiscard]] ListValue& as_list();
+  [[nodiscard]] const MapValue& as_map() const;
+  [[nodiscard]] const ListValue& as_list() const;
+  [[nodiscard]] Text as_scalar() const;
 
 public:
-  ValueType type() const;
-  TextChain to_string() const;
+  [[nodiscard]] ValueType type() const;
+  [[nodiscard]] TextChain to_string() const;
 
 public:
   void set_value(const Text& txt);
-  Text get_value() const;
-  List<Text> get_array_value() const;
+  [[nodiscard]] Text get_value() const;
+  [[nodiscard]] List<Text> get_array_value() const;
 
   void add(PValue v);
   void add(const Text& txt, PValue v);
@@ -56,11 +56,11 @@ public:
   void clear();
   Value& operator[](int index) const;
   Value& operator[](const Text& key) const;
-  PValue get(int index) const;
-  PValue get(const Text& key) const;
-  bool has(const Text& key) const;
-  size_t size() const;
-  std::optional<Text> get_opt(const kl::Text& path);
+  [[nodiscard]] PValue get(int index) const;
+  [[nodiscard]] PValue get(const Text& key) const;
+  [[nodiscard]] bool has(const Text& key) const;
+  [[nodiscard]] size_t size() const;
+  [[nodiscard]] std::optional<Text> get_opt(const kl::Text& path);
 
 public:
   void perform(const std::function<void(NullValue&)>& null_op, const std::function<void(Text&)>& scalar_op,

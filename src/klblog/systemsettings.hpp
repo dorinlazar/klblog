@@ -5,18 +5,18 @@
 
 namespace klblog {
 
-constexpr auto KLBLOG_VERSION{"0.0.1"};
+constexpr auto KlBlogVersion{"0.0.1"};
 
 enum class VerbosityLevel { Verbose, Quiet };
 
 struct SystemSettings {
   SystemSettings(int argc, char** argv, char** envp);
 
-  bool verbose() const;
+  [[nodiscard]] bool verbose() const;
 
   kl::Dict<kl::Text, kl::Text> environment;
   kl::List<kl::Text> arguments;
-  kl::Text version = KLBLOG_VERSION;
+  kl::Text version = KlBlogVersion;
   VerbosityLevel verbosity = VerbosityLevel::Quiet;
   kl::Text source_folder = ".";
   kl::Text destination_folder = "blog/";

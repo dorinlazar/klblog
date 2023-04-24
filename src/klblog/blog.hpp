@@ -6,10 +6,10 @@
 namespace klblog {
 
 class Blog {
-  Settings settings;
+  Settings m_settings;
 
 public:
-  Blog(std::shared_ptr<SystemSettings> sys);
+  explicit Blog(std::shared_ptr<SystemSettings> sys);
   void process() const;
 };
 

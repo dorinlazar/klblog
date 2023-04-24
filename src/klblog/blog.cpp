@@ -5,13 +5,13 @@
 namespace klblog {
 
 Blog::Blog(std::shared_ptr<SystemSettings> sys) {
-  kl::FilePath config_file{sys->source_folder + "/blog.config"};
+  const kl::FilePath config_file{sys->source_folder + "/blog.config"};
   if (sys->verbose()) {
     kl::log("Blog processing started: {} => {}", sys->source_folder, config_file.full_path());
   }
-  settings.parse(config_file.full_path());
+  m_settings.parse(config_file.full_path());
   if (sys->verbose()) {
-    settings.log_abstract();
+    m_settings.log_abstract();
   }
 }
 
