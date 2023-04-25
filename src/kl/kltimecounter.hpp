@@ -3,8 +3,8 @@
 
 namespace kl {
 class TimeCounter {
-  kl::DateTime _start;
-  kl::Text _op;
+  kl::DateTime m_start;
+  kl::Text m_op;
 
 public:
   TimeCounter(const Text& operation);
