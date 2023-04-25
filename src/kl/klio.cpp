@@ -87,13 +87,13 @@ bool StreamReader::end_of_stream() { return m_stream->end_of_stream(); }
 StreamWriter::StreamWriter(Stream* stream) : _stream(stream) {}
 Stream* StreamWriter::stream() const { return _stream; }
 void StreamWriter::write(std::span<uint8_t> what) { _stream->write(what); }
-void StreamWriter::write(const Text& what) { _stream->write(what.toRawData()); }
+void StreamWriter::write(const Text& what) { _stream->write(what.to_raw_data()); }
 void StreamWriter::write_line(const Text& what) {
   static char eol[] = "\n";
-  _stream->write(what.toRawData());
+  _stream->write(what.to_raw_data());
   _stream->write(std::span<uint8_t>((uint8_t*)&eol[0], 1));
 }
-void StreamWriter::write(const TextChain& what) { _stream->write(what.to_text().toRawData()); }
+void StreamWriter::write(const TextChain& what) { _stream->write(what.to_text().to_raw_data()); }
 void StreamWriter::flush() { _stream->flush(); }
 
 PosixFileStream::PosixFileStream(int fd) : _fd(fd) {
@@ -113,9 +113,9 @@ static int openFile(const Text& filename, FileOpenMode mode) {
   case FileOpenMode::TruncateRW: flags = O_RDWR | O_TRUNC | O_CREAT; break;
   }
   if (flags & O_CREAT) {
-    return ::open(std::string(filename.toView()).c_str(), flags, 0600);
+    return ::open(std::string(filename.to_view()).c_str(), flags, 0600);
   }
-  return ::open(std::string(filename.toView()).c_str(), flags);
+  return ::open(std::string(filename.to_view()).c_str(), flags);
 }
 
 FileStream::FileStream(const Text& filename, FileOpenMode mode)

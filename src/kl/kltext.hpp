@@ -12,6 +12,7 @@
 #include <span>
 #include <fmt/format.h>
 
+// NOLINTBEGIN(google-explicit-constructor)
 namespace kl {
 
 enum class SplitEmpty { Keep, Discard };
@@ -98,15 +99,15 @@ private:
 };
 
 class TextRefCounter {
-  int64_t ref_count = 1;
-  char block_start[0];
+  int64_t m_ref_count = 1;
+  char m_block_start[0]; // NOLINT(modernize-avoid-c-arrays)
 
 public:
   TextRefCounter* acquire();
   bool release();
   char* text_data();
   static TextRefCounter* allocate(size_t text_size);
-  static TextRefCounter s_empty;
+  static TextRefCounter m_s_empty;
 };
 static_assert(sizeof(TextRefCounter) == sizeof(int64_t));
 
@@ -162,10 +163,10 @@ public:
   bool ends_with(char c) const;
 
   std::string to_string() const;
-  std::string_view toView() const;
-  TextView toTextView() const;
-  std::span<uint8_t> toRawData() const;
-  int64_t toInt() const;
+  std::string_view to_view() const;
+  TextView to_text_view() const;
+  std::span<uint8_t> to_raw_data() const;
+  int64_t to_int() const;
 
   bool contains(char c) const;
   Text skip(std::string_view skippables) const;
@@ -260,7 +261,7 @@ template <>
 struct fmt::formatter<kl::Text> : public fmt::formatter<std::string_view> {
   template <typename FormatContext>
   auto format(kl::Text c, FormatContext& ctx) const {
-    return fmt::formatter<std::string_view>::format(c.toView(), ctx);
+    return fmt::formatter<std::string_view>::format(c.to_view(), ctx);
   }
 };
 
@@ -268,3 +269,4 @@ kl::TextChain operator+(const kl::Text&, const char*);
 kl::TextChain operator+(const kl::Text&, const kl::Text&);
 kl::TextChain operator+(const kl::TextChain&, const kl::Text&);
 kl::TextChain operator+(const kl::TextChain&, const char*);
+// NOLINTEND(google-explicit-constructor)

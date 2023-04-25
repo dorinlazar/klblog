@@ -24,9 +24,9 @@ TextView TextView::trim_right() const {
   return m_view.substr(0, position + 1);
 }
 
-bool TextView::starts_with(char c) const { return m_view.size() > 0 && m_view.front() == c; }
+bool TextView::starts_with(char c) const { return !m_view.empty() && m_view.front() == c; }
 bool TextView::starts_with(const TextView& tv) const { return m_view.starts_with(tv.m_view); }
-bool TextView::ends_with(char c) const { return m_view.size() > 0 && m_view.back() == c; }
+bool TextView::ends_with(char c) const { return !m_view.empty() && m_view.back() == c; }
 bool TextView::ends_with(const TextView& tv) const { return m_view.ends_with(tv.m_view); }
 
 char TextView::operator[](size_t index) const {
@@ -59,11 +59,11 @@ TextView TextView::skip(const TextView& skippables) const {
   v.remove_prefix(std::min(v.find_first_not_of(skippables.m_view), v.size()));
   return v;
 }
-TextView TextView::skip(size_t size) const { return m_view.substr(size); }
+TextView TextView::skip(size_t n) const { return m_view.substr(n); }
 TextView TextView::skip_bom() const {
   if (size() >= 3) {
     auto buf = begin();
-    if (buf[0] == (char)0xEF && buf[1] == (char)0xBB && buf[2] == (char)0xBF) {
+    if (buf[0] == '\xEF' && buf[1] == '\xBB' && buf[2] == '\xBF') {
       return skip(3);
     }
   }
@@ -129,8 +129,8 @@ std::optional<size_t> TextView::last_pos(char c) const {
 }
 
 std::pair<TextView, TextView> TextView::split_pos(ssize_t where) const {
-  size_t pos = where > 0 ? std::min(size(), static_cast<size_t>(where))
-                         : (size() - std::min(static_cast<size_t>(-where), size()));
+  const size_t pos = where > 0 ? std::min(size(), static_cast<size_t>(where))
+                               : (size() - std::min(static_cast<size_t>(-where), size()));
   return {m_view.substr(0, pos), m_view.substr(pos)};
 }
 
@@ -230,7 +230,7 @@ std::optional<TextView> TextView::skip_indent(size_t indentLevel) const {
 
 size_t TextView::get_indent() const {
   size_t level = 0;
-  for (char c: *this) {
+  for (const char c: *this) {
     if (c == ' ') {
       level++;
     } else {
@@ -240,10 +240,10 @@ size_t TextView::get_indent() const {
   return level;
 }
 
-size_t TextView::count(char t) const {
+size_t TextView::count(char c) const {
   size_t count = 0;
-  for (auto c: *this) {
-    if (c == t) {
+  for (auto ch: *this) {
+    if (ch == c) {
       count++;
     }
   }
@@ -251,39 +251,41 @@ size_t TextView::count(char t) const {
 }
 
 TextRefCounter* TextRefCounter::acquire() {
-  ref_count++;
+  m_ref_count++;
   return this;
 }
 bool TextRefCounter::release() {
-  ref_count--;
-  return ref_count == 0;
+  m_ref_count--;
+  return m_ref_count == 0;
 }
 
-char* TextRefCounter::text_data() { return reinterpret_cast<char*>(&block_start); }
+char* TextRefCounter::text_data() { return reinterpret_cast<char*>(&m_block_start); }
 TextRefCounter* TextRefCounter::allocate(size_t text_size) {
   auto buffer = reinterpret_cast<TextRefCounter*>(malloc(sizeof(TextRefCounter) + text_size));
-  buffer->ref_count = 1;
+  buffer->m_ref_count = 1;
   return buffer;
 }
 
-TextRefCounter TextRefCounter::s_empty;
+TextRefCounter TextRefCounter::m_s_empty;
 
-Text::Text() : m_memblock(&TextRefCounter::s_empty) {}
+Text::Text() : m_memblock(&TextRefCounter::m_s_empty) {}
 
 Text::~Text() { clear(); }
 
 Text::Text(const Text& value) : m_memblock(value.m_memblock->acquire()), m_start(value.m_start), m_end(value.m_end) {}
 
 Text::Text(Text&& dying) noexcept
-    : m_memblock(std::exchange(dying.m_memblock, &TextRefCounter::s_empty)), m_start(std::exchange(dying.m_start, 0)),
+    : m_memblock(std::exchange(dying.m_memblock, &TextRefCounter::m_s_empty)), m_start(std::exchange(dying.m_start, 0)),
       m_end(std::exchange(dying.m_end, 0)) {}
 
 Text& Text::operator=(const Text& value) {
-  clear();
-  if (value.size() > 0) {
-    m_memblock = value.m_memblock->acquire();
-    m_start = value.m_start;
-    m_end = value.m_end;
+  if (this != &value) {
+    clear();
+    if (value.size() > 0) {
+      m_memblock = value.m_memblock->acquire();
+      m_start = value.m_start;
+      m_end = value.m_end;
+    }
   }
   return *this;
 }
@@ -291,7 +293,7 @@ Text& Text::operator=(const Text& value) {
 Text& Text::operator=(Text&& dying) noexcept {
   clear();
   if (dying.size() > 0) {
-    m_memblock = std::exchange(dying.m_memblock, &TextRefCounter::s_empty);
+    m_memblock = std::exchange(dying.m_memblock, &TextRefCounter::m_s_empty);
     m_start = std::exchange(dying.m_start, 0);
     m_end = std::exchange(dying.m_end, 0);
   }
@@ -311,7 +313,7 @@ Text::Text(const std::string& s) {
     m_memblock = TextRefCounter::allocate(m_end);
     std::copy(s.begin(), s.end(), m_memblock->text_data());
   } else {
-    m_memblock = &TextRefCounter::s_empty;
+    m_memblock = &TextRefCounter::m_s_empty;
   }
 }
 
@@ -321,7 +323,7 @@ Text::Text(const char* ptr) {
     m_memblock = TextRefCounter::allocate(m_end);
     std::copy(ptr, ptr + m_end, m_memblock->text_data());
   } else {
-    m_memblock = &TextRefCounter::s_empty;
+    m_memblock = &TextRefCounter::m_s_empty;
   }
 }
 
@@ -331,7 +333,7 @@ Text::Text(const char* ptr, size_t size) {
     m_memblock = TextRefCounter::allocate(m_end);
     std::copy(ptr, ptr + m_end, m_memblock->text_data());
   } else {
-    m_memblock = &TextRefCounter::s_empty;
+    m_memblock = &TextRefCounter::m_s_empty;
   }
 }
 
@@ -339,7 +341,7 @@ Text::Text(const Text& t, size_t start, size_t length) {
   auto real_start = std::min(t.m_start + start, t.m_end);
   auto real_end = std::min(real_start + length, t.m_end);
   if (real_start == real_end) {
-    m_memblock = &TextRefCounter::s_empty;
+    m_memblock = &TextRefCounter::m_s_empty;
   } else {
     m_start = real_start;
     m_end = real_end;
@@ -354,7 +356,7 @@ void Text::clear() {
     if (m_memblock->release()) {
       free(m_memblock);
     }
-    m_memblock = &TextRefCounter::s_empty;
+    m_memblock = &TextRefCounter::m_s_empty;
   }
   m_start = 0;
   m_end = 0;
@@ -439,31 +441,35 @@ const char* Text::begin() const { return m_memblock->text_data() + m_start; }
 const char* Text::end() const { return m_memblock->text_data() + m_end; }
 
 std::string Text::to_string() const { return std::string(begin(), size()); }
-std::string_view Text::toView() const { return std::string_view(begin(), size()); }
-TextView Text::toTextView() const { return TextView(toView()); }
-std::span<uint8_t> Text::toRawData() const { return {(uint8_t*)begin(), (uint8_t*)end()}; }
-int64_t Text::toInt() const { return std::stoll(to_string()); }
+std::string_view Text::to_view() const { return std::string_view(begin(), size()); }
+TextView Text::to_text_view() const { return TextView(to_view()); }
+std::span<uint8_t> Text::to_raw_data() const {
+  auto* st = reinterpret_cast<uint8_t*>(const_cast<char*>(begin()));
+  auto* en = reinterpret_cast<uint8_t*>(const_cast<char*>(end()));
+  return {st, en};
+}
+int64_t Text::to_int() const { return std::stoll(to_string()); }
 
 Text Text::trim() const { return trim_left().trim_right(); }
 Text Text::trim_left() const { return skip(WHITESPACE); }
 Text Text::trim_right() const {
-  auto position = toView().find_last_not_of(WHITESPACE);
+  auto position = to_view().find_last_not_of(WHITESPACE);
   if (position == std::string_view::npos) {
     return {};
   }
   return Text(*this, 0, position + 1);
 }
 
-bool Text::starts_with(const Text& tv) const { return toView().starts_with(tv.toView()); }
+bool Text::starts_with(const Text& tv) const { return to_view().starts_with(tv.to_view()); }
 bool Text::starts_with(const char* v) const {
   if (v == nullptr) [[unlikely]] {
     return false;
   }
-  return toView().starts_with(v);
+  return to_view().starts_with(v);
 }
 bool Text::starts_with(char c) const { return size() > 0 && *begin() == c; }
 
-bool Text::ends_with(const Text& tv) const { return toView().ends_with(tv.toView()); }
+bool Text::ends_with(const Text& tv) const { return to_view().ends_with(tv.to_view()); }
 bool Text::ends_with(char c) const {
   if (size() > 0) {
     return c == *(begin() + size() - 1);
@@ -471,9 +477,9 @@ bool Text::ends_with(char c) const {
   return false;
 }
 
-bool Text::contains(char c) const { return toTextView().contains(c); }
+bool Text::contains(char c) const { return to_text_view().contains(c); }
 
-Text Text::skip(std::string_view skippables) const { return skip(toView().find_first_not_of(skippables)); }
+Text Text::skip(std::string_view skippables) const { return skip(to_view().find_first_not_of(skippables)); }
 
 Text Text::skip(size_t n) const {
   if (n < size()) {
@@ -482,14 +488,16 @@ Text Text::skip(size_t n) const {
   return {};
 }
 
-std::optional<size_t> Text::pos(char c, size_t occurence) const { return toTextView().pos(c, occurence); }
+std::optional<size_t> Text::pos(char c, size_t occurence) const { return to_text_view().pos(c, occurence); }
 
-std::optional<size_t> Text::pos(Text t, size_t occurence) const { return toTextView().pos(t.toTextView(), occurence); }
+std::optional<size_t> Text::pos(Text t, size_t occurence) const {
+  return to_text_view().pos(t.to_text_view(), occurence);
+}
 
-std::optional<size_t> Text::last_pos(char c) const { return toTextView().last_pos(c); }
+std::optional<size_t> Text::last_pos(char c) const { return to_text_view().last_pos(c); }
 
 std::pair<Text, Text> Text::split_pos(ssize_t where) const {
-  auto maxn = size();
+  auto maxn = static_cast<ssize_t>(size());
   if (where < 0) {
     where += maxn;
     if (where < 0) {
@@ -560,10 +568,11 @@ List<Text> Text::split_by_text(const Text& t, SplitEmpty onEmpty) const {
   auto position = pos(t);
   auto left_over = *this;
   while (position.has_value()) {
-    if (position.value() > 0 || onEmpty != SplitEmpty::Discard) {
-      res.add(left_over.sublen(0, position.value()));
+    auto pos_value = position.value(); // NOLINT(bugprone-unchecked-optional-access)
+    if (pos_value > 0 || onEmpty != SplitEmpty::Discard) {
+      res.add(left_over.sublen(0, pos_value));
     }
-    left_over = left_over.sublen(position.value() + t.size(), left_over.size());
+    left_over = left_over.sublen(pos_value + t.size(), left_over.size());
     position = left_over.pos(t);
   }
   if (left_over.size() > 0 || onEmpty != SplitEmpty::Discard) {
@@ -615,7 +624,7 @@ std::optional<Text> Text::skip_indent(size_t indentLevel) const {
 
 size_t Text::get_indent() const {
   size_t level = 0;
-  for (char c: *this) {
+  for (const char c: *this) {
     if (c == ' ') {
       level++;
     } else {
@@ -629,17 +638,17 @@ void Text::fill_c_buffer(char* dest, size_t bufsize) const {
   if (bufsize == 0) {
     return;
   }
-  size_t amount_to_copy = bufsize <= size() ? bufsize - 1 : size();
+  const size_t amount_to_copy = bufsize <= size() ? bufsize - 1 : size();
   std::copy(begin(), begin() + amount_to_copy, dest);
   dest[amount_to_copy] = 0;
 }
 
-size_t Text::count(char t) const {
-  return std::accumulate(begin(), end(), 0uz, [t](size_t count, char c) { return count + (c == t ? 1 : 0); });
+size_t Text::count(char c) const {
+  return std::accumulate(begin(), end(), 0UZ, [c](size_t count, char ch) { return count + (ch == c ? 1 : 0); });
 }
 
 size_t Text::count(Text t) const {
-  return std::accumulate(begin(), end(), 0uz, [&t](size_t count, char c) { return count + (t.contains(c) ? 1 : 0); });
+  return std::accumulate(begin(), end(), 0UZ, [&t](size_t count, char c) { return count + (t.contains(c) ? 1 : 0); });
 }
 
 Text Text::quote_escaped() const {
@@ -647,13 +656,13 @@ Text Text::quote_escaped() const {
   if (escapes == 0) {
     return TextChain{"\"", *this, "\""};
   }
-  size_t length = escapes + size() + 2;
+  const size_t length = escapes + size() + 2;
   auto memblock = TextRefCounter::allocate(length);
   auto ptr = memblock->text_data();
   ptr[0] = '"';
   size_t offset = 1;
 
-  for (char c: *this) {
+  for (const char c: *this) {
     if (c == '"' || c == '\\') {
       ptr[offset++] = '\\';
     }
@@ -701,14 +710,14 @@ Text TextChain::join(char splitchar) {
   if (m_length == 0) {
     return ""_t;
   }
-  size_t size = m_length + (splitchar != '\0' ? (m_chain.size() - 1) : 0);
+  const size_t size = m_length + (splitchar != '\0' ? (m_chain.size() - 1) : 0);
 
   auto memblock = TextRefCounter::allocate(size);
   char* ptr = memblock->text_data();
 
   size_t offset = 0;
   for (const auto& t: m_chain) {
-    if (splitchar && offset != 0) {
+    if (splitchar != '\0' && offset != 0) {
       ptr[offset] = splitchar;
       offset++;
     }
@@ -722,13 +731,13 @@ Text TextChain::join(kl::Text split_text) {
   if (m_length == 0) {
     return ""_t;
   }
-  size_t size = m_length + split_text.size() * (m_chain.size() - 1);
+  const size_t size = m_length + split_text.size() * (m_chain.size() - 1);
 
   auto memblock = TextRefCounter::allocate(size);
   char* ptr = memblock->text_data();
 
   size_t offset = 0;
-  size_t split_size = split_text.size();
+  const size_t split_size = split_text.size();
   for (const auto& t: m_chain) {
     if (split_size > 0 && offset != 0) {
       std::copy(split_text.begin(), split_text.end(), ptr + offset);
@@ -777,13 +786,13 @@ Text operator"" _t(const char* p, size_t s) { return {p, s}; }
 } // namespace literals
 
 std::ostream& operator<<(std::ostream& os, const TextView& tv) { return os << tv.view(); }
-std::ostream& operator<<(std::ostream& os, const Text& tv) { return os << tv.toView(); }
-std::ostream& operator<<(std::ostream& os, const TextChain& tv) { return os << tv.to_text().toView(); }
+std::ostream& operator<<(std::ostream& os, const Text& tv) { return os << tv.to_view(); }
+std::ostream& operator<<(std::ostream& os, const TextChain& tv) { return os << tv.to_text().to_view(); }
 
 } // namespace kl
 
 std::size_t std::hash<kl::Text>::operator()(const kl::Text& s) const noexcept {
-  return std::hash<std::string_view>{}(s.toView());
+  return std::hash<std::string_view>{}(s.to_view());
 }
 
 kl::TextChain operator+(const kl::Text& t, const char* p) {

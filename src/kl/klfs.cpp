@@ -19,7 +19,7 @@ const std::size_t LargestSupportedFile = 0x8FFFFFFFULL;
 
 Text klfs_read_file_impl(const Text& filename) {
   const fs::path p =
-      filename.starts_with(FolderSeparator[0]) ? filename.toView() : fs::current_path() / filename.toView();
+      filename.starts_with(FolderSeparator[0]) ? filename.to_view() : fs::current_path() / filename.to_view();
   auto size = fs::file_size(p); // throws if error;
 
   if (size > LargestSupportedFile) [[unlikely]] {
@@ -251,22 +251,22 @@ Text FileSystem::executable_path(const Text& exename) {
 
 bool FileSystem::make_directory(const Text& path) {
   // TODO(dorin) try to not do it like a lazy individual that we all know you are.
-  return std::filesystem::create_directories(path.toView());
+  return std::filesystem::create_directories(path.to_view());
 }
 
 bool FileSystem::is_directory(const Text& path) {
   // TODO(dorin) try to not do it like a lazy individual that we all know you are.
-  return std::filesystem::is_directory(path.toView());
+  return std::filesystem::is_directory(path.to_view());
 }
 
 bool FileSystem::is_file(const Text& path) {
   // TODO(dorin) try to not do it like a lazy individual that we all know you are.
-  return std::filesystem::is_regular_file(path.toView());
+  return std::filesystem::is_regular_file(path.to_view());
 }
 
 bool FileSystem::exists(const Text& path) {
   // TODO(dorin) try to not do it like a lazy individual that we all know you are.
-  return std::filesystem::exists(path.toView());
+  return std::filesystem::exists(path.to_view());
 }
 
 FileReader::FileReader(const Text& name) { m_unread_content = klfs_read_file_impl(name); }
