@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 #include <memory>
 #include <span>
@@ -42,12 +42,12 @@ public: // operations
 
 class StreamReader {
   size_t m_offset = 0, m_read_size = 0;
-  constexpr static size_t kBufferSize = 4096;
-  std::array<uint8_t, kBufferSize> m_buffer;
+  constexpr static size_t ReaderBufferSize = 4096;
+  std::array<uint8_t, ReaderBufferSize> m_buffer;
   Stream* m_stream;
 
 public:
-  StreamReader(Stream* stream);
+  explicit StreamReader(Stream* stream);
   Stream* stream() const;
   size_t read(std::span<uint8_t> where);
   Text read_line();
@@ -56,10 +56,10 @@ public:
 };
 
 class StreamWriter {
-  Stream* _stream;
+  Stream* m_stream;
 
 public:
-  StreamWriter(Stream* stream);
+  explicit StreamWriter(Stream* stream);
   Stream* stream() const;
   void write(std::span<uint8_t> what);
   void write(const Text& what);
@@ -72,12 +72,12 @@ enum class FileOpenMode { ReadOnly, WriteOnly, ReadWrite, AppendRW, TruncateRW }
 
 class PosixFileStream : public Stream {
 protected:
-  int _fd = -1;
-  bool _regular = false;
+  int m_fd = -1;
+  bool m_regular = false;
 
 public:
-  PosixFileStream(int fd);
-  virtual ~PosixFileStream();
+  explicit PosixFileStream(int fd);
+  ~PosixFileStream() override;
 
 public: // properties
   size_t size() override;
@@ -93,7 +93,7 @@ public: // operations
   bool end_of_stream() override;
 
   void close() override;
-  int file_descriptor();
+  int file_descriptor() const;
 };
 
 class FileStream final : public PosixFileStream {
@@ -101,11 +101,12 @@ class FileStream final : public PosixFileStream {
 
 public:
   FileStream(const Text& filename, FileOpenMode mode);
+  ~FileStream() override = default;
 
 public: // capabilities
-  bool can_read() override final;
-  bool can_write() override final;
-  bool can_seek() override final;
+  bool can_read() override;
+  bool can_write() override;
+  bool can_seek() override;
 };
 
 } // namespace kl

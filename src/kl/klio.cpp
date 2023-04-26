@@ -84,22 +84,22 @@ Text StreamReader::read_all() {
 
 bool StreamReader::end_of_stream() { return m_stream->end_of_stream(); }
 
-StreamWriter::StreamWriter(Stream* stream) : _stream(stream) {}
-Stream* StreamWriter::stream() const { return _stream; }
-void StreamWriter::write(std::span<uint8_t> what) { _stream->write(what); }
-void StreamWriter::write(const Text& what) { _stream->write(what.to_raw_data()); }
+StreamWriter::StreamWriter(Stream* stream) : m_stream(stream) {}
+Stream* StreamWriter::stream() const { return m_stream; }
+void StreamWriter::write(std::span<uint8_t> what) { m_stream->write(what); }
+void StreamWriter::write(const Text& what) { m_stream->write(what.to_raw_data()); }
 void StreamWriter::write_line(const Text& what) {
   static char eol[] = "\n";
-  _stream->write(what.to_raw_data());
-  _stream->write(std::span<uint8_t>((uint8_t*)&eol[0], 1));
+  m_stream->write(what.to_raw_data());
+  m_stream->write(std::span<uint8_t>((uint8_t*)&eol[0], 1));
 }
-void StreamWriter::write(const TextChain& what) { _stream->write(what.to_text().to_raw_data()); }
-void StreamWriter::flush() { _stream->flush(); }
+void StreamWriter::write(const TextChain& what) { m_stream->write(what.to_text().to_raw_data()); }
+void StreamWriter::flush() { m_stream->flush(); }
 
-PosixFileStream::PosixFileStream(int fd) : _fd(fd) {
+PosixFileStream::PosixFileStream(int fd) : m_fd(fd) {
   struct stat statbuf;
-  if (::fstat(_fd, &statbuf) == 0) {
-    _regular = S_ISREG(statbuf.st_mode);
+  if (::fstat(m_fd, &statbuf) == 0) {
+    m_regular = S_ISREG(statbuf.st_mode);
   }
 }
 
@@ -126,9 +126,9 @@ bool FileStream::can_write() { return m_mode != FileOpenMode::ReadOnly; }
 bool FileStream::can_seek() { return true; }
 
 size_t PosixFileStream::size() {
-  if (_regular) {
+  if (m_regular) {
     struct stat statbuf;
-    if (::fstat(_fd, &statbuf) != 0) [[unlikely]] {
+    if (::fstat(m_fd, &statbuf) != 0) [[unlikely]] {
       throw IOException::currentStandardError();
     };
     return statbuf.st_size;
@@ -137,8 +137,8 @@ size_t PosixFileStream::size() {
 }
 
 size_t PosixFileStream::position() {
-  if (_regular) {
-    auto pos = ::lseek(_fd, 0, SEEK_CUR);
+  if (m_regular) {
+    auto pos = ::lseek(m_fd, 0, SEEK_CUR);
     if (pos < 0) [[unlikely]] {
       throw IOException::currentStandardError();
     }
@@ -148,7 +148,7 @@ size_t PosixFileStream::position() {
 }
 
 size_t PosixFileStream::read(std::span<uint8_t> where) {
-  auto res = ::read(_fd, where.data(), where.size());
+  auto res = ::read(m_fd, where.data(), where.size());
   if (res < 0) [[unlikely]] {
     throw IOException::currentStandardError();
   }
@@ -159,7 +159,7 @@ void PosixFileStream::write(std::span<uint8_t> what) {
   // TODO(dorin): write everything!
   size_t offset = 0;
   while (offset < what.size()) {
-    auto bytes_written = ::write(_fd, what.data() + offset, what.size() - offset);
+    auto bytes_written = ::write(m_fd, what.data() + offset, what.size() - offset);
     if (bytes_written < 0) [[unlikely]] {
       throw IOException::currentStandardError();
     }
@@ -168,40 +168,41 @@ void PosixFileStream::write(std::span<uint8_t> what) {
 }
 
 void PosixFileStream::seek(size_t offset) {
-  if (lseek(_fd, offset, SEEK_SET) < 0) [[unlikely]] {
+  if (lseek(m_fd, offset, SEEK_SET) < 0) [[unlikely]] {
     throw IOException::currentStandardError();
   }
 }
 
 bool PosixFileStream::data_available() {
-  if (_regular) {
+  if (m_regular) {
     return position() < size();
   }
-  auto pfd = pollfd{.fd = _fd, .events = 0, .revents = 0};
+  auto pfd = pollfd{.fd = m_fd, .events = 0, .revents = 0};
   return poll(&pfd, 1, 0) > 0;
 }
 
 bool PosixFileStream::end_of_stream() {
-  if (_regular) [[likely]] {
+  if (m_regular) [[likely]] {
     return position() >= size();
   }
   throw OperationNotSupported("End of stream", "non-regular file");
 }
 
 void PosixFileStream::flush() {
-  if (fdatasync(_fd) < 0) [[unlikely]] {
+  if (fdatasync(m_fd) < 0) [[unlikely]] {
     throw IOException::currentStandardError();
   }
 }
 
 void PosixFileStream::close() {
-  if (_fd >= 0) {
-    ::close(_fd);
-    _fd = -1;
+  if (m_fd >= 0) {
+    ::close(m_fd);
+    m_fd = -1;
   }
 }
 
 PosixFileStream::~PosixFileStream() { close(); }
 
-int PosixFileStream::file_descriptor() { return _fd; }
+int PosixFileStream::file_descriptor() const { return m_fd; }
+
 } // namespace kl

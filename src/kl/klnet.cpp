@@ -55,7 +55,7 @@ size_t TcpClient::size() { throw OperationNotSupported("TcpClient::size()", "");
 size_t TcpClient::position() { throw OperationNotSupported("TcpClient::size()", ""); }
 
 bool TcpClient::data_available() {
-  struct pollfd pfd = {.fd = _fd, .events = POLLIN, .revents = 0};
+  struct pollfd pfd = {.fd = m_fd, .events = POLLIN, .revents = 0};
   return ::poll(&pfd, 1, 0) > 0;
 }
 
@@ -65,7 +65,7 @@ void TcpClient::flush() { throw OperationNotSupported("TcpClient::flush()", "");
 TimeSpan TcpClient::readTimeout() {
   struct timeval timeout;
   socklen_t length = sizeof(timeout);
-  if (getsockopt(_fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, &length) < 0) {
+  if (getsockopt(m_fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, &length) < 0) {
     return {};
   }
   return TimeSpan::from_timeval(timeout);
@@ -73,13 +73,13 @@ TimeSpan TcpClient::readTimeout() {
 
 void TcpClient::setReadTimeout(TimeSpan ts) {
   struct timeval timeout = ts.timeval();
-  setsockopt(_fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
+  setsockopt(m_fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
 }
 
 TimeSpan TcpClient::writeTimeout() {
   struct timeval timeout;
   socklen_t length = sizeof(timeout);
-  if (getsockopt(_fd, SOL_SOCKET, SO_SNDTIMEO, &timeout, &length) < 0) {
+  if (getsockopt(m_fd, SOL_SOCKET, SO_SNDTIMEO, &timeout, &length) < 0) {
     return {};
   }
   return TimeSpan::from_timeval(timeout);
@@ -87,7 +87,7 @@ TimeSpan TcpClient::writeTimeout() {
 
 void TcpClient::setWriteTimeout(TimeSpan ts) {
   struct timeval timeout = ts.timeval();
-  setsockopt(_fd, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout));
+  setsockopt(m_fd, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout));
 }
 
 class SSLHandler {
