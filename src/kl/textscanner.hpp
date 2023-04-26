@@ -4,8 +4,8 @@
 
 namespace kl {
 class ParsingError : public std::logic_error {
-  uint32_t _line;
-  uint32_t _column;
+  uint32_t m_line;
+  uint32_t m_column;
 
 public:
   ParsingError(const Text& why, uint32_t line, uint32_t column);
@@ -23,7 +23,7 @@ enum class NewLineHandling { Skip, Keep };
 class TextScanner {
 
 public:
-  TextScanner(const Text& source);
+  explicit TextScanner(const Text& source);
 
   uint32_t line() const;
   uint32_t column() const;
@@ -32,17 +32,17 @@ public:
   bool empty() const;
   char top_char() const;
   ParsedCharacter read_char();
-  ParsedCharacter readCharEscaped();
+  ParsedCharacter read_char_escaped();
   Text read_quoted_string();
-  Text readUntil(char character);
+  Text read_until(char character);
   Text read_word();
   Text read_line();
   Text remainder() const;
   uint32_t read_digit();
   void expect(char character);
   void expect_ws(char character, NewLineHandling handling = NewLineHandling::Keep);
-  bool starts_with(const Text& txt);
-  void skip(uint32_t nChars);
+  bool starts_with(const Text& what) const;
+  void skip(uint32_t n_chars);
   uint32_t get_indent_level() const;
 
 public:
@@ -50,11 +50,11 @@ public:
     friend class TextScanner;
 
   protected:
-    uint32_t _line = 1;
-    uint32_t _column = 1;
-    uint32_t _offset = 0;
-    uint32_t _dataLeft = 0;
-    const char* _current;
+    uint32_t m_line = 1;
+    uint32_t m_column = 1;
+    uint32_t m_offset = 0;
+    uint32_t m_data_left = 0;
+    const char* m_current;
   };
 
   void rewind();
@@ -65,8 +65,8 @@ public:
   void error(const Text& why) const;
 
 private:
-  DataLocation loc;
-  Text _originalSource;
+  DataLocation m_loc;
+  Text m_original_source;
   void advance();
 };
 
