@@ -35,11 +35,10 @@ private:
 struct ExecutionNode final {
   List<Text> m_params;
   List<ExecutionNode*> m_dependencies;
-  Process::State m_state;
+  Process::State m_state{Process::State::NotStarted};
 
 public:
-  ExecutionNode(const List<Text>& p, const List<ExecutionNode*>& d)
-      : m_params(p), m_dependencies(d), m_state(Process::State::NotStarted) {}
+  ExecutionNode(const List<Text>& p, const List<ExecutionNode*>& d) : m_params(p), m_dependencies(d) {}
 };
 
 class ProcessHorde {

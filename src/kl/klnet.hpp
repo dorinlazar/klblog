@@ -12,19 +12,19 @@ public:
   TcpClient(const Text& server, uint16_t port);
 
 public: // capabilities
-  bool can_read() override final;
-  bool can_write() override final;
-  bool can_seek() override final;
-  bool can_timeout() override final;
+  bool can_read() override;
+  bool can_write() override;
+  bool can_seek() override;
+  bool can_timeout() override;
 
 public: // properties
-  size_t size() override final;
-  size_t position() override final;
+  size_t size() override;
+  size_t position() override;
 
 public: // operations
-  bool data_available() override final;
-  bool end_of_stream() override final;
-  void flush() override final;
+  bool data_available() override;
+  bool end_of_stream() override;
+  void flush() override;
 
 public:
   TimeSpan read_timeout();
@@ -39,7 +39,7 @@ class SslClient final : public Stream {
 
 public:
   SslClient(const Text& server, uint16_t port);
-  virtual ~SslClient();
+  ~SslClient() override;
 
 public: // capabilities
   bool can_read() override;
@@ -62,7 +62,7 @@ public:
 
 class TcpServer {
 public:
-  TcpServer(uint16_t port);
+  explicit TcpServer(uint16_t port);
   ~TcpServer();
 
   std::unique_ptr<Stream> accept();
