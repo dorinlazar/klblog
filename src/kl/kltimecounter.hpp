@@ -7,7 +7,7 @@ class TimeCounter {
   kl::Text m_op;
 
 public:
-  TimeCounter(const Text& operation);
+  explicit TimeCounter(const Text& operation);
   ~TimeCounter();
 };
 }

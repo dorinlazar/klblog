@@ -27,15 +27,15 @@ public: // operations
   void flush() override final;
 
 public:
-  TimeSpan readTimeout();
-  void setReadTimeout(TimeSpan);
-  TimeSpan writeTimeout();
-  void setWriteTimeout(TimeSpan);
+  TimeSpan read_timeout();
+  void set_read_timeout(TimeSpan);
+  TimeSpan write_timeout();
+  void set_write_timeout(TimeSpan);
 };
 
 class SslClient final : public Stream {
   struct SslClientImpl;
-  std::unique_ptr<SslClientImpl> _impl;
+  std::unique_ptr<SslClientImpl> m_impl;
 
 public:
   SslClient(const Text& server, uint16_t port);
@@ -54,10 +54,10 @@ public: // operations
   void close() override;
 
 public:
-  TimeSpan readTimeout();
-  void setReadTimeout(TimeSpan);
-  TimeSpan writeTimeout();
-  void setWriteTimeout(TimeSpan);
+  TimeSpan read_timeout();
+  void set_read_timeout(TimeSpan);
+  TimeSpan write_timeout();
+  void set_write_timeout(TimeSpan);
 };
 
 class TcpServer {

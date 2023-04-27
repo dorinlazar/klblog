@@ -6,7 +6,7 @@
 #include <poll.h>
 
 namespace kl {
-static Text s_notImplemented = "Not implemented by derived class"_t;
+static Text s_not_implemented{"Not implemented by derived class"};
 
 Stream::~Stream() { close(); }
 
@@ -15,13 +15,17 @@ bool Stream::can_write() { return false; }
 bool Stream::can_seek() { return false; }
 bool Stream::can_timeout() { return false; }
 
-size_t Stream::size() { throw OperationNotSupported("Stream::size"_t, s_notImplemented); }
-size_t Stream::position() { throw OperationNotSupported("Stream::position"_t, s_notImplemented); }
-size_t Stream::read(std::span<uint8_t>) { throw OperationNotSupported("Stream::read"_t, s_notImplemented); }
-void Stream::write(std::span<uint8_t>) { throw OperationNotSupported("Stream::write"_t, s_notImplemented); }
-void Stream::seek(size_t) { throw OperationNotSupported("Stream::seek"_t, s_notImplemented); }
-bool Stream::data_available() { throw OperationNotSupported("Stream::data_available"_t, s_notImplemented); }
-void Stream::flush() { throw OperationNotSupported("Stream::flush"_t, s_notImplemented); }
+size_t Stream::size() { throw OperationNotSupported("Stream::size"_t, s_not_implemented); }
+size_t Stream::position() { throw OperationNotSupported("Stream::position"_t, s_not_implemented); }
+size_t Stream::read([[maybe_unused]] std::span<uint8_t> where) {
+  throw OperationNotSupported("Stream::read"_t, s_not_implemented);
+}
+void Stream::write([[maybe_unused]] std::span<uint8_t> what) {
+  throw OperationNotSupported("Stream::write"_t, s_not_implemented);
+}
+void Stream::seek([[maybe_unused]] size_t offset) { throw OperationNotSupported("Stream::seek"_t, s_not_implemented); }
+bool Stream::data_available() { throw OperationNotSupported("Stream::data_available"_t, s_not_implemented); }
+void Stream::flush() { throw OperationNotSupported("Stream::flush"_t, s_not_implemented); }
 void Stream::close() {}
 bool Stream::end_of_stream() { return false; }
 
@@ -52,15 +56,15 @@ Text StreamReader::read_line() {
         break;
       }
     }
-    auto _startOffset = m_offset;
+    auto start_offset = m_offset;
     for (; m_offset < m_read_size; m_offset++) {
       if (m_buffer[m_offset] == '\n') { // TODO(dorin) identify newlines based on encoding.
-        tc.add(Text((const char*)m_buffer.data() + _startOffset, m_offset - _startOffset));
+        tc.add(Text(reinterpret_cast<const char*>(m_buffer.data() + start_offset), m_offset - start_offset));
         m_offset++;
         return tc.to_text();
       }
     }
-    tc.add(Text((const char*)m_buffer.data() + _startOffset, m_offset - _startOffset));
+    tc.add(Text(reinterpret_cast<const char*>(m_buffer.data() + start_offset), m_offset - start_offset));
   }
   return tc.to_text();
 }
@@ -75,7 +79,7 @@ Text StreamReader::read_all() {
         break;
       }
     }
-    tc.add(Text((const char*)m_buffer.data() + m_offset, m_read_size - m_offset));
+    tc.add(Text(reinterpret_cast<const char*>(m_buffer.data() + m_offset), m_read_size - m_offset));
     m_read_size = 0;
     m_offset = 0;
   }
@@ -89,9 +93,9 @@ Stream* StreamWriter::stream() const { return m_stream; }
 void StreamWriter::write(std::span<uint8_t> what) { m_stream->write(what); }
 void StreamWriter::write(const Text& what) { m_stream->write(what.to_raw_data()); }
 void StreamWriter::write_line(const Text& what) {
-  static char eol[] = "\n";
+  static auto eol = "\n";
   m_stream->write(what.to_raw_data());
-  m_stream->write(std::span<uint8_t>((uint8_t*)&eol[0], 1));
+  m_stream->write(std::span<uint8_t>(reinterpret_cast<uint8_t*>(const_cast<char*>(eol)), 1));
 }
 void StreamWriter::write(const TextChain& what) { m_stream->write(what.to_text().to_raw_data()); }
 void StreamWriter::flush() { m_stream->flush(); }
@@ -103,7 +107,7 @@ PosixFileStream::PosixFileStream(int fd) : m_fd(fd) {
   }
 }
 
-static int openFile(const Text& filename, FileOpenMode mode) {
+static int open_file(const Text& filename, FileOpenMode mode) {
   int flags = 0;
   switch (mode) {
   case FileOpenMode::ReadOnly: flags = O_RDONLY; break;
@@ -112,14 +116,14 @@ static int openFile(const Text& filename, FileOpenMode mode) {
   case FileOpenMode::AppendRW: flags = O_RDWR | O_APPEND | O_CREAT; break;
   case FileOpenMode::TruncateRW: flags = O_RDWR | O_TRUNC | O_CREAT; break;
   }
-  if (flags & O_CREAT) {
-    return ::open(std::string(filename.to_view()).c_str(), flags, 0600);
+  if ((flags & O_CREAT) != 0) {
+    return ::open(std::string(filename.to_view()).c_str(), flags, 0600); // NOLINT(readability-magic-numbers)
   }
   return ::open(std::string(filename.to_view()).c_str(), flags);
 }
 
 FileStream::FileStream(const Text& filename, FileOpenMode mode)
-    : PosixFileStream(openFile(filename, mode)), m_mode(mode) {}
+    : PosixFileStream(open_file(filename, mode)), m_mode(mode) {}
 
 bool FileStream::can_read() { return m_mode != FileOpenMode::WriteOnly; }
 bool FileStream::can_write() { return m_mode != FileOpenMode::ReadOnly; }
@@ -129,7 +133,7 @@ size_t PosixFileStream::size() {
   if (m_regular) {
     struct stat statbuf;
     if (::fstat(m_fd, &statbuf) != 0) [[unlikely]] {
-      throw IOException::currentStandardError();
+      throw IOException::current_standard_error();
     };
     return statbuf.st_size;
   }
@@ -140,7 +144,7 @@ size_t PosixFileStream::position() {
   if (m_regular) {
     auto pos = ::lseek(m_fd, 0, SEEK_CUR);
     if (pos < 0) [[unlikely]] {
-      throw IOException::currentStandardError();
+      throw IOException::current_standard_error();
     }
     return pos;
   }
@@ -150,7 +154,7 @@ size_t PosixFileStream::position() {
 size_t PosixFileStream::read(std::span<uint8_t> where) {
   auto res = ::read(m_fd, where.data(), where.size());
   if (res < 0) [[unlikely]] {
-    throw IOException::currentStandardError();
+    throw IOException::current_standard_error();
   }
   return res;
 }
@@ -161,15 +165,15 @@ void PosixFileStream::write(std::span<uint8_t> what) {
   while (offset < what.size()) {
     auto bytes_written = ::write(m_fd, what.data() + offset, what.size() - offset);
     if (bytes_written < 0) [[unlikely]] {
-      throw IOException::currentStandardError();
+      throw IOException::current_standard_error();
     }
     offset += bytes_written;
   }
 }
 
 void PosixFileStream::seek(size_t offset) {
-  if (lseek(m_fd, offset, SEEK_SET) < 0) [[unlikely]] {
-    throw IOException::currentStandardError();
+  if (lseek(m_fd, static_cast<off_t>(offset), SEEK_SET) < 0) [[unlikely]] {
+    throw IOException::current_standard_error();
   }
 }
 
@@ -190,7 +194,7 @@ bool PosixFileStream::end_of_stream() {
 
 void PosixFileStream::flush() {
   if (fdatasync(m_fd) < 0) [[unlikely]] {
-    throw IOException::currentStandardError();
+    throw IOException::current_standard_error();
   }
 }
 

@@ -8,7 +8,7 @@ enum class Signal { Interrupt, Terminate, Kill };
 
 class Process final {
 public:
-  Process(const List<Text>& params);
+  explicit Process(const List<Text>& params);
   Process(const Process&) = delete;
   Process(Process&&) = delete;
   ~Process();
@@ -49,7 +49,7 @@ class ProcessHorde {
 
 public:
   ExecutionNode* add_node(const List<Text>& params, const List<ExecutionNode*>& deps);
-  bool run(uint32_t nJobs, bool verbose = false);
+  bool run(uint32_t n_jobs, bool verbose = false);
 };
 
 } // namespace kl

@@ -16,12 +16,12 @@ public:
 };
 
 class IOException {
-  Text _why;
+  Text m_why;
 
 public:
-  IOException(const Text& why);
+  explicit IOException(const Text& why);
   const Text& what();
-  static IOException currentStandardError();
+  static IOException current_standard_error();
 };
 
 } // namespace kl

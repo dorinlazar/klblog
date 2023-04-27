@@ -7,8 +7,8 @@ OperationNotSupported::OperationNotSupported(const Text& op, const Text& reason)
 InvalidInputData::InvalidInputData(const Text& received, const Text& expected)
     : std::logic_error(("Invalid input data: [" + received + "], expected: " + expected).to_text().to_string()) {}
 
-IOException::IOException(const Text& why) : _why(why) {}
-IOException IOException::currentStandardError() { return {strerror(errno)}; }
-const Text& IOException::what() { return _why; }
+IOException::IOException(const Text& why) : m_why(why) {}
+IOException IOException::current_standard_error() { return IOException{strerror(errno)}; }
+const Text& IOException::what() { return m_why; }
 
 } // namespace kl
