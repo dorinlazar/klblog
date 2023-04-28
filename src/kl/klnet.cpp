@@ -12,7 +12,7 @@
 
 namespace kl {
 
-static int connect_to_server(const Text& server, uint16_t port) {
+int connect_to_server(const Text& server, uint16_t port) {
   addrinfo hints;
   memset(&hints, 0, sizeof(addrinfo));
   hints.ai_flags = AI_ADDRCONFIG | AI_PASSIVE | AI_ALL | AI_NUMERICSERV;

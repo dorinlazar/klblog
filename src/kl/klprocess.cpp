@@ -5,20 +5,20 @@
 
 namespace kl {
 
-static char* to_c_string(const Text& t) {
+char* klprocess_to_c_string(const Text& t) {
   char* p = static_cast<char*>(malloc(t.size() + 1));
   std::copy(t.begin(), t.end(), p);
   p[t.size()] = 0;
   return p;
 }
 
-static void free_c_string(char* p) { free(p); }
+void klprocess_free_c_string(char* p) { free(p); }
 
-static char** to_c_array(const List<Text>& l) {
+char** klprocess_to_c_array(const List<Text>& l) {
   char** res = static_cast<char**>(malloc(sizeof(char*) * (l.size() + 1)));
   char** current = res;
   for (const auto& t: l) {
-    *current = to_c_string(t);
+    *current = klprocess_to_c_string(t);
     current++;
   }
   *current = nullptr;
@@ -44,15 +44,15 @@ struct Process::Impl {
 public:
   explicit Impl(const List<Text>& params) {
     check(params.size() > 0, "Expected more than one parameter to Process invocation");
-    m_exe = to_c_string(FileSystem::executable_path(params[0]));
-    m_params = to_c_array(params);
+    m_exe = klprocess_to_c_string(FileSystem::executable_path(params[0]));
+    m_params = klprocess_to_c_array(params);
   }
 
   ~Impl() {
     if (m_pid != 0) {
       join();
     }
-    free_c_string(m_exe);
+    klprocess_free_c_string(m_exe);
     free_c_array(m_params);
   }
 

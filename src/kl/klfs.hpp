@@ -55,7 +55,13 @@ struct FileSystem {
 };
 
 struct InputSource {
+  InputSource() = default;
+  InputSource(const InputSource&) = delete;
+  InputSource(InputSource&&) = delete;
+  InputSource& operator=(const InputSource&) = delete;
+  InputSource& operator=(InputSource&&) = delete;
   virtual ~InputSource() = default;
+
   virtual std::optional<Text> read_line() = 0;
   virtual std::optional<char> read_char() = 0;
   virtual List<Text> read_all_lines(SplitEmpty onEmpty) = 0;
@@ -65,6 +71,10 @@ struct InputSource {
 
 struct FileReader final : public InputSource {
   explicit FileReader(const Text& name);
+  FileReader(const FileReader&) = delete;
+  FileReader(FileReader&&) = delete;
+  FileReader& operator=(const FileReader&) = delete;
+  FileReader& operator=(FileReader&&) = delete;
   ~FileReader() override = default;
   [[nodiscard]] std::optional<Text> read_line() override;
   [[nodiscard]] std::optional<char> read_char() override;

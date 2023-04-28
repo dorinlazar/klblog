@@ -122,6 +122,8 @@ public:
   Pair(T1 t1, T2 t2) : m_pair(t1, t2) {}
   Pair(Pair&&) noexcept = default;
   Pair(const Pair&) = default;
+  Pair& operator=(const Pair&) = default;
+  Pair& operator=(Pair&&) noexcept = default;
   ~Pair() = default;
 
   auto first() { return m_pair.first(); }

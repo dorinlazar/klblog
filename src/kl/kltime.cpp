@@ -6,7 +6,7 @@
 
 namespace kl {
 
-static constexpr bool kltime_leap_year(int32_t year) { // Leap year, for one-based 1-400 interval
+constexpr bool kltime_leap_year(int32_t year) { // Leap year, for one-based 1-400 interval
   if (year < 0) {
     return false;
   }
@@ -16,16 +16,16 @@ static constexpr bool kltime_leap_year(int32_t year) { // Leap year, for one-bas
 
 using month_size_t = std::array<int32_t, TimeLimits::MonthsPerYear>;
 
-static constexpr month_size_t MonthSizesArray = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-static constexpr month_size_t LeapMonthSizesArray = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+constexpr month_size_t MonthSizesArray = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+constexpr month_size_t LeapMonthSizesArray = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
-static constexpr const month_size_t& kltime_month_sizes(int32_t year) { // year in the interval 1-400.
+constexpr const month_size_t& kltime_month_sizes(int32_t year) { // year in the interval 1-400.
   return kltime_leap_year(year) ? LeapMonthSizesArray : MonthSizesArray;
 }
 
 using delta_months_array_t = std::array<int32_t, TimeLimits::RegularYearsOffset * TimeLimits::MonthsPerYear + 1>;
 
-static constexpr delta_months_array_t kltime_calculate_delta_months() {
+constexpr delta_months_array_t kltime_calculate_delta_months() {
   delta_months_array_t res;
   int32_t total_days = 0;
   res[0] = 0;
@@ -41,7 +41,7 @@ static constexpr delta_months_array_t kltime_calculate_delta_months() {
   return res;
 }
 
-static const delta_months_array_t DeltaMonths = kltime_calculate_delta_months();
+const delta_months_array_t DeltaMonths = kltime_calculate_delta_months();
 
 const DateTime DateTime::UnixEpoch(1970, 1, 1);
 const DateTime DateTime::Max = DateTime::from_ticks(TimeLimits::MaxTicks);

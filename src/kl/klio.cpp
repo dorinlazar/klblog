@@ -6,7 +6,7 @@
 #include <poll.h>
 
 namespace kl {
-static Text s_not_implemented{"Not implemented by derived class"};
+Text s_not_implemented{"Not implemented by derived class"};
 
 Stream::~Stream() { close(); }
 
@@ -107,7 +107,7 @@ PosixFileStream::PosixFileStream(int fd) : m_fd(fd) {
   }
 }
 
-static int open_file(const Text& filename, FileOpenMode mode) {
+int open_file(const Text& filename, FileOpenMode mode) {
   int flags = 0;
   switch (mode) {
   case FileOpenMode::ReadOnly: flags = O_RDONLY; break;
