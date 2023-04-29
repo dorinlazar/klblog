@@ -100,13 +100,15 @@ private:
 
 class TextRefCounter {
   int64_t m_ref_count = 1;
+  // cppcheck-suppress cppcheck-uninitMemberVarPrivate
   char m_block_start[0]; // NOLINT(modernize-avoid-c-arrays)
+  [[nodiscard]] bool release();
 
 public:
   TextRefCounter* acquire();
-  bool release();
   char* text_data();
   static TextRefCounter* allocate(size_t text_size);
+  static void release(TextRefCounter* ref);
   static TextRefCounter m_s_empty;
 };
 static_assert(sizeof(TextRefCounter) == sizeof(int64_t));

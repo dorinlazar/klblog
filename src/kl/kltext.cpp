@@ -266,6 +266,14 @@ TextRefCounter* TextRefCounter::allocate(size_t text_size) {
   return buffer;
 }
 
+void TextRefCounter::release(TextRefCounter* ref) {
+  if (ref != &TextRefCounter::m_s_empty) {
+    if (ref->release()) {
+      free(ref);
+    }
+  }
+}
+
 TextRefCounter TextRefCounter::m_s_empty;
 
 Text::Text() : m_memblock(&TextRefCounter::m_s_empty) {}
@@ -352,12 +360,8 @@ Text::Text(const Text& t, size_t start, size_t length) {
 Text::Text(TextRefCounter* buffer, size_t length) : m_memblock(buffer), m_end(length) {}
 
 void Text::clear() {
-  if (m_start < m_end) {
-    if (m_memblock->release()) {
-      free(m_memblock);
-    }
-    m_memblock = &TextRefCounter::m_s_empty;
-  }
+  TextRefCounter::release(m_memblock);
+  m_memblock = &TextRefCounter::m_s_empty;
   m_start = 0;
   m_end = 0;
 }
