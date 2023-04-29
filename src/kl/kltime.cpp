@@ -170,6 +170,12 @@ inline std::tuple<uint32_t, uint32_t, uint32_t> kltime_read_date(TextScanner& sc
 }
 
 inline std::tuple<uint32_t, uint32_t, uint32_t, uint64_t> kltime_read_time(TextScanner& sc) {
+  const uint32_t HourFieldSize = 2;
+  const uint32_t MinuteFieldSize = 2;
+  const uint32_t SecondFieldSize = 2;
+  const uint32_t FractionFieldBase = 3;
+  const uint32_t FractionFactor = 1000;
+
   uint32_t hh = 0;
   uint32_t mm = 0;
   uint32_t ss = 0;
@@ -184,8 +190,7 @@ inline std::tuple<uint32_t, uint32_t, uint32_t, uint64_t> kltime_read_time(TextS
   } else {
     sc.error("Expected Date-Time split");
   }
-  hh += sc.read_digit() * 10; // NOLINT(readability-magic-numbers)
-  hh += sc.read_digit();
+  hh += sc.read_fixed_int(HourFieldSize);
 
   if (sc.empty()) {
     return {hh, mm, ss, ff};
@@ -197,8 +202,7 @@ inline std::tuple<uint32_t, uint32_t, uint32_t, uint64_t> kltime_read_time(TextS
     return {hh, mm, ss, ff};
   }
 
-  mm += sc.read_digit() * 10; // NOLINT(readability-magic-numbers)
-  mm += sc.read_digit();
+  mm += sc.read_fixed_int(MinuteFieldSize);
   if (sc.empty() || sc.top_char() == '+' || sc.top_char() == '-' || sc.top_char() == 'Z') {
     return {hh, mm, ss, ff};
   }
@@ -206,25 +210,18 @@ inline std::tuple<uint32_t, uint32_t, uint32_t, uint64_t> kltime_read_time(TextS
     sc.expect(':');
   }
 
-  ss += sc.read_digit() * 10; // NOLINT(readability-magic-numbers)
-  ss += sc.read_digit();
+  ss += sc.read_fixed_int(SecondFieldSize);
   if (sc.empty() || sc.top_char() == '+' || sc.top_char() == '-' || sc.top_char() == 'Z') {
     return {hh, mm, ss, ff};
   }
 
   sc.expect('.');
-  ff += static_cast<uint64_t>(sc.read_digit() * 100); // NOLINT(readability-magic-numbers)
-  ff += static_cast<uint64_t>(sc.read_digit() * 10);  // NOLINT(readability-magic-numbers)
-  ff += static_cast<uint64_t>(sc.read_digit());
+  ff += sc.read_fixed_int(FractionFieldBase);
+  ff *= FractionFactor;
   if (!sc.empty() && sc.top_char() >= '0' && sc.top_char() <= '9') {
-    ff *= 1000;                                         // NOLINT(readability-magic-numbers)
-    ff += static_cast<uint64_t>(sc.read_digit() * 100); // NOLINT(readability-magic-numbers)
-    ff += static_cast<uint64_t>(sc.read_digit() * 10);  // NOLINT(readability-magic-numbers)
-    ff += static_cast<uint64_t>(sc.read_digit());
-    ff *= 1000; // NOLINT(readability-magic-numbers)
-  } else {
-    ff *= 1'000'000; // NOLINT(readability-magic-numbers)
+    ff += sc.read_fixed_int(FractionFieldBase);
   }
+  ff *= FractionFactor;
   return {hh, mm, ss, ff};
 }
 
