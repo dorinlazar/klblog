@@ -91,9 +91,11 @@ DateTime::DateTime(time_t seconds, int32_t nsec) {
   m_ticks = DateTime::UnixEpoch.ticks() + seconds * TimeLimits::TicksPerSecond + nsec / TimeLimits::NanosecondsPerTick;
 }
 
+const int32_t MaxDaysInMonth = 31;
+
 DateTime::DateTime(int32_t year, int32_t month, int32_t day, int32_t hour, int32_t minute, int32_t sec, int32_t nsec) {
   if (year < TimeLimits::MinYear || year > TimeLimits::MaxYear || month < 1 || month > TimeLimits::MonthsPerYear ||
-      day < 1 || day > 31 || nsec < 0 || nsec >= TimeLimits::NanosecondsPerSecond || sec < 0 ||
+      day < 1 || day > MaxDaysInMonth || nsec < 0 || nsec >= TimeLimits::NanosecondsPerSecond || sec < 0 ||
       sec >= TimeLimits::SecondsPerMinute || minute < 0 || minute >= TimeLimits::MinutesPerHour || hour < 0 ||
       hour > TimeLimits::HoursPerDay) [[unlikely]] {
     m_ticks = 0;
@@ -145,11 +147,12 @@ std::ostream& operator<<(std::ostream& os, TimeSpan t) {
   return os << fmt::format("{:0>2}:{:0>2}:{:0>2}.{:0>3}", hours, minutes, seconds, millis);
 }
 
-inline std::tuple<uint32_t, uint32_t, uint32_t> kltime_read_date(TextScanner& sc) {
-  uint32_t year = sc.read_digit() * 1000; // NOLINT(readability-magic-numbers)
-  year += sc.read_digit() * 100;          // NOLINT(readability-magic-numbers)
-  year += sc.read_digit() * 10;           // NOLINT(readability-magic-numbers)
-  year += sc.read_digit();
+inline std::tuple<int32_t, int32_t, int32_t> kltime_read_date(TextScanner& sc) {
+  const uint32_t year_field_size = 4;
+  const uint32_t month_field_size = 2;
+  const uint32_t day_field_size = 2;
+
+  const int32_t year = sc.read_fixed_int(year_field_size);
 
   const bool has_splitter = sc.top_char() == '-';
 
@@ -157,29 +160,27 @@ inline std::tuple<uint32_t, uint32_t, uint32_t> kltime_read_date(TextScanner& sc
     sc.expect('-');
   }
 
-  uint32_t month = sc.read_digit() * 10; // NOLINT(readability-magic-numbers)
-  month += sc.read_digit();
+  const int32_t month = sc.read_fixed_int(month_field_size);
 
   if (has_splitter) {
     sc.expect('-');
   }
 
-  uint32_t day = sc.read_digit() * 10; // NOLINT(readability-magic-numbers)
-  day += sc.read_digit();
+  const int32_t day = sc.read_fixed_int(day_field_size);
   return {year, month, day};
 }
 
-inline std::tuple<uint32_t, uint32_t, uint32_t, uint64_t> kltime_read_time(TextScanner& sc) {
-  const uint32_t HourFieldSize = 2;
-  const uint32_t MinuteFieldSize = 2;
-  const uint32_t SecondFieldSize = 2;
-  const uint32_t FractionFieldBase = 3;
-  const uint32_t FractionFactor = 1000;
+inline std::tuple<int32_t, int32_t, int32_t, int32_t> kltime_read_time(TextScanner& sc) {
+  const uint32_t hour_field_size = 2;
+  const uint32_t minute_field_size = 2;
+  const uint32_t second_field_size = 2;
+  const uint32_t fraction_field_base = 3;
+  const uint32_t fraction_factor = 1000;
 
-  uint32_t hh = 0;
-  uint32_t mm = 0;
-  uint32_t ss = 0;
-  uint64_t ff = 0;
+  int32_t hh = 0;
+  int32_t mm = 0;
+  int32_t ss = 0;
+  int32_t ff = 0;
 
   if (sc.empty()) {
     return {hh, mm, ss, ff};
@@ -190,7 +191,7 @@ inline std::tuple<uint32_t, uint32_t, uint32_t, uint64_t> kltime_read_time(TextS
   } else {
     sc.error("Expected Date-Time split");
   }
-  hh += sc.read_fixed_int(HourFieldSize);
+  hh += sc.read_fixed_int(hour_field_size);
 
   if (sc.empty()) {
     return {hh, mm, ss, ff};
@@ -202,7 +203,7 @@ inline std::tuple<uint32_t, uint32_t, uint32_t, uint64_t> kltime_read_time(TextS
     return {hh, mm, ss, ff};
   }
 
-  mm += sc.read_fixed_int(MinuteFieldSize);
+  mm += sc.read_fixed_int(minute_field_size);
   if (sc.empty() || sc.top_char() == '+' || sc.top_char() == '-' || sc.top_char() == 'Z') {
     return {hh, mm, ss, ff};
   }
@@ -210,33 +211,33 @@ inline std::tuple<uint32_t, uint32_t, uint32_t, uint64_t> kltime_read_time(TextS
     sc.expect(':');
   }
 
-  ss += sc.read_fixed_int(SecondFieldSize);
+  ss += sc.read_fixed_int(second_field_size);
   if (sc.empty() || sc.top_char() == '+' || sc.top_char() == '-' || sc.top_char() == 'Z') {
     return {hh, mm, ss, ff};
   }
 
   sc.expect('.');
-  ff += sc.read_fixed_int(FractionFieldBase);
-  ff *= FractionFactor;
+  ff += sc.read_fixed_int(fraction_field_base);
+  ff *= fraction_factor;
   if (!sc.empty() && sc.top_char() >= '0' && sc.top_char() <= '9') {
-    ff += sc.read_fixed_int(FractionFieldBase);
+    ff += sc.read_fixed_int(fraction_field_base);
   }
-  ff *= FractionFactor;
+  ff *= fraction_factor;
   return {hh, mm, ss, ff};
 }
 
-std::tuple<bool, uint32_t, uint32_t> kltime_read_timezone(TextScanner& sc) {
-  uint32_t ts_hours = 0;
-  uint32_t ts_minutes = 0;
+std::tuple<bool, int32_t, int32_t> kltime_read_timezone(TextScanner& sc) {
+  const uint32_t hours_field_size = 2;
+  const uint32_t minutes_field_size = 2;
+  int32_t ts_hours = 0;
+  int32_t ts_minutes = 0;
   bool plus = false;
   if (!sc.empty()) {
     if (sc.top_char() == '+' || sc.top_char() == '-') {
       plus = sc.read_char().character == '+';
-      ts_hours += sc.read_digit() * 10; // NOLINT(readability-magic-numbers)
-      ts_hours += sc.read_digit();
+      ts_hours += sc.read_fixed_int(hours_field_size);
       sc.expect(':');
-      ts_minutes += sc.read_digit() * 10; // NOLINT(readability-magic-numbers)
-      ts_minutes += sc.read_digit();
+      ts_minutes += sc.read_fixed_int(minutes_field_size);
     } else {
       sc.expect('Z');
     }

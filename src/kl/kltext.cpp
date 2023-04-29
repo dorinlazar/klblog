@@ -259,7 +259,7 @@ bool TextRefCounter::release() {
   return m_ref_count == 0;
 }
 
-char* TextRefCounter::text_data() { return reinterpret_cast<char*>(&m_block_start); }
+char* TextRefCounter::text_data() { return reinterpret_cast<char*>(this) + sizeof(TextRefCounter); }
 TextRefCounter* TextRefCounter::allocate(size_t text_size) {
   auto buffer = reinterpret_cast<TextRefCounter*>(malloc(sizeof(TextRefCounter) + text_size));
   buffer->m_ref_count = 1;

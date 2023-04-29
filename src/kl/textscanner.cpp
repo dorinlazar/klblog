@@ -213,7 +213,7 @@ uint32_t TextScanner::get_indent_level() const {
   return m_loc.m_data_left;
 }
 
-uint32_t TextScanner::read_digit() {
+int32_t TextScanner::read_digit() {
   if (empty()) [[unlikely]] {
     error("Reading from empty data");
   }
@@ -225,11 +225,11 @@ uint32_t TextScanner::read_digit() {
   return c - '0';
 }
 
-uint32_t TextScanner::read_fixed_int(uint32_t n_digits) {
-  uint32_t cumulated = 0;
-  const uint32_t DigitsBase = 10;
+int32_t TextScanner::read_fixed_int(uint32_t n_digits) {
+  int32_t cumulated = 0;
+  const uint32_t digits_base = 10;
   for (uint32_t index = 0; index < n_digits; index++) {
-    cumulated *= DigitsBase;
+    cumulated *= digits_base;
     cumulated += read_digit();
   }
   return cumulated;

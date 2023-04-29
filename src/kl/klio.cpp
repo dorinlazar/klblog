@@ -115,7 +115,7 @@ int open_file(const Text& filename, FileOpenMode mode) {
   case FileOpenMode::TruncateRW: flags = O_RDWR | O_TRUNC | O_CREAT; break;
   }
   if ((flags & O_CREAT) != 0) {
-    return ::open(std::string(filename.to_view()).c_str(), flags, 0600); // NOLINT(readability-magic-numbers)
+    return ::open(std::string(filename.to_view()).c_str(), flags, S_IWUSR | S_IRUSR);
   }
   return ::open(std::string(filename.to_view()).c_str(), flags);
 }

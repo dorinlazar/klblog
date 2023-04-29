@@ -94,10 +94,6 @@ void TcpClient::set_write_timeout(TimeSpan ts) {
 class SSLHandler {
   SSL_CTX* m_ctx;
   SSLHandler() { m_ctx = SSL_CTX_new(SSLv23_method()); }
-  SSLHandler(const SSLHandler&) = delete;
-  SSLHandler(SSLHandler&&) = delete;
-  SSLHandler& operator=(const SSLHandler&) = delete;
-  SSLHandler& operator=(SSLHandler&&) = delete;
   ~SSLHandler() {
     SSL_CTX_free(m_ctx);
     m_ctx = nullptr;
@@ -106,6 +102,11 @@ class SSLHandler {
   SSL* create_ssl() { return SSL_new(m_ctx); }
 
 public:
+  SSLHandler(const SSLHandler&) = delete;
+  SSLHandler(SSLHandler&&) = delete;
+  SSLHandler& operator=(const SSLHandler&) = delete;
+  SSLHandler& operator=(SSLHandler&&) = delete;
+
   static SSL* create() {
     static SSLHandler libhandler;
     return libhandler.create_ssl();

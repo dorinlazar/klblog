@@ -1,18 +1,25 @@
 #include "blogsettings.hpp"
 #include "ff/poorconfig.hpp"
 
-using namespace kl::literals;
-
 namespace klblog {
+const kl::Text DefaultHostUrl{"https://localhost/"};
+const kl::Text EmptyText{};
+const kl::Text DefaultLanguage{"en"};
+const kl::Text DefaultTheme{"default"};
+const kl::Text FieldHostUrl{"url"};
+const kl::Text FieldTitle{"title"};
+const kl::Text FieldCopyright{"copyright"};
+const kl::Text FieldLanguage{"language"};
+const kl::Text FieldTheme{"theme"};
 
 void Settings::parse(const kl::Text& filename) {
   auto config = kl::PoorConfig(filename);
   auto value = config.top();
-  website_url = value->get_opt("url").value_or("https://localhost/");
-  website_title = value->get_opt("title").value_or(""_t);
-  copyright_notice = value->get_opt("copyright").value_or(""_t);
-  default_language = value->get_opt("language").value_or("en"_t);
-  theme_name = value->get_opt("theme").value_or("default"_t);
+  website_url = value->get_opt(FieldHostUrl).value_or(DefaultHostUrl);
+  website_title = value->get_opt(FieldTitle).value_or(EmptyText);
+  copyright_notice = value->get_opt(FieldCopyright).value_or(EmptyText);
+  default_language = value->get_opt(FieldLanguage).value_or(DefaultLanguage);
+  theme_name = value->get_opt(FieldTheme).value_or(DefaultTheme);
 }
 
 void Settings::log_abstract() const {

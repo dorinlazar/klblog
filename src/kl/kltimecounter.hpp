@@ -16,4 +16,4 @@ public:
   ~TimeCounter();
 };
 
-}
+} // namespace kl

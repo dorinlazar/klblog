@@ -38,8 +38,8 @@ public:
   Text read_word();
   Text read_line();
   Text remainder() const;
-  uint32_t read_digit();
-  uint32_t read_fixed_int(uint32_t n_digits);
+  int32_t read_digit();
+  int32_t read_fixed_int(uint32_t n_digits);
   void expect(char character);
   void expect_ws(char character, NewLineHandling handling = NewLineHandling::Keep);
   bool starts_with(const Text& what) const;

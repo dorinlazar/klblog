@@ -100,8 +100,6 @@ private:
 
 class TextRefCounter {
   int64_t m_ref_count = 1;
-  // cppcheck-suppress cppcheck-uninitMemberVarPrivate
-  char m_block_start[0]; // NOLINT(modernize-avoid-c-arrays)
   [[nodiscard]] bool release();
 
 public:
