@@ -1,0 +1,24 @@
+{
+	"Deleted constructors": {
+		"prefix": "ctr",
+		"body": [
+			"$1() = default;",
+			"$1(const $1&) = delete;",
+			"$1($1&&) = delete;",
+			"$1& operator=(const $1&) = delete;",
+			"$1& operator=($1&&) = delete;",
+			"~$1() = default;"
+		]
+	},
+	"Defaulted constructors": {
+		"prefix": "dctr",
+		"body": [
+			"$1() = default;",
+			"$1(const $1&) = default;",
+			"$1($1&&) = default;",
+			"$1& operator=(const $1&) = default;",
+			"$1& operator=($1&&) = default;",
+			"~$1() = default;"
+		]
+	}
+}
