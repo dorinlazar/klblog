@@ -211,7 +211,7 @@ public:
   Text quote_escaped() const;
 };
 
-class TextChain {
+class TextChain final {
   uint32_t m_length = 0;
   List<Text> m_chain;
 
@@ -221,11 +221,12 @@ public:
   TextChain() = default;
   TextChain(const TextChain&) = default;
   TextChain(TextChain&&) = default;
+  TextChain& operator=(const TextChain&) = default;
+  TextChain& operator=(TextChain&&) = default;
   TextChain(std::initializer_list<Text> l);
   TextChain(List<Text>&& l);
   TextChain(const List<Text>& l);
-
-  inline TextChain& operator=(const TextChain& v) = default;
+  ~TextChain() = default;
 
   void operator+=(const Text& text);
   void add(const Text& text);

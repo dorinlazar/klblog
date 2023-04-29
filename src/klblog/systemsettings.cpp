@@ -1,15 +1,16 @@
 #include "systemsettings.hpp"
 
 namespace klblog {
-using namespace kl::literals;
+const kl::Text VerboseFlag{" - v "};
 
 SystemSettings::SystemSettings(int argc, char** argv, char** envp) {
   kl::check(argc > 0, "internal error: invalid number of arguments: {}", argc);
   for (int i = 1; i < argc; i++) {
-    if ("-v"_t == argv[i]) {
+    kl::Text arg(argv[i]);
+    if (VerboseFlag == arg) {
       verbosity = VerbosityLevel::Verbose;
     } else {
-      arguments.add(argv[i]);
+      arguments.add(arg);
     }
   }
   while (*envp != nullptr) {

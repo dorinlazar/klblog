@@ -8,8 +8,6 @@
 namespace kl {
 Text s_not_implemented{"Not implemented by derived class"};
 
-Stream::~Stream() { close(); }
-
 bool Stream::can_read() { return false; }
 bool Stream::can_write() { return false; }
 bool Stream::can_seek() { return false; }
@@ -205,7 +203,13 @@ void PosixFileStream::close() {
   }
 }
 
-PosixFileStream::~PosixFileStream() { close(); }
+PosixFileStream::~PosixFileStream() {
+  if (m_fd >= 0) { // don't call close here, it's problematic due to virtual dispatch being disabled in the constructors
+                   // and destructors.
+    ::close(m_fd);
+    m_fd = -1;
+  }
+}
 
 int PosixFileStream::file_descriptor() const { return m_fd; }
 

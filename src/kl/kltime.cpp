@@ -91,11 +91,11 @@ DateTime::DateTime(time_t seconds, int32_t nsec) {
   m_ticks = DateTime::UnixEpoch.ticks() + seconds * TimeLimits::TicksPerSecond + nsec / TimeLimits::NanosecondsPerTick;
 }
 
-DateTime::DateTime(uint32_t year, uint32_t month, uint32_t day, uint32_t hour, uint32_t minute, uint32_t sec,
-                   uint32_t nsec) {
+DateTime::DateTime(int32_t year, int32_t month, int32_t day, int32_t hour, int32_t minute, int32_t sec, int32_t nsec) {
   if (year < TimeLimits::MinYear || year > TimeLimits::MaxYear || month < 1 || month > TimeLimits::MonthsPerYear ||
-      day < 1 || nsec >= TimeLimits::NanosecondsPerSecond || sec >= TimeLimits::SecondsPerMinute ||
-      minute >= TimeLimits::MinutesPerHour || hour > TimeLimits::HoursPerDay) [[unlikely]] {
+      day < 1 || day > 31 || nsec < 0 || nsec >= TimeLimits::NanosecondsPerSecond || sec < 0 ||
+      sec >= TimeLimits::SecondsPerMinute || minute < 0 || minute >= TimeLimits::MinutesPerHour || hour < 0 ||
+      hour > TimeLimits::HoursPerDay) [[unlikely]] {
     m_ticks = 0;
     return;
   }

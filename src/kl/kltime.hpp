@@ -108,9 +108,10 @@ public:
 public:
   DateTime() = default;
   explicit DateTime(time_t seconds, int32_t nsec = 0);
-  DateTime(uint32_t year, uint32_t month, uint32_t day, uint32_t hour = 0, uint32_t minute = 0, uint32_t sec = 0,
-           uint32_t nsec = 0);
+  DateTime(int32_t year, int32_t month, int32_t day, int32_t hour = 0, int32_t minute = 0, int32_t sec = 0,
+           int32_t nsec = 0);
   DateTime(const DateTime&) = default;
+  DateTime(DateTime&&) = default;
   DateTime& operator=(DateTime&& d) = default;
   DateTime& operator=(const DateTime& d) = default;
   ~DateTime() = default;

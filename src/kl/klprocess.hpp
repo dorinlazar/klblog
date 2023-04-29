@@ -11,6 +11,8 @@ public:
   explicit Process(const List<Text>& params);
   Process(const Process&) = delete;
   Process(Process&&) = delete;
+  Process& operator=(const Process&) = delete;
+  Process& operator=(Process&&) = delete;
   ~Process();
 
   void spawn();

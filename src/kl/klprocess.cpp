@@ -47,6 +47,10 @@ public:
     m_exe = klprocess_to_c_string(FileSystem::executable_path(params[0]));
     m_params = klprocess_to_c_array(params);
   }
+  Impl(const Impl&) = delete;
+  Impl(Impl&&) = delete;
+  Impl& operator=(const Impl&) = delete;
+  Impl& operator=(Impl&&) = delete;
 
   ~Impl() {
     if (m_pid != 0) {

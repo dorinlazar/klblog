@@ -10,6 +10,11 @@ namespace kl {
 class TcpClient : public PosixFileStream {
 public:
   TcpClient(const Text& server, uint16_t port);
+  TcpClient(const TcpClient&) = delete;
+  TcpClient(TcpClient&&) = delete;
+  TcpClient& operator=(const TcpClient&) = delete;
+  TcpClient& operator=(TcpClient&&) = delete;
+  ~TcpClient() override = default;
 
 public: // capabilities
   bool can_read() override;
@@ -39,6 +44,10 @@ class SslClient final : public Stream {
 
 public:
   SslClient(const Text& server, uint16_t port);
+  SslClient(const SslClient&) = delete;
+  SslClient(SslClient&&) = delete;
+  SslClient& operator=(const SslClient&) = delete;
+  SslClient& operator=(SslClient&&) = delete;
   ~SslClient() override;
 
 public: // capabilities
@@ -63,6 +72,10 @@ public:
 class TcpServer {
 public:
   explicit TcpServer(uint16_t port);
+  TcpServer(const TcpServer&) = delete;
+  TcpServer(TcpServer&&) = delete;
+  TcpServer& operator=(const TcpServer&) = delete;
+  TcpServer& operator=(TcpServer&&) = delete;
   ~TcpServer();
 
   std::unique_ptr<Stream> accept();

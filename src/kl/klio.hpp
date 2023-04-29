@@ -16,7 +16,8 @@ public:
   Stream(const Stream&) = delete;
   Stream(Stream&&) = delete;
   Stream& operator=(const Stream&) = delete;
-  virtual ~Stream();
+  Stream& operator=(Stream&&) = delete;
+  virtual ~Stream() = default;
 
 public: // capabilities
   virtual bool can_read();
@@ -77,6 +78,10 @@ protected:
 
 public:
   explicit PosixFileStream(int fd);
+  PosixFileStream(const PosixFileStream&) = delete;
+  PosixFileStream(PosixFileStream&&) = delete;
+  PosixFileStream& operator=(const PosixFileStream&) = delete;
+  PosixFileStream& operator=(PosixFileStream&&) = delete;
   ~PosixFileStream() override;
 
 public: // properties
@@ -101,6 +106,10 @@ class FileStream final : public PosixFileStream {
 
 public:
   FileStream(const Text& filename, FileOpenMode mode);
+  FileStream(const FileStream&) = delete;
+  FileStream(FileStream&&) = delete;
+  FileStream& operator=(const FileStream&) = delete;
+  FileStream& operator=(FileStream&&) = delete;
   ~FileStream() override = default;
 
 public: // capabilities
