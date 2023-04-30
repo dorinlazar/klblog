@@ -133,6 +133,17 @@ TEST(kltextview, test_comparisons) {
   EXPECT_TRUE(hello > "");
   EXPECT_TRUE(hello > nullptr);
 
+  EXPECT_EQ(hello, "hello"s);
+  EXPECT_TRUE(hello < "hfllo"s);
+  EXPECT_TRUE(hello <= "hfllo"s);
+  EXPECT_TRUE(hello != "hfllo"s);
+  EXPECT_TRUE(hello >= "hallo"s);
+  EXPECT_TRUE(hello >= "ahllo"s);
+  EXPECT_TRUE(hello > "hallo"s);
+  EXPECT_TRUE(hello > "hell"s);
+  EXPECT_TRUE(hello < "hello world"s);
+  EXPECT_TRUE(hello > ""s);
+
   EXPECT_EQ(hello, "hello"sv);
   EXPECT_TRUE(hello < "hfllo"sv);
   EXPECT_TRUE(hello <= "hfllo"sv);
