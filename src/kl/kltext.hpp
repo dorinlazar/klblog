@@ -181,7 +181,7 @@ public:
 
   // occurence is one based - so first occurence is 1;
   std::optional<size_t> pos(char c, size_t occurence = 1) const;
-  std::optional<size_t> pos(Text t, size_t occurence = 1) const;
+  std::optional<size_t> pos(const Text& t, size_t occurence = 1) const;
   std::optional<size_t> last_pos(char c) const;
 
   std::pair<Text, Text> split_pos(ssize_t where) const;
@@ -261,7 +261,7 @@ struct std::hash<kl::Text> {
 template <>
 struct fmt::formatter<kl::Text> : public fmt::formatter<std::string_view> {
   template <typename FormatContext>
-  auto format(kl::Text c, FormatContext& ctx) const {
+  auto format(const kl::Text& c, FormatContext& ctx) const {
     return fmt::formatter<std::string_view>::format(c.to_view(), ctx);
   }
 };

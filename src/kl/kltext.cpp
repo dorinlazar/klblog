@@ -494,7 +494,7 @@ Text Text::skip(size_t n) const {
 
 std::optional<size_t> Text::pos(char c, size_t occurence) const { return to_text_view().pos(c, occurence); }
 
-std::optional<size_t> Text::pos(Text t, size_t occurence) const {
+std::optional<size_t> Text::pos(const Text& t, size_t occurence) const {
   return to_text_view().pos(t.to_text_view(), occurence);
 }
 
