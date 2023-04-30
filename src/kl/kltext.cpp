@@ -56,7 +56,7 @@ const char* TextView::end() const { return m_view.end(); }
 std::strong_ordering TextView::operator<=>(const TextView& v) const { return m_view <=> v.m_view; }
 std::strong_ordering TextView::operator<=>(const std::string_view& sv) const { return m_view <=> sv; }
 std::strong_ordering TextView::operator<=>(const std::string& s) const { return m_view <=> s; }
-std::strong_ordering TextView::operator<=>(const char* s) const { return m_view <=> s; }
+std::strong_ordering TextView::operator<=>(const char* s) const { return m_view <=> TextView(s); }
 bool TextView::operator==(const TextView& v) const { return m_view == v.m_view; }
 bool TextView::operator==(const std::string_view& sv) const { return m_view == sv; }
 bool TextView::operator==(const std::string& s) const { return m_view == s; }
@@ -72,7 +72,7 @@ TextView TextView::skip(const TextView& skippables) const {
   v.remove_prefix(std::min(v.find_first_not_of(skippables.m_view), v.size()));
   return v;
 }
-TextView TextView::skip(size_t n) const { return m_view.substr(n); }
+TextView TextView::skip(size_t n) const { return m_view.substr(std::min(n, size())); }
 TextView TextView::skip_bom() const {
   if (size() >= 3) {
     auto buf = begin();
@@ -142,9 +142,16 @@ std::optional<size_t> TextView::last_pos(char c) const {
 }
 
 std::pair<TextView, TextView> TextView::split_pos(ssize_t where) const {
-  const size_t pos = where > 0 ? std::min(size(), static_cast<size_t>(where))
-                               : (size() - std::min(static_cast<size_t>(-where), size()));
-  return std::pair<TextView, TextView>{m_view.substr(0, pos), m_view.substr(pos)};
+  auto maxn = static_cast<ssize_t>(size());
+  if (where < 0) {
+    where += maxn;
+    if (where < 0) {
+      where = 0;
+    }
+  } else {
+    where = std::min(where, maxn);
+  }
+  return std::pair<TextView, TextView>{sublen(0, where), sublen(where, maxn - where)};
 }
 
 std::pair<TextView, TextView> TextView::split_next_char(char c, SplitDirection direction) const {
@@ -521,27 +528,27 @@ std::pair<Text, Text> Text::split_pos(ssize_t where) const {
       where = 0;
     }
   }
-  return {sublen(0, where), sublen(where, maxn)};
+  return std::pair<Text, Text>{sublen(0, where), sublen(where, maxn)};
 }
 
 std::pair<Text, Text> Text::split_next_char(char c, SplitDirection direction) const {
   auto position = pos(c, 1);
   if (!position.has_value()) {
-    return {*this, {}};
+    return std::pair<Text, Text>{*this, {}};
   }
   if (direction == SplitDirection::Discard) {
-    return {sublen(0, position.value()), sublen(position.value() + 1, m_end)};
+    return std::pair<Text, Text>{sublen(0, position.value()), sublen(position.value() + 1, m_end)};
   }
   auto split_position = position.value() + ((direction == SplitDirection::KeepLeft) ? 1 : 0);
-  return {sublen(0, split_position), sublen(split_position, m_end)};
+  return std::pair<Text, Text>{sublen(0, split_position), sublen(split_position, m_end)};
 }
 
 std::pair<Text, Text> Text::split_next_line() const {
   auto [left, right] = split_next_char('\n', SplitDirection::Discard);
   if (left.size() > 0 && left[-1] == '\r') {
-    return {left.sublen(0, left.size() - 1), right};
+    return std::pair<Text, Text>{left.sublen(0, left.size() - 1), right};
   }
-  return {left, right};
+  return std::pair<Text, Text>{left, right};
 }
 
 List<Text> Text::split_lines(SplitEmpty onEmpty) const {
@@ -793,8 +800,8 @@ void TextChain::clear() {
 Text Text::skip_bom() const {
   if (size() >= 3) {
     const auto* buf = begin();
-    // NOLINTNEXTLINE(readability-magic-numbers): BOM is 0xEFBBBF for UTF8
-    if (buf[0] == static_cast<char>(0xEF) && buf[1] == static_cast<char>(0xBB) && buf[2] == static_cast<char>(0xBF)) {
+    // BOM is 0xEFBBBF for UTF8
+    if (buf[0] == '\xEF' && buf[1] == '\xBB' && buf[2] == '\xBF') {
       return skip(3);
     }
   }
