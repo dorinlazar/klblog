@@ -10,9 +10,22 @@ namespace kl {
 
 constexpr std::string_view WHITESPACE = " \t\n\r"sv;
 
+TextView::TextView() : m_view(WHITESPACE.begin(), WHITESPACE.begin()) {}
 TextView::TextView(std::string_view v) : m_view(v) {}
-TextView::TextView(const char* text) : m_view(text) {}
-TextView::TextView(const char* text, size_t length) : m_view(text, length) {}
+TextView::TextView(const char* text) {
+  if (text != nullptr) {
+    m_view = text;
+  } else {
+    m_view = std::string_view(WHITESPACE.begin(), WHITESPACE.begin());
+  }
+}
+TextView::TextView(const char* text, size_t length) {
+  if (text != nullptr) {
+    m_view = std::string_view(text, std::min(length, strlen(text)));
+  } else {
+    m_view = std::string_view(WHITESPACE.begin(), WHITESPACE.begin());
+  }
+}
 
 TextView TextView::trim() const { return trim_left().trim_right(); }
 TextView TextView::trim_left() const { return skip(WHITESPACE); }
@@ -131,7 +144,7 @@ std::optional<size_t> TextView::last_pos(char c) const {
 std::pair<TextView, TextView> TextView::split_pos(ssize_t where) const {
   const size_t pos = where > 0 ? std::min(size(), static_cast<size_t>(where))
                                : (size() - std::min(static_cast<size_t>(-where), size()));
-  return {m_view.substr(0, pos), m_view.substr(pos)};
+  return std::pair<TextView, TextView>{m_view.substr(0, pos), m_view.substr(pos)};
 }
 
 std::pair<TextView, TextView> TextView::split_next_char(char c, SplitDirection direction) const {
@@ -140,7 +153,7 @@ std::pair<TextView, TextView> TextView::split_next_char(char c, SplitDirection d
     return {m_view, {}};
   }
   if (direction == SplitDirection::Discard) {
-    return {m_view.substr(0, pos), m_view.substr(pos + 1)};
+    return std::pair<TextView, TextView>{m_view.substr(0, pos), m_view.substr(pos + 1)};
   }
   if (direction == SplitDirection::KeepLeft) {
     pos++;
@@ -151,12 +164,12 @@ std::pair<TextView, TextView> TextView::split_next_char(char c, SplitDirection d
 std::pair<TextView, TextView> TextView::split_next_line() const {
   auto pos = m_view.find_first_of('\n');
   if (pos == std::string_view::npos) {
-    return {m_view, {}};
+    return std::pair<TextView, TextView>{m_view, {}};
   }
   if (pos > 0 && m_view[pos - 1] == '\r') {
-    return {m_view.substr(0, pos - 1), m_view.substr(pos + 1)};
+    return std::pair<TextView, TextView>{m_view.substr(0, pos - 1), m_view.substr(pos + 1)};
   }
-  return {m_view.substr(0, pos), m_view.substr(pos + 1)};
+  return std::pair<TextView, TextView>{m_view.substr(0, pos), m_view.substr(pos + 1)};
 }
 
 List<TextView> TextView::split_lines(SplitEmpty onEmpty) const {
@@ -790,6 +803,7 @@ Text Text::skip_bom() const {
 
 inline namespace literals {
 Text operator"" _t(const char* p, size_t s) { return {p, s}; }
+TextView operator"" _tv(const char* p, size_t s) { return {p, s}; }
 } // namespace literals
 
 std::ostream& operator<<(std::ostream& os, const TextView& tv) { return os << tv.view(); }

@@ -20,7 +20,7 @@ enum class SplitDirection { KeepLeft, Discard, KeepRight };
 
 class TextView {
 public:
-  TextView() = default;
+  TextView();
   TextView(std::string_view v);
   TextView(const char* text);
   TextView(const char* text, size_t length);
@@ -245,7 +245,8 @@ public:
 
 inline namespace literals {
 kl::Text operator"" _t(const char* p, size_t s);
-}
+kl::TextView operator"" _tv(const char* p, size_t s);
+} // namespace literals
 
 std::ostream& operator<<(std::ostream& os, const TextView& tv);
 std::ostream& operator<<(std::ostream& os, const Text& t);
