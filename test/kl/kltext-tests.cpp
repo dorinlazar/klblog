@@ -212,7 +212,6 @@ TEST(kltext, test_split_char) {
   EXPECT_EQ(sp1[4], "an"_t);
   EXPECT_EQ(sp1[5], "ending"_t);
 
-  kl::log("Splitting {}", t1);
   auto sp2 = t1.split_by_char(',', SplitEmpty::Keep);
   EXPECT_EQ(sp2.size(), 9);
   EXPECT_EQ(sp2[0], "My"_t);

@@ -655,10 +655,13 @@ size_t Text::count(Text t) const {
   return std::accumulate(begin(), end(), 0UZ, [&t](size_t count, char c) { return count + (t.contains(c) ? 1 : 0); });
 }
 
+const Text QuoteAndBackslash("\"\\");
+const Text Quote(QuoteAndBackslash.sublen(0, 1));
+
 Text Text::quote_escaped() const {
-  auto escapes = count("\"\\");
+  const auto escapes = count(QuoteAndBackslash);
   if (escapes == 0) {
-    return TextChain{"\"", *this, "\""};
+    return TextChain{Quote, *this, Quote};
   }
   const size_t length = escapes + size() + 2;
   auto memblock = TextRefCounter::allocate(length);
@@ -790,8 +793,11 @@ Text operator"" _t(const char* p, size_t s) { return {p, s}; }
 } // namespace literals
 
 std::ostream& operator<<(std::ostream& os, const TextView& tv) { return os << tv.view(); }
-std::ostream& operator<<(std::ostream& os, const Text& tv) { return os << tv.to_view(); }
-std::ostream& operator<<(std::ostream& os, const TextChain& tv) { return os << tv.to_text().to_view(); }
+std::ostream& operator<<(std::ostream& os, const Text& t) { return os << t.to_view(); }
+std::ostream& operator<<(std::ostream& os, const TextChain& tc) {
+  Text t = tc.to_text();
+  return os << t.to_view();
+}
 
 } // namespace kl
 
