@@ -40,7 +40,7 @@ public:
   bool ends_with(char c) const;
   bool ends_with(const TextView& tv) const;
 
-  char operator[](size_t index) const;
+  char operator[](ssize_t index) const;
 
   size_t size() const;
   const char* begin() const;
@@ -78,9 +78,9 @@ public:
   std::pair<TextView, TextView> split_pos(ssize_t where) const;
   std::pair<TextView, TextView> split_next_char(char c, SplitDirection direction = SplitDirection::Discard) const;
   std::pair<TextView, TextView> split_next_line() const;
-  List<TextView> split_lines(SplitEmpty onEmpty = SplitEmpty::Keep) const;
-  List<TextView> split_by_char(char c, SplitEmpty onEmpty = SplitEmpty::Discard) const;
-  List<TextView> split_by_text(const TextView& t, SplitEmpty onEmpty = SplitEmpty::Discard) const;
+  List<TextView> split_lines(SplitEmpty on_empty = SplitEmpty::Keep) const;
+  List<TextView> split_by_char(char c, SplitEmpty on_empty = SplitEmpty::Discard) const;
+  List<TextView> split_by_text(const TextView& t, SplitEmpty on_empty = SplitEmpty::Discard) const;
 
   // returns a value that skips the starting text
   std::optional<TextView> expect(const TextView& t) const;
@@ -187,9 +187,9 @@ public:
   std::pair<Text, Text> split_pos(ssize_t where) const;
   std::pair<Text, Text> split_next_char(char c, SplitDirection direction = SplitDirection::Discard) const;
   std::pair<Text, Text> split_next_line() const;
-  List<Text> split_lines(SplitEmpty onEmpty = SplitEmpty::Keep) const;
-  List<Text> split_by_char(char c, SplitEmpty onEmpty = SplitEmpty::Discard) const;
-  List<Text> split_by_text(const Text& t, SplitEmpty onEmpty = SplitEmpty::Discard) const;
+  List<Text> split_lines(SplitEmpty on_empty = SplitEmpty::Keep) const;
+  List<Text> split_by_char(char c, SplitEmpty on_empty = SplitEmpty::Discard) const;
+  List<Text> split_by_text(const Text& t, SplitEmpty on_empty = SplitEmpty::Discard) const;
 
   // returns a value that skips the starting text
   std::optional<Text> expect(const Text& t) const;

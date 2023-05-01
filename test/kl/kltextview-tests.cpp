@@ -219,3 +219,346 @@ TEST(kltextview, test_skip) {
   EXPECT_EQ(t.skip(10), ""_tv);
   EXPECT_EQ(t.skip(100), ""_tv);
 }
+
+TEST(kltextview, test_indices) {
+  TextView t("hello");
+  ASSERT_EQ(t[0], 'h');
+  ASSERT_EQ(t[2], 'l');
+  ASSERT_EQ(t[4], 'o');
+  ASSERT_EQ(t[-1], 'o');
+  ASSERT_EQ(t[-4], 'e');
+  ASSERT_EQ(t[-5], 'h');
+  EXPECT_THROW(t[5], std::out_of_range);
+  EXPECT_THROW(t[500], std::out_of_range);
+  EXPECT_THROW(t[-6], std::out_of_range);
+  EXPECT_THROW(t[-600], std::out_of_range);
+}
+
+TEST(kltextview, test_pos) {
+  TextView t("hello world");
+  EXPECT_EQ(t.pos('l'), 2);
+  EXPECT_EQ(t.pos('l', 2), 3);
+  EXPECT_EQ(t.pos('l', 3), 9);
+  EXPECT_EQ(t.pos('d'), 10);
+  EXPECT_EQ(t.pos(' '), 5);
+  EXPECT_FALSE(t.pos('o', 3).has_value());
+  EXPECT_FALSE(t.pos('k').has_value());
+  EXPECT_FALSE(t.pos('o', 0).has_value());
+
+  EXPECT_FALSE(""_tv.pos('x').has_value());
+
+  EXPECT_EQ(t.pos("l"_tv), 2);
+  EXPECT_EQ(t.pos("ll"_tv), 2);
+  EXPECT_EQ(t.pos("l"_tv, 2), 3);
+  EXPECT_EQ(t.pos("l"_tv, 3), 9);
+  EXPECT_EQ(t.pos("o w"_tv), 4);
+  EXPECT_EQ(t.pos("d"_tv), 10);
+  EXPECT_FALSE(t.pos("o W"_tv).has_value());
+  EXPECT_FALSE(t.pos(""_tv).has_value());
+  EXPECT_FALSE(t.pos("hello world!"_tv).has_value());
+  EXPECT_EQ(t.pos("hello w"_tv), 0);
+  EXPECT_EQ(t.pos("hello world"_tv), 0);
+  EXPECT_FALSE(t.pos("o"_tv, 0).has_value());
+
+  EXPECT_FALSE(""_tv.pos("x"_tv).has_value());
+  EXPECT_FALSE(""_tv.pos(""_tv).has_value());
+}
+
+TEST(kltextview, test_split_char) {
+  TextView t1("My,CSV,text,with,,an,ending,,");
+  auto sp1 = t1.split_by_char(',');
+
+  EXPECT_EQ(sp1.size(), 6);
+  EXPECT_EQ(sp1[0], "My"_tv);
+  EXPECT_EQ(sp1[1], "CSV"_tv);
+  EXPECT_EQ(sp1[2], "text"_tv);
+  EXPECT_EQ(sp1[3], "with"_tv);
+  EXPECT_EQ(sp1[4], "an"_tv);
+  EXPECT_EQ(sp1[5], "ending"_tv);
+
+  auto sp2 = t1.split_by_char(',', SplitEmpty::Keep);
+  EXPECT_EQ(sp2.size(), 9);
+  EXPECT_EQ(sp2[0], "My"_tv);
+  EXPECT_EQ(sp2[1], "CSV"_tv);
+  EXPECT_EQ(sp2[2], "text"_tv);
+  EXPECT_EQ(sp2[3], "with"_tv);
+  EXPECT_EQ(sp2[4], ""_tv);
+  EXPECT_EQ(sp2[5], "an"_tv);
+  EXPECT_EQ(sp2[6], "ending"_tv);
+  EXPECT_EQ(sp2[7], ""_tv);
+  EXPECT_EQ(sp2[8], ""_tv);
+
+  auto sp3 = "Hello World"_tv.split_by_char(' ');
+  EXPECT_EQ(sp3.size(), 2);
+  EXPECT_EQ(sp3[0], "Hello"_tv);
+  EXPECT_EQ(sp3[1], "World"_tv);
+
+  sp3 = "   Hello World"_tv.split_by_char(' ');
+  EXPECT_EQ(sp3.size(), 2);
+  EXPECT_EQ(sp3[0], "Hello"_tv);
+  EXPECT_EQ(sp3[1], "World"_tv);
+
+  sp3 = "   Hello World"_tv.split_by_char(' ', SplitEmpty::Keep);
+  EXPECT_EQ(sp3.size(), 5);
+  EXPECT_EQ(sp3[0], ""_tv);
+  EXPECT_EQ(sp3[1], ""_tv);
+  EXPECT_EQ(sp3[2], ""_tv);
+  EXPECT_EQ(sp3[3], "Hello"_tv);
+  EXPECT_EQ(sp3[4], "World"_tv);
+
+  auto sp4 = "Hello_World"_tv.split_by_char(' ');
+  EXPECT_EQ(sp4.size(), 1);
+  EXPECT_EQ(sp4[0], "Hello_World"_tv);
+}
+
+TEST(kltextview, test_split_text) {
+  TextView t1("This||is||||||some||text||||");
+  auto sp1 = t1.split_by_text("||"_tv);
+
+  EXPECT_EQ(sp1.size(), 4);
+  EXPECT_EQ(sp1[0], "This"_tv);
+  EXPECT_EQ(sp1[1], "is"_tv);
+  EXPECT_EQ(sp1[2], "some"_tv);
+  EXPECT_EQ(sp1[3], "text"_tv);
+
+  auto sp2 = t1.split_by_text("||"_tv, SplitEmpty::Keep);
+  EXPECT_EQ(sp2.size(), 8);
+  EXPECT_EQ(sp2[0], "This"_tv);
+  EXPECT_EQ(sp2[1], "is"_tv);
+  EXPECT_EQ(sp2[2], ""_tv);
+  EXPECT_EQ(sp2[3], ""_tv);
+  EXPECT_EQ(sp2[4], "some"_tv);
+  EXPECT_EQ(sp2[5], "text"_tv);
+  EXPECT_EQ(sp2[6], ""_tv);
+  EXPECT_EQ(sp2[7], ""_tv);
+
+  auto sp3 = "Hello World"_tv.split_by_text(" "_tv);
+  EXPECT_EQ(sp3.size(), 2);
+  EXPECT_EQ(sp3[0], "Hello"_tv);
+  EXPECT_EQ(sp3[1], "World"_tv);
+
+  sp3 = "   Hello World"_tv.split_by_text(" "_tv);
+  EXPECT_EQ(sp3.size(), 2);
+  EXPECT_EQ(sp3[0], "Hello"_tv);
+  EXPECT_EQ(sp3[1], "World"_tv);
+
+  sp3 = "   Hello World "_tv.split_by_text(" "_tv, SplitEmpty::Keep);
+  EXPECT_EQ(sp3.size(), 6);
+  EXPECT_EQ(sp3[0], ""_tv);
+  EXPECT_EQ(sp3[1], ""_tv);
+  EXPECT_EQ(sp3[2], ""_tv);
+  EXPECT_EQ(sp3[3], "Hello"_tv);
+  EXPECT_EQ(sp3[4], "World"_tv);
+  EXPECT_EQ(sp3[5], ""_tv);
+
+  auto sp4 = "Hello_World"_tv.split_by_text(" "_tv);
+  EXPECT_EQ(sp4.size(), 1);
+  EXPECT_EQ(sp4[0], "Hello_World"_tv);
+
+  sp4 = "Hello"_tv.split_by_text("HelloWorld"_tv);
+  EXPECT_EQ(sp4.size(), 1);
+  EXPECT_EQ(sp4[0], "Hello"_tv);
+
+  sp4 = "Hello"_tv.split_by_text("Hello"_tv);
+  EXPECT_EQ(sp4.size(), 0);
+
+  sp4 = "Hello"_tv.split_by_text(""_tv);
+  EXPECT_EQ(sp4.size(), 1);
+  EXPECT_EQ(sp4[0], "Hello"_tv);
+
+  sp4 = "ttttt"_tv.split_by_text("tt"_tv);
+  EXPECT_EQ(sp4.size(), 1);
+  EXPECT_EQ(sp4[0], "t"_tv);
+}
+
+TEST(kltextview, test_split_next_char) {
+  auto sp1 = "This is some bad text  "_tv;
+  auto [first, next] = sp1.split_next_char(' ', SplitDirection::KeepLeft);
+  EXPECT_EQ(first, "This ");
+  EXPECT_EQ(next, "is some bad text  ");
+  std::tie(first, next) = next.split_next_char(' ', SplitDirection::KeepLeft);
+  EXPECT_EQ(first, "is ");
+  EXPECT_EQ(next, "some bad text  ");
+  std::tie(first, next) = next.split_next_char(' ', SplitDirection::KeepLeft);
+  EXPECT_EQ(first, "some ");
+  EXPECT_EQ(next, "bad text  ");
+  std::tie(first, next) = next.split_next_char(' ', SplitDirection::KeepLeft);
+  EXPECT_EQ(first, "bad ");
+  EXPECT_EQ(next, "text  ");
+  std::tie(first, next) = next.split_next_char(' ', SplitDirection::KeepLeft);
+  EXPECT_EQ(first, "text ");
+  EXPECT_EQ(next, " ");
+  std::tie(first, next) = next.split_next_char(' ', SplitDirection::KeepLeft);
+  EXPECT_EQ(first, " ");
+  EXPECT_EQ(next.size(), 0);
+
+  std::tie(first, next) = sp1.split_next_char(' ', SplitDirection::KeepRight);
+  EXPECT_EQ(first, "This");
+  EXPECT_EQ(next, " is some bad text  ");
+  std::tie(first, next) = next.split_next_char(' ', SplitDirection::KeepRight);
+  EXPECT_EQ(first, "");
+  EXPECT_EQ(next, " is some bad text  ");
+  std::tie(first, next) = next.skip(1).split_next_char(' ', SplitDirection::KeepRight);
+  EXPECT_EQ(first, "is");
+  EXPECT_EQ(next, " some bad text  ");
+  std::tie(first, next) = next.skip(1).split_next_char(' ', SplitDirection::KeepRight);
+  EXPECT_EQ(first, "some");
+  EXPECT_EQ(next, " bad text  ");
+  std::tie(first, next) = next.skip(1).split_next_char(' ', SplitDirection::KeepRight);
+  EXPECT_EQ(first, "bad");
+  EXPECT_EQ(next, " text  ");
+  std::tie(first, next) = next.skip(1).split_next_char(' ', SplitDirection::KeepRight);
+  EXPECT_EQ(first, "text");
+  EXPECT_EQ(next, "  ");
+  std::tie(first, next) = next.skip(1).split_next_char(' ', SplitDirection::KeepRight);
+  EXPECT_EQ(first, "");
+  EXPECT_EQ(next, " ");
+  std::tie(first, next) = next.skip(1).split_next_char(' ', SplitDirection::KeepRight);
+  EXPECT_EQ(first, "");
+  EXPECT_EQ(next, "");
+
+  std::tie(first, next) = sp1.split_next_char(' ', SplitDirection::Discard);
+  EXPECT_EQ(first, "This");
+  EXPECT_EQ(next, "is some bad text  ");
+  std::tie(first, next) = next.split_next_char(' ', SplitDirection::Discard);
+  EXPECT_EQ(first, "is");
+  EXPECT_EQ(next, "some bad text  ");
+  std::tie(first, next) = next.split_next_char(' ', SplitDirection::Discard);
+  EXPECT_EQ(first, "some");
+  EXPECT_EQ(next, "bad text  ");
+  std::tie(first, next) = next.split_next_char(' ', SplitDirection::Discard);
+  EXPECT_EQ(first, "bad");
+  EXPECT_EQ(next, "text  ");
+  std::tie(first, next) = next.split_next_char(' ', SplitDirection::Discard);
+  EXPECT_EQ(first, "text");
+  EXPECT_EQ(next, " ");
+  std::tie(first, next) = next.split_next_char(' ', SplitDirection::Discard);
+  EXPECT_EQ(first, "");
+  EXPECT_EQ(next, "");
+
+  std::tie(first, next) = ""_tv.split_next_char(' ', SplitDirection::KeepLeft);
+  EXPECT_EQ(first, "");
+  EXPECT_EQ(next, "");
+
+  std::tie(first, next) = ""_tv.split_next_char(' ', SplitDirection::KeepRight);
+  EXPECT_EQ(first, "");
+  EXPECT_EQ(next, "");
+
+  std::tie(first, next) = ""_tv.split_next_char(' ', SplitDirection::Discard);
+  EXPECT_EQ(first, "");
+  EXPECT_EQ(next, "");
+}
+
+TEST(kltextview, test_split_next_line) {
+  auto sp1 = "This\nis\r\nsome\r\nbad\ntext\n\n"_tv;
+  auto [first, next] = sp1.split_next_line();
+  EXPECT_EQ(first, "This");
+  EXPECT_EQ(next, "is\r\nsome\r\nbad\ntext\n\n");
+  std::tie(first, next) = next.split_next_line();
+  EXPECT_EQ(first, "is");
+  EXPECT_EQ(next, "some\r\nbad\ntext\n\n");
+  std::tie(first, next) = next.split_next_line();
+  EXPECT_EQ(first, "some");
+  EXPECT_EQ(next, "bad\ntext\n\n");
+  std::tie(first, next) = next.split_next_line();
+  EXPECT_EQ(first, "bad");
+  EXPECT_EQ(next, "text\n\n");
+  std::tie(first, next) = next.split_next_line();
+  EXPECT_EQ(first, "text");
+  EXPECT_EQ(next, "\n");
+  std::tie(first, next) = next.split_next_line();
+  EXPECT_EQ(first.size(), 0);
+  EXPECT_EQ(next.size(), 0);
+
+  auto sp2 = "A bad example"_tv;
+  std::tie(first, next) = sp2.split_next_line();
+  EXPECT_EQ(first, sp2);
+  EXPECT_EQ(next.size(), 0);
+
+  auto sp3 = "A simple\nexample"_tv;
+  std::tie(first, next) = sp3.split_next_line();
+  EXPECT_EQ(first, "A simple");
+  EXPECT_EQ(next, "example");
+
+  std::tie(first, next) = ""_tv.split_next_line();
+  EXPECT_EQ(first, "");
+  EXPECT_EQ(next, "");
+}
+
+TEST(kltextview, test_split_lines) {
+  auto sp1 = "This\nis\nsome\ntext\n"_tv.split_lines();
+  EXPECT_EQ(sp1.size(), 5);
+  EXPECT_EQ(sp1[0], "This"_tv);
+  EXPECT_EQ(sp1[1], "is"_tv);
+  EXPECT_EQ(sp1[2], "some"_tv);
+  EXPECT_EQ(sp1[3], "text"_tv);
+  EXPECT_EQ(sp1[4], ""_tv);
+
+  sp1 = "This\nis\nsome\ntext\n"_tv.split_lines(SplitEmpty::Discard);
+  EXPECT_EQ(sp1.size(), 4);
+  EXPECT_EQ(sp1[0], "This"_tv);
+  EXPECT_EQ(sp1[1], "is"_tv);
+  EXPECT_EQ(sp1[2], "some"_tv);
+  EXPECT_EQ(sp1[3], "text"_tv);
+
+  auto sp2 = "\n\nThis\n\nis\n\n\nsome\ntext"_tv.split_lines();
+  EXPECT_EQ(sp2.size(), 9);
+  EXPECT_EQ(sp2[0], ""_tv);
+  EXPECT_EQ(sp2[1], ""_tv);
+  EXPECT_EQ(sp2[2], "This"_tv);
+  EXPECT_EQ(sp2[3], ""_tv);
+  EXPECT_EQ(sp2[4], "is"_tv);
+  EXPECT_EQ(sp2[5], ""_tv);
+  EXPECT_EQ(sp2[6], ""_tv);
+  EXPECT_EQ(sp2[7], "some"_tv);
+  EXPECT_EQ(sp2[8], "text"_tv);
+
+  sp2 = "\r\n\r\nThis\r\n\r\nis\r\n\r\n\nsome\ntext"_tv.split_lines();
+  EXPECT_EQ(sp2.size(), 9);
+  EXPECT_EQ(sp2[0], ""_tv);
+  EXPECT_EQ(sp2[1], ""_tv);
+  EXPECT_EQ(sp2[2], "This"_tv);
+  EXPECT_EQ(sp2[3], ""_tv);
+  EXPECT_EQ(sp2[4], "is"_tv);
+  EXPECT_EQ(sp2[5], ""_tv);
+  EXPECT_EQ(sp2[6], ""_tv);
+  EXPECT_EQ(sp2[7], "some"_tv);
+  EXPECT_EQ(sp2[8], "text"_tv);
+
+  sp2 = "\r\n\r\nThis\r\n\r\nis\r\n\r\n\r\nsome\r\ntext"_tv.split_lines();
+  EXPECT_EQ(sp2.size(), 9);
+  EXPECT_EQ(sp2[0], ""_tv);
+  EXPECT_EQ(sp2[1], ""_tv);
+  EXPECT_EQ(sp2[2], "This"_tv);
+  EXPECT_EQ(sp2[3], ""_tv);
+  EXPECT_EQ(sp2[4], "is"_tv);
+  EXPECT_EQ(sp2[5], ""_tv);
+  EXPECT_EQ(sp2[6], ""_tv);
+  EXPECT_EQ(sp2[7], "some"_tv);
+  EXPECT_EQ(sp2[8], "text"_tv);
+
+  sp2 = "Hello\r\n"_tv.split_lines();
+  EXPECT_EQ(sp2.size(), 2);
+  EXPECT_EQ(sp2[0], "Hello"_tv);
+  EXPECT_EQ(sp2[1], ""_tv);
+
+  sp2 = "Hello\r\n"_tv.split_lines(SplitEmpty::Discard);
+  EXPECT_EQ(sp2.size(), 1);
+  EXPECT_EQ(sp2[0], "Hello"_tv);
+
+  sp2 = "\r\n\r\nThis\r\n\r\nis\r\n\r\n\r\nsome\r\ntext"_tv.split_lines(SplitEmpty::Discard);
+  EXPECT_EQ(sp2.size(), 4);
+  EXPECT_EQ(sp2[0], "This"_tv);
+  EXPECT_EQ(sp2[1], "is"_tv);
+  EXPECT_EQ(sp2[2], "some"_tv);
+  EXPECT_EQ(sp2[3], "text"_tv);
+}
+
+TEST(kltextview, test_last_pos) {
+  auto filename = "/123456/89.1234"_tv;
+  EXPECT_EQ(filename.last_pos('.'), 10);
+  EXPECT_EQ(filename.last_pos('/'), 7);
+  EXPECT_EQ(filename.last_pos('4'), 14);
+  EXPECT_EQ(filename.last_pos('9'), 9);
+  EXPECT_FALSE(filename.last_pos('+').has_value());
+}

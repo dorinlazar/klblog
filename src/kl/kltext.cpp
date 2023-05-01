@@ -42,11 +42,11 @@ bool TextView::starts_with(const TextView& tv) const { return m_view.starts_with
 bool TextView::ends_with(char c) const { return !m_view.empty() && m_view.back() == c; }
 bool TextView::ends_with(const TextView& tv) const { return m_view.ends_with(tv.m_view); }
 
-char TextView::operator[](size_t index) const {
-  if (index >= size()) [[unlikely]] {
-    throw std::out_of_range(fmt::format("Requested index {} in a {} long TextView", index, size()));
+char TextView::operator[](ssize_t index) const {
+  if (index >= static_cast<ssize_t>(size()) || (-index > static_cast<ssize_t>(size()))) [[unlikely]] {
+    throw std::out_of_range(fmt::format("Requested index {} out of {}", index, size()));
   }
-  return m_view[index];
+  return m_view[index + ((index < 0) ? size() : 0)];
 }
 
 size_t TextView::size() const { return m_view.size(); }
@@ -89,7 +89,7 @@ TextView TextView::subpos(size_t start, size_t end) const {
     return {};
   }
 
-  return m_view.substr(std::min(start, size()), 1 + (std::min(end, size()) - start));
+  return m_view.substr(std::min(start, size()), std::min(end, size()) - start);
 }
 
 // substring length based. The return value will have a string of at most <len> characters
@@ -165,7 +165,7 @@ std::pair<TextView, TextView> TextView::split_next_char(char c, SplitDirection d
   if (direction == SplitDirection::KeepLeft) {
     pos++;
   }
-  return {m_view.substr(0, pos), m_view.substr(pos)};
+  return std::pair<TextView, TextView>{m_view.substr(0, pos), m_view.substr(pos)};
 }
 
 std::pair<TextView, TextView> TextView::split_next_line() const {
@@ -179,33 +179,41 @@ std::pair<TextView, TextView> TextView::split_next_line() const {
   return std::pair<TextView, TextView>{m_view.substr(0, pos), m_view.substr(pos + 1)};
 }
 
-List<TextView> TextView::split_lines(SplitEmpty onEmpty) const {
+List<TextView> TextView::split_lines(SplitEmpty on_empty) const {
   List<TextView> res;
   TextView view = *this;
   TextView first_line;
   while (view.size() > 0) {
     std::tie(first_line, view) = view.split_next_line();
-    if (first_line.size() > 0 || onEmpty == SplitEmpty::Keep) {
+    if (first_line.size() > 0 || on_empty == SplitEmpty::Keep) {
       res.add(first_line);
     }
+  }
+  if (on_empty == SplitEmpty::Keep && size() > 0 &&
+      (m_view[size() - 1] == '\n' || (size() > 1 && m_view[size() - 2] == '\n' && m_view[size() - 1] == '\r'))) {
+    res.add(TextView{});
   }
   return res;
 }
 
-List<TextView> TextView::split_by_char(char c, SplitEmpty onEmpty) const {
+List<TextView> TextView::split_by_char(char c, SplitEmpty on_empty) const {
   List<TextView> res;
   TextView view = *this;
   TextView first_line;
   while (view.size() > 0) {
     std::tie(first_line, view) = view.split_next_char(c);
-    if (first_line.size() > 0 || onEmpty == SplitEmpty::Keep) {
+    if (first_line.size() > 0 || on_empty == SplitEmpty::Keep) {
       res.add(first_line);
     }
   }
+  if (on_empty == SplitEmpty::Keep && (size() == 0 || operator[](-1) == c)) {
+    res.add(TextView{});
+  }
+
   return res;
 }
 
-List<TextView> TextView::split_by_text(const TextView& t, SplitEmpty onEmpty) const {
+List<TextView> TextView::split_by_text(const TextView& t, SplitEmpty on_empty) const {
   List<TextView> res;
   TextView view = *this;
   TextView first_line;
@@ -218,8 +226,11 @@ List<TextView> TextView::split_by_text(const TextView& t, SplitEmpty onEmpty) co
       first_line = view;
       view = {};
     }
-    if (first_line.size() > 0 || onEmpty == SplitEmpty::Keep) {
+    if (first_line.size() > 0 || on_empty == SplitEmpty::Keep) {
       res.add(first_line);
+    }
+    if (on_empty == SplitEmpty::Keep && view.size() == 0 && opos.has_value()) {
+      res.add(view);
     }
   }
   return res;
@@ -551,40 +562,40 @@ std::pair<Text, Text> Text::split_next_line() const {
   return std::pair<Text, Text>{left, right};
 }
 
-List<Text> Text::split_lines(SplitEmpty onEmpty) const {
+List<Text> Text::split_lines(SplitEmpty on_empty) const {
   List<Text> res;
   auto right = *this;
   Text left;
   while (right.size() > 0) {
     std::tie(left, right) = right.split_next_line();
-    if (left.size() > 0 || onEmpty == SplitEmpty::Keep) {
+    if (left.size() > 0 || on_empty == SplitEmpty::Keep) {
       res.add(left);
     }
   }
-  if (onEmpty == SplitEmpty::Keep && (size() == 0 || operator[](-1) == '\n')) {
+  if (on_empty == SplitEmpty::Keep && (size() == 0 || operator[](-1) == '\n')) {
     res.add(Text{});
   }
   return res;
 }
 
-List<Text> Text::split_by_char(char c, SplitEmpty onEmpty) const {
+List<Text> Text::split_by_char(char c, SplitEmpty on_empty) const {
   List<Text> res;
   auto right = *this;
   Text left;
   while (right.size() > 0) {
     std::tie(left, right) = right.split_next_char(c, SplitDirection::Discard);
-    if (left.size() > 0 || onEmpty == SplitEmpty::Keep) {
+    if (left.size() > 0 || on_empty == SplitEmpty::Keep) {
       res.add(left);
     }
   }
-  if (onEmpty == SplitEmpty::Keep && (size() == 0 || operator[](-1) == c)) {
+  if (on_empty == SplitEmpty::Keep && (size() == 0 || operator[](-1) == c)) {
     res.add(Text{});
   }
 
   return res;
 }
 
-List<Text> Text::split_by_text(const Text& t, SplitEmpty onEmpty) const {
+List<Text> Text::split_by_text(const Text& t, SplitEmpty on_empty) const {
   if (t.size() == 0) {
     return {*this};
   }
@@ -593,13 +604,13 @@ List<Text> Text::split_by_text(const Text& t, SplitEmpty onEmpty) const {
   auto left_over = *this;
   while (position.has_value()) {
     auto pos_value = position.value(); // NOLINT(bugprone-unchecked-optional-access)
-    if (pos_value > 0 || onEmpty != SplitEmpty::Discard) {
+    if (pos_value > 0 || on_empty != SplitEmpty::Discard) {
       res.add(left_over.sublen(0, pos_value));
     }
     left_over = left_over.sublen(pos_value + t.size(), left_over.size());
     position = left_over.pos(t);
   }
-  if (left_over.size() > 0 || onEmpty != SplitEmpty::Discard) {
+  if (left_over.size() > 0 || on_empty != SplitEmpty::Discard) {
     res.add(left_over);
   }
   return res;
