@@ -76,8 +76,9 @@ public:
   std::optional<size_t> last_pos(char c) const;
 
   std::pair<TextView, TextView> split_pos(ssize_t where) const;
-  std::pair<TextView, TextView> split_next_char(char c, SplitDirection direction = SplitDirection::Discard) const;
-  std::pair<TextView, TextView> split_next_line() const;
+  std::pair<TextView, std::optional<TextView>>
+  split_next_char(char c, SplitDirection direction = SplitDirection::Discard) const;
+  std::pair<TextView, std::optional<TextView>> split_next_line() const;
   List<TextView> split_lines(SplitEmpty on_empty = SplitEmpty::Keep) const;
   List<TextView> split_by_char(char c, SplitEmpty on_empty = SplitEmpty::Discard) const;
   List<TextView> split_by_text(const TextView& t, SplitEmpty on_empty = SplitEmpty::Discard) const;

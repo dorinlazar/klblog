@@ -154,60 +154,53 @@ std::pair<TextView, TextView> TextView::split_pos(ssize_t where) const {
   return std::pair<TextView, TextView>{sublen(0, where), sublen(where, maxn - where)};
 }
 
-std::pair<TextView, TextView> TextView::split_next_char(char c, SplitDirection direction) const {
+std::pair<TextView, std::optional<TextView>> TextView::split_next_char(char c, SplitDirection direction) const {
   auto pos = m_view.find_first_of(c);
   if (pos == std::string_view::npos) {
-    return {m_view, {}};
+    return std::pair<TextView, std::optional<TextView>>{m_view, std::nullopt};
   }
   if (direction == SplitDirection::Discard) {
-    return std::pair<TextView, TextView>{m_view.substr(0, pos), m_view.substr(pos + 1)};
+    return std::pair<TextView, std::optional<TextView>>{m_view.substr(0, pos), m_view.substr(pos + 1)};
   }
   if (direction == SplitDirection::KeepLeft) {
     pos++;
   }
-  return std::pair<TextView, TextView>{m_view.substr(0, pos), m_view.substr(pos)};
+  return std::pair<TextView, std::optional<TextView>>{m_view.substr(0, pos), m_view.substr(pos)};
 }
 
-std::pair<TextView, TextView> TextView::split_next_line() const {
+std::pair<TextView, std::optional<TextView>> TextView::split_next_line() const {
   auto pos = m_view.find_first_of('\n');
   if (pos == std::string_view::npos) {
-    return std::pair<TextView, TextView>{m_view, {}};
+    return std::pair<TextView, std::optional<TextView>>{m_view, std::nullopt};
   }
   if (pos > 0 && m_view[pos - 1] == '\r') {
-    return std::pair<TextView, TextView>{m_view.substr(0, pos - 1), m_view.substr(pos + 1)};
+    return std::pair<TextView, std::optional<TextView>>{m_view.substr(0, pos - 1), m_view.substr(pos + 1)};
   }
-  return std::pair<TextView, TextView>{m_view.substr(0, pos), m_view.substr(pos + 1)};
+  return std::pair<TextView, std::optional<TextView>>{m_view.substr(0, pos), m_view.substr(pos + 1)};
 }
 
 List<TextView> TextView::split_lines(SplitEmpty on_empty) const {
   List<TextView> res;
-  TextView view = *this;
+  std::optional<TextView> view = *this;
   TextView first_line;
-  while (view.size() > 0) {
-    std::tie(first_line, view) = view.split_next_line();
+  while (view.has_value()) {
+    std::tie(first_line, view) = view.value().split_next_line();
     if (first_line.size() > 0 || on_empty == SplitEmpty::Keep) {
       res.add(first_line);
     }
-  }
-  if (on_empty == SplitEmpty::Keep && size() > 0 &&
-      (m_view[size() - 1] == '\n' || (size() > 1 && m_view[size() - 2] == '\n' && m_view[size() - 1] == '\r'))) {
-    res.add(TextView{});
   }
   return res;
 }
 
 List<TextView> TextView::split_by_char(char c, SplitEmpty on_empty) const {
   List<TextView> res;
-  TextView view = *this;
+  std::optional<TextView> view = *this;
   TextView first_line;
-  while (view.size() > 0) {
-    std::tie(first_line, view) = view.split_next_char(c);
+  while (view.has_value()) {
+    std::tie(first_line, view) = view.value().split_next_char(c);
     if (first_line.size() > 0 || on_empty == SplitEmpty::Keep) {
       res.add(first_line);
     }
-  }
-  if (on_empty == SplitEmpty::Keep && (size() == 0 || operator[](-1) == c)) {
-    res.add(TextView{});
   }
 
   return res;
@@ -481,7 +474,7 @@ TextView Text::to_text_view() const { return TextView(to_view()); }
 std::span<uint8_t> Text::to_raw_data() const {
   auto* st = reinterpret_cast<uint8_t*>(const_cast<char*>(begin()));
   auto* en = reinterpret_cast<uint8_t*>(const_cast<char*>(end()));
-  return {st, en};
+  return std::span<uint8_t>{st, en};
 }
 int64_t Text::to_int() const { return std::stoll(to_string()); }
 
