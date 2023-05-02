@@ -606,3 +606,45 @@ TEST(kltextview, test_sublen_subpos) {
   EXPECT_EQ(t.sublen(8, 10), "89"_tv);
   EXPECT_EQ(t.sublen(8, 20), "89"_tv);
 }
+
+TEST(kltextview, test_count) {
+  TextView t("hello world");
+  EXPECT_EQ(t.count('h'), 1);
+  EXPECT_EQ(t.count('x'), 0);
+  EXPECT_EQ(t.count('e'), 1);
+  EXPECT_EQ(t.count('l'), 3);
+  EXPECT_EQ(t.count('o'), 2);
+  EXPECT_EQ(t.count(' '), 1);
+}
+
+TEST(kltextview, test_indent) {
+  EXPECT_EQ(""_tv.get_indent(), 0);
+  EXPECT_EQ("  "_tv.get_indent(), 2);
+  EXPECT_EQ("  xxx"_tv.get_indent(), 2);
+  EXPECT_EQ(" x "_tv.get_indent(), 1);
+
+  EXPECT_FALSE(""_tv.skip_indent(2).has_value());
+  EXPECT_TRUE(""_tv.skip_indent(0).has_value());
+  EXPECT_EQ(""_tv.skip_indent(0), ""_tv);
+  EXPECT_TRUE("  "_tv.skip_indent(1).has_value());
+  EXPECT_EQ("  "_tv.skip_indent(1), " "_tv);
+  EXPECT_TRUE("  "_tv.skip_indent(2).has_value());
+  EXPECT_EQ("  "_tv.skip_indent(2), ""_tv);
+  EXPECT_FALSE("  "_tv.skip_indent(3).has_value());
+  EXPECT_FALSE("  "_tv.skip_indent(100).has_value());
+  EXPECT_FALSE("  xxx"_tv.skip_indent(3).has_value());
+  EXPECT_EQ("  xxx"_tv.skip_indent(2), "xxx"_tv);
+  EXPECT_EQ("  xxx"_tv.skip_indent(1), " xxx"_tv);
+  EXPECT_EQ("  xxx"_tv.skip_indent(0), "  xxx"_tv);
+  EXPECT_FALSE(" x "_tv.skip_indent(3).has_value());
+  EXPECT_FALSE(" x "_tv.skip_indent(2).has_value());
+  EXPECT_EQ(" x "_tv.skip_indent(1), "x "_tv);
+  EXPECT_EQ(" x "_tv.skip_indent(0), " x "_tv);
+}
+
+TEST(kltextview, format_test) {
+  TextView v1("Hello");
+  TextView v2("World");
+
+  EXPECT_EQ(fmt::format("{}, {}!", v1, v2), "Hello, World!");
+}
