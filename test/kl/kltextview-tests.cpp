@@ -588,3 +588,21 @@ TEST(kltextview, test_last_pos) {
   EXPECT_EQ(filename.last_pos('9'), 9);
   EXPECT_FALSE(filename.last_pos('+').has_value());
 }
+
+TEST(kltextview, test_sublen_subpos) {
+  TextView t("0123456789");
+  EXPECT_EQ(t.sublen(0, 2), "01"_tv);
+  EXPECT_EQ(t.sublen(0, 4), "0123"_tv);
+  EXPECT_EQ(t.sublen(2, 4), "2345"_tv);
+  EXPECT_EQ(t.sublen(2, 0), ""_tv);
+  EXPECT_EQ(t.sublen(8, 4), "89"_tv);
+
+  EXPECT_EQ(t.subpos(0, 2), "012"_tv);
+  EXPECT_EQ(t.subpos(0, 4), "01234"_tv);
+  EXPECT_EQ(t.subpos(2, 4), "234"_tv);
+  EXPECT_EQ(t.subpos(2, 0), ""_tv);
+  EXPECT_EQ(t.subpos(2, 2), "2"_tv);
+  EXPECT_EQ(t.sublen(8, 9), "89"_tv);
+  EXPECT_EQ(t.sublen(8, 10), "89"_tv);
+  EXPECT_EQ(t.sublen(8, 20), "89"_tv);
+}

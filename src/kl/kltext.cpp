@@ -88,8 +88,10 @@ TextView TextView::subpos(size_t start, size_t end) const {
   if (start > end) {
     return {};
   }
+  end = std::min(end + 1, size());
+  start = std::min(start, size());
 
-  return m_view.substr(std::min(start, size()), std::min(end, size()) - start);
+  return m_view.substr(std::min(start, size()), end - start);
 }
 
 // substring length based. The return value will have a string of at most <len> characters
@@ -213,8 +215,8 @@ List<TextView> TextView::split_by_text(const TextView& t, SplitEmpty on_empty) c
   while (view.size() > 0) {
     auto opos = view.pos(t);
     if (opos.has_value()) {
-      first_line = view.subpos(0, opos.value());
-      view = view.subpos(opos.value() + t.size(), view.size());
+      first_line = view.sublen(0, opos.value());
+      view = view.sublen(opos.value() + t.size(), view.size());
     } else {
       first_line = view;
       view = {};
