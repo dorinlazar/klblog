@@ -648,3 +648,26 @@ TEST(kltextview, format_test) {
 
   EXPECT_EQ(fmt::format("{}, {}!", v1, v2), "Hello, World!");
 }
+
+TEST(kltextview, expect_test) {
+  TextView v1("Hello");
+  TextView v2("  World");
+
+  EXPECT_FALSE(v1.expect('h').has_value());
+  EXPECT_TRUE(v1.expect('H').has_value());
+  EXPECT_EQ(v1.expect('H'), "ello"_tv);
+  EXPECT_FALSE(v1.expect("h"_tv).has_value());
+  auto llo = v1.expect("He"_tv);
+  EXPECT_TRUE(llo.has_value());
+  EXPECT_EQ(llo, "llo"_tv);
+
+  EXPECT_TRUE(v2.expect(' ').has_value());
+  EXPECT_EQ(v2.expect(' ').value(), " World"_tv);
+  EXPECT_TRUE(v2.expect("  "_tv).has_value());
+  EXPECT_EQ(v2.expect("  ").value(), "World"_tv);
+  EXPECT_FALSE(v2.expect_ws(' ').has_value());
+  EXPECT_TRUE(v2.expect_ws('W').has_value());
+  EXPECT_FALSE(v2.expect_ws("He"_tv).has_value());
+  EXPECT_TRUE(v2.expect_ws("Wo"_tv).has_value());
+  EXPECT_EQ(v2.expect_ws("Wo"_tv).value(), "rld"_tv);
+}

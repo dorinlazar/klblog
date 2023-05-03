@@ -87,6 +87,10 @@ public:
   std::optional<TextView> expect(const TextView& t) const;
   // returns a value that skips the whitespace in the text
   std::optional<TextView> expect_ws(const TextView& t) const;
+  // returns a value that skips the starting text
+  std::optional<TextView> expect(char c) const;
+  // returns a value that skips the whitespace in the text
+  std::optional<TextView> expect_ws(char c) const;
 
   // returns text after <indentLevel> whitespaces, or empty;
   std::optional<TextView> skip_indent(size_t indentLevel) const;

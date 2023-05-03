@@ -240,6 +240,15 @@ std::optional<TextView> TextView::expect(const TextView& t) const {
 
 std::optional<TextView> TextView::expect_ws(const TextView& t) const { return trim_left().expect(t); }
 
+std::optional<TextView> TextView::expect(char c) const {
+  if (starts_with(c)) {
+    return skip(1);
+  }
+  return {};
+}
+
+std::optional<TextView> TextView::expect_ws(char c) const { return trim_left().expect(c); }
+
 std::optional<TextView> TextView::skip_indent(size_t indentLevel) const {
   if (size() < indentLevel) [[unlikely]] {
     return {};
