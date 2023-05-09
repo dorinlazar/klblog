@@ -218,6 +218,15 @@ TEST(kltextview, test_skip) {
   EXPECT_EQ(t.skip(5), ""_tv);
   EXPECT_EQ(t.skip(10), ""_tv);
   EXPECT_EQ(t.skip(100), ""_tv);
+
+  EXPECT_EQ(t.skip_bom(), "hello");
+  TextView bom_hello("\xEF\xBB\xBF"
+                     "bomhello");
+  EXPECT_EQ(bom_hello.skip_bom(), "bomhello"_tv);
+  TextView bom("\xEF\xBB\xBF");
+  EXPECT_EQ(bom.skip_bom(), ""_tv);
+  TextView bo("\xEF\xBB");
+  EXPECT_EQ(bo.skip_bom(), "\xEF\xBB"_tv);
 }
 
 TEST(kltextview, test_indices) {
