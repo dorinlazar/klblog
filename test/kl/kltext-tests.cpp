@@ -6,6 +6,18 @@ using namespace kl::literals;
 
 TEST(kltext, test_text_construction) {
   Text txt("Hello world");
+  EXPECT_EQ(txt.to_string(), "Hello world"s);
+
+  Text txt2("Hello world"s);
+  EXPECT_EQ(txt2.to_string(), "Hello world"s);
+
+  Text txt3;
+  txt3 = txt2;
+  EXPECT_EQ(txt3.to_string(), "Hello world"s);
+
+  Text txt4('h');
+  EXPECT_EQ(txt4, "h"_t);
+
   auto t2 = Text(txt, 4, 20);
   EXPECT_EQ(t2.to_string(), "o world"s);
   EXPECT_EQ(t2.size(), 7);
@@ -54,6 +66,7 @@ TEST(kltext, test_trimming) {
 
 TEST(kltext, test_starts_with) {
   Text txt("Hello");
+  EXPECT_FALSE(txt.starts_with(nullptr));
   EXPECT_TRUE(txt.starts_with(""));
   EXPECT_TRUE(txt.starts_with("H"));
   EXPECT_TRUE(txt.starts_with("Hell"));
@@ -73,10 +86,12 @@ TEST(kltext, test_ends_with) {
   Text txt("Hello");
   EXPECT_TRUE(txt.ends_with(""));
   EXPECT_TRUE(txt.ends_with("o"));
+  EXPECT_TRUE(txt.ends_with('o'));
   EXPECT_TRUE(txt.ends_with("ello"));
   EXPECT_TRUE(txt.ends_with("Hello"));
   EXPECT_FALSE(txt.ends_with("Hello world"));
   EXPECT_FALSE(txt.ends_with("world"));
+  EXPECT_FALSE(""_t.ends_with('o'));
 }
 
 TEST(kltext, test_comparisons) {
@@ -88,6 +103,8 @@ TEST(kltext, test_comparisons) {
   EXPECT_TRUE(hello < "hfllo");
   EXPECT_TRUE(hello <= "hfllo");
   EXPECT_TRUE(hello != "hfllo");
+  EXPECT_TRUE(hello != "hell");
+  EXPECT_FALSE(hello == "hell");
   EXPECT_TRUE(hello >= "hallo");
   EXPECT_TRUE(hello >= "ahllo");
   EXPECT_TRUE(hello > "hallo");
@@ -100,6 +117,8 @@ TEST(kltext, test_comparisons) {
   EXPECT_TRUE(hello < "hfllo"s);
   EXPECT_TRUE(hello <= "hfllo"s);
   EXPECT_TRUE(hello != "hfllo"s);
+  EXPECT_TRUE(hello != "hell"s);
+  EXPECT_FALSE(hello == "hell"s);
   EXPECT_TRUE(hello >= "hallo"s);
   EXPECT_TRUE(hello >= "ahllo"s);
   EXPECT_TRUE(hello > "hallo"s);
@@ -111,6 +130,8 @@ TEST(kltext, test_comparisons) {
   EXPECT_TRUE(hello < "hfllo"_t);
   EXPECT_TRUE(hello <= "hfllo"_t);
   EXPECT_TRUE(hello != "hfllo"_t);
+  EXPECT_TRUE(hello != "hell"_t);
+  EXPECT_FALSE(hello == "hell"_t);
   EXPECT_TRUE(hello >= "hallo"_t);
   EXPECT_TRUE(hello >= "ahllo"_t);
   EXPECT_TRUE(hello > "hallo"_t);
@@ -525,6 +546,11 @@ TEST(kltext, test_count) {
   EXPECT_EQ(t.count('l'), 3);
   EXPECT_EQ(t.count('o'), 2);
   EXPECT_EQ(t.count(' '), 1);
+
+  EXPECT_EQ(t.count("l"), 3);
+  EXPECT_EQ(t.count("lo"_t), 5);
+  EXPECT_EQ(t.count(""_t), 0);
+  EXPECT_EQ(t.count("lox"_t), 5);
 }
 
 TEST(kltext, test_fill_c_buff) {
@@ -574,4 +600,82 @@ TEST(kltext, format_test) {
   Text v2("World");
 
   EXPECT_EQ(fmt::format("{}, {}!", v1, v2), "Hello, World!");
+}
+
+TEST(kltext, operator_index) {
+  Text t("Hello");
+  EXPECT_EQ(t[0], 'H');
+  EXPECT_EQ(t[1], 'e');
+  EXPECT_EQ(t[2], 'l');
+  EXPECT_EQ(t[3], 'l');
+  EXPECT_EQ(t[4], 'o');
+  EXPECT_EQ(t[-5], 'H');
+  EXPECT_EQ(t[-4], 'e');
+  EXPECT_EQ(t[-3], 'l');
+  EXPECT_EQ(t[-2], 'l');
+  EXPECT_EQ(t[-1], 'o');
+  EXPECT_THROW(t[5], std::out_of_range);
+  EXPECT_THROW(t[-6], std::out_of_range);
+}
+
+TEST(kltext, test_reuse) {
+  Text t("Hello");
+  Text t1(t);
+  EXPECT_EQ(t.begin(), t1.begin());
+  EXPECT_EQ(t.begin() + 1, t1.sublen(1, 2).begin());
+  Text t2{t.copy()};
+  EXPECT_NE(t.begin(), t2.begin());
+  EXPECT_EQ(t.size(), t2.size());
+  EXPECT_EQ(t, t2);
+  EXPECT_EQ(t.to_string(), t2.to_string());
+
+  auto tspan = t.to_raw_data();
+  EXPECT_EQ(tspan.size(), t.size());
+  EXPECT_EQ(static_cast<const void*>(tspan.data()), static_cast<const void*>(t.begin()));
+}
+
+TEST(kltext, test_int_convert) {
+  Text t("Hello");
+  EXPECT_THROW(t.to_int(), std::invalid_argument);
+  Text t2{"100"};
+  EXPECT_EQ(t2.to_int(), 100);
+  Text t3{"00100"};
+  EXPECT_EQ(t3.to_int(), 100);
+  Text t4{"100t"};
+  EXPECT_EQ(t4.to_int(), 100);
+  Text t5{"-100"};
+  EXPECT_EQ(t5.to_int(), -100);
+}
+
+TEST(kltext, expect_tests) {
+  Text t("Hello world");
+  auto t1 = t.expect("Hello");
+  EXPECT_TRUE(t1.has_value());
+  EXPECT_EQ(t1.value(), " world");
+  EXPECT_FALSE(t.expect("Hallo").has_value());
+  EXPECT_FALSE(t1->expect("world").has_value());
+  EXPECT_TRUE(t1->expect_ws("world").has_value());
+  EXPECT_EQ(t1->expect_ws("world").value(), ""_t);
+  EXPECT_TRUE(t.expect_ws("Hello").has_value());
+  EXPECT_EQ(t.expect_ws("Hello").value(), " world"_t);
+}
+
+TEST(kltext, quote_escaped) {
+  Text t(R"(Hell"o\ world)");
+  auto q = t.quote_escaped();
+  EXPECT_EQ(q.size(), t.size() + 4);
+  EXPECT_EQ(q.sublen(0, 5), "\"Hell"_t);
+  EXPECT_EQ(q.subpos(10, 100), " world\""_t);
+  EXPECT_EQ(q[5], '\\');
+  EXPECT_EQ(q[6], '"');
+  EXPECT_EQ(q[7], 'o');
+  EXPECT_EQ(q[8], '\\');
+  EXPECT_EQ(q[9], '\\');
+
+  Text t2("Hello world");
+  auto q2 = t2.quote_escaped();
+  EXPECT_EQ(q2.size(), t2.size() + 2);
+  EXPECT_EQ(q2.sublen(1, t2.size()), t2);
+  EXPECT_EQ(q2[0], '"');
+  EXPECT_EQ(q2[-1], '"');
 }
