@@ -1,4 +1,5 @@
 #include "kl/kltext.hpp"
+#include <unordered_map>
 #include <gtest/gtest.h>
 using namespace kl;
 using namespace std::literals;
@@ -678,4 +679,10 @@ TEST(kltext, quote_escaped) {
   EXPECT_EQ(q2.sublen(1, t2.size()), t2);
   EXPECT_EQ(q2[0], '"');
   EXPECT_EQ(q2[-1], '"');
+}
+
+TEST(kltext, kltext_dict) {
+  std::unordered_map<Text, Text> m;
+  m["hello"] = "world";
+  EXPECT_EQ(m["hello"], "world");
 }
