@@ -240,6 +240,7 @@ public:
 
   Text to_text() const;
   operator Text() const;
+  size_t size() const;
 
   const List<Text>& chain() const;
 

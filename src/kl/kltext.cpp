@@ -749,8 +749,11 @@ Text TextChain::to_text() const {
 }
 
 Text TextChain::join(char splitchar) {
-  if (m_length == 0) {
+  if (m_chain.size() == 0) {
     return ""_t;
+  }
+  if (m_chain.size() == 1) {
+    return m_chain[0];
   }
   const size_t size = m_length + (splitchar != '\0' ? (m_chain.size() - 1) : 0);
 
@@ -758,11 +761,13 @@ Text TextChain::join(char splitchar) {
   char* ptr = memblock->text_data();
 
   size_t offset = 0;
+  bool split_element = false;
   for (const auto& t: m_chain) {
-    if (splitchar != '\0' && offset != 0) {
+    if (splitchar != '\0' && split_element) {
       ptr[offset] = splitchar;
       offset++;
     }
+    split_element = true;
     std::copy(t.begin(), t.end(), ptr + offset);
     offset += t.size();
   }
@@ -770,8 +775,11 @@ Text TextChain::join(char splitchar) {
 }
 
 Text TextChain::join(kl::Text split_text) {
-  if (m_length == 0) {
+  if (m_chain.size() == 0) {
     return ""_t;
+  }
+  if (m_chain.size() == 1) {
+    return m_chain[0];
   }
   const size_t size = m_length + split_text.size() * (m_chain.size() - 1);
 
@@ -779,12 +787,14 @@ Text TextChain::join(kl::Text split_text) {
   char* ptr = memblock->text_data();
 
   size_t offset = 0;
+  bool split_element = false;
   const size_t split_size = split_text.size();
   for (const auto& t: m_chain) {
-    if (split_size > 0 && offset != 0) {
+    if (split_size > 0 && split_element) {
       std::copy(split_text.begin(), split_text.end(), ptr + offset);
       offset += split_size;
     }
+    split_element = true;
     std::copy(t.begin(), t.end(), ptr + offset);
     offset += t.size();
   }
@@ -834,6 +844,8 @@ std::ostream& operator<<(std::ostream& os, const TextChain& tc) {
   Text t = tc.to_text();
   return os << t.to_view();
 }
+
+size_t TextChain::size() const { return m_length; }
 
 } // namespace kl
 

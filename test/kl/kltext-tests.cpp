@@ -192,6 +192,15 @@ TEST(kltext, test_skip) {
   EXPECT_EQ(t.skip(5), ""_t);
   EXPECT_EQ(t.skip(10), ""_t);
   EXPECT_EQ(t.skip(100), ""_t);
+
+  EXPECT_EQ(t.skip_bom(), "hello");
+  Text bom_hello("\xEF\xBB\xBF"
+                 "bomhello");
+  EXPECT_EQ(bom_hello.skip_bom(), "bomhello"_t);
+  Text bom("\xEF\xBB\xBF");
+  EXPECT_EQ(bom.skip_bom(), ""_t);
+  Text bo("\xEF\xBB");
+  EXPECT_EQ(bo.skip_bom(), "\xEF\xBB"_t);
 }
 
 TEST(kltext, test_pos) {

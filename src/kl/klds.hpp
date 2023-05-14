@@ -26,6 +26,14 @@ public:
   List(std::initializer_list<T> v) : m_vec(v) {}
   explicit List(size_t size) { m_vec.reserve(size); }
   void clear() { m_vec.clear(); }
+
+  bool operator==(const List<T>& l) const {
+    if (&l == this) {
+      return true;
+    }
+    return m_vec == l.m_vec;
+  }
+
   [[nodiscard]] T& operator[](size_t pos) {
     if (pos >= m_vec.size()) {
       throw std::out_of_range("Invalid index access");
