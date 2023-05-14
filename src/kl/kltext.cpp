@@ -748,7 +748,7 @@ Text TextChain::to_text() const {
   return Text(memblock, m_length);
 }
 
-Text TextChain::join(char splitchar) {
+Text TextChain::join(char splitchar) const {
   if (m_chain.size() == 0) {
     return ""_t;
   }
@@ -774,21 +774,22 @@ Text TextChain::join(char splitchar) {
   return Text(memblock, size);
 }
 
-Text TextChain::join(kl::Text split_text) {
+kl::Text TextChain::join(const kl::Text& split_text, const kl::Text& prefix, const kl::Text& suffix) const {
   if (m_chain.size() == 0) {
     return ""_t;
   }
   if (m_chain.size() == 1) {
     return m_chain[0];
   }
-  const size_t size = m_length + split_text.size() * (m_chain.size() - 1);
+  const size_t size = m_length + split_text.size() * (m_chain.size() - 1) + prefix.size() + suffix.size();
 
   auto memblock = TextRefCounter::allocate(size);
   char* ptr = memblock->text_data();
 
-  size_t offset = 0;
   bool split_element = false;
   const size_t split_size = split_text.size();
+  std::copy(prefix.begin(), prefix.end(), ptr);
+  size_t offset = prefix.size();
   for (const auto& t: m_chain) {
     if (split_size > 0 && split_element) {
       std::copy(split_text.begin(), split_text.end(), ptr + offset);
@@ -798,6 +799,7 @@ Text TextChain::join(kl::Text split_text) {
     std::copy(t.begin(), t.end(), ptr + offset);
     offset += t.size();
   }
+  std::copy(suffix.begin(), suffix.end(), ptr + offset);
   return Text(memblock, size);
 }
 

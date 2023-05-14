@@ -22,7 +22,11 @@ TEST(kltextchain, text_construction) {
   dict.add("second", " ");
   dict.add("third", "world");
   TextChain tc2(dict.values());
-  EXPECT_EQ(tc.size(), 11);
+  EXPECT_EQ(tc2.size(), 11);
+
+  auto tc3(std::move(tc));
+  EXPECT_EQ(tc3.size(), 11);
+  EXPECT_EQ(tc3.to_text(), "Hello world");
 
   TextChain empty;
   EXPECT_EQ(empty.size(), 0);
@@ -66,6 +70,12 @@ TEST(kltextchain, join_ops) {
   EXPECT_EQ(tc.join(""), "Helloworld"_t);
   EXPECT_EQ(tc.join("'X'"), "Hello'X'world"_t);
 
+  EXPECT_EQ(tc.join(" ", "--", "--"), "--Hello world--"_t);
+  EXPECT_EQ(tc.join(" ", "++", "--"), "++Hello world--"_t);
+  EXPECT_EQ(tc.join(" ", "", "--"), "Hello world--"_t);
+  EXPECT_EQ(tc.join("", "--", "+"), "--Helloworld+"_t);
+  EXPECT_EQ(tc.join("'-'", "'", "'"), "'Hello'-'world'"_t);
+
   TextChain tc1{"Hello"_t, ""_t, "world"_t};
   EXPECT_EQ(tc1.join(" "), "Hello  world"_t);
   EXPECT_EQ(tc1.join(""), "Helloworld"_t);
@@ -78,4 +88,9 @@ TEST(kltextchain, join_ops) {
   EXPECT_EQ(tc2.join(' '), "Hello"_t);
   EXPECT_EQ(tc2.join('\0'), "Hello"_t);
   EXPECT_EQ(tc2.join('X'), "Hello"_t);
+}
+
+TEST(kltextchain, formatting) {
+  TextChain tc{"Hello"_t, "world"_t};
+  EXPECT_EQ(fmt::format("{}", tc), R"({"Hello"}, {"world"})");
 }

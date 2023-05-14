@@ -245,8 +245,8 @@ public:
   const List<Text>& chain() const;
 
   void clear();
-  kl::Text join(char splitchar = '\0');
-  kl::Text join(kl::Text split_text);
+  kl::Text join(char splitchar = '\0') const;
+  kl::Text join(const kl::Text& split_text, const kl::Text& prefix = {}, const kl::Text& suffix = {}) const;
 };
 
 inline namespace literals {
@@ -266,6 +266,17 @@ struct fmt::formatter<kl::Text> : public fmt::formatter<std::string_view> {
   template <typename FormatContext>
   auto format(const kl::Text& c, FormatContext& ctx) const {
     return fmt::formatter<std::string_view>::format(c.to_view(), ctx);
+  }
+};
+
+template <>
+struct fmt::formatter<kl::TextChain> : public fmt::formatter<std::string_view> {
+  template <typename FormatContext>
+  auto format(const kl::TextChain& tc, FormatContext& ctx) const {
+    const kl::Text split{R"("}, {")"};
+    const kl::Text prefix{R"({")"};
+    const kl::Text suffix{R"("})"};
+    return fmt::formatter<std::string_view>::format(tc.join(split, prefix, suffix).to_view(), ctx);
   }
 };
 
