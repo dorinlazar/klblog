@@ -42,6 +42,13 @@ TEST(kltextchain, chain_ops) {
   EXPECT_EQ(tc.to_text(), "Hello world! Some more stuff"_t);
   tc.clear();
   EXPECT_EQ(tc.to_text(), ""_t);
+
+  tc = "Hello"_t + " world";
+  EXPECT_EQ(tc.size(), 11);
+  EXPECT_EQ(tc.to_text(), "Hello world");
+  tc = tc + "!";
+  EXPECT_EQ(tc.size(), 12);
+  EXPECT_EQ(tc.to_text(), "Hello world!");
 }
 
 TEST(kltextchain, join_ops) {

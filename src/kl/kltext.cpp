@@ -838,13 +838,6 @@ Text operator"" _t(const char* p, size_t s) { return {p, s}; }
 TextView operator"" _tv(const char* p, size_t s) { return {p, s}; }
 } // namespace literals
 
-std::ostream& operator<<(std::ostream& os, const TextView& tv) { return os << tv.view(); }
-std::ostream& operator<<(std::ostream& os, const Text& t) { return os << t.to_view(); }
-std::ostream& operator<<(std::ostream& os, const TextChain& tc) {
-  Text t = tc.to_text();
-  return os << t.to_view();
-}
-
 size_t TextChain::size() const { return m_length; }
 
 } // namespace kl

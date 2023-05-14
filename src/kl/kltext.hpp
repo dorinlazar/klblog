@@ -254,10 +254,6 @@ kl::Text operator"" _t(const char* p, size_t s);
 kl::TextView operator"" _tv(const char* p, size_t s);
 } // namespace literals
 
-std::ostream& operator<<(std::ostream& os, const TextView& tv);
-std::ostream& operator<<(std::ostream& os, const Text& t);
-std::ostream& operator<<(std::ostream& os, const TextChain& tc);
-
 } // namespace kl
 
 template <>
