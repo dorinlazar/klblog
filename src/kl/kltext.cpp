@@ -842,6 +842,10 @@ TextView operator"" _tv(const char* p, size_t s) { return {p, s}; }
 
 size_t TextChain::size() const { return m_length; }
 
+std::ostream& operator<<(std::ostream& os, const kl::TextView& tv) { return os << tv.view(); }
+std::ostream& operator<<(std::ostream& os, const kl::Text& t) { return os << t.to_view(); }
+std::ostream& operator<<(std::ostream& os, const kl::TextChain& tc) { return os << fmt::format("{}", tc); }
+
 } // namespace kl
 
 std::size_t std::hash<kl::Text>::operator()(const kl::Text& s) const noexcept {
@@ -875,7 +879,3 @@ kl::TextChain operator+(const kl::TextChain& t, const char* p) {
   tc.add(p);
   return tc;
 }
-
-std::ostream& operator<<(std::ostream& os, const kl::TextView& tv) { return os << tv.view(); }
-std::ostream& operator<<(std::ostream& os, const kl::Text& t) { return os << t.to_view(); }
-std::ostream& operator<<(std::ostream& os, const kl::TextChain& tc) { return os << fmt::format("{}", tc); }

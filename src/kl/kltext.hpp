@@ -254,6 +254,10 @@ kl::Text operator"" _t(const char* p, size_t s);
 kl::TextView operator"" _tv(const char* p, size_t s);
 } // namespace literals
 
+std::ostream& operator<<(std::ostream& os, const kl::TextView& tv);
+std::ostream& operator<<(std::ostream& os, const kl::Text& t);
+std::ostream& operator<<(std::ostream& os, const kl::TextChain& tc);
+
 } // namespace kl
 
 template <>
@@ -279,10 +283,6 @@ struct fmt::formatter<kl::TextChain> : public fmt::formatter<std::string_view> {
     return fmt::formatter<std::string_view>::format(tc.join(split, prefix, suffix).to_view(), ctx);
   }
 };
-
-std::ostream& operator<<(std::ostream& os, const kl::TextView& tv);
-std::ostream& operator<<(std::ostream& os, const kl::Text& t);
-std::ostream& operator<<(std::ostream& os, const kl::TextChain& tc);
 
 kl::TextChain operator+(const kl::Text&, const char*);
 kl::TextChain operator+(const kl::Text&, const kl::Text&);
