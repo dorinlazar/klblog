@@ -280,6 +280,10 @@ struct fmt::formatter<kl::TextChain> : public fmt::formatter<std::string_view> {
   }
 };
 
+std::ostream& operator<<(std::ostream& os, const kl::TextView& tv);
+std::ostream& operator<<(std::ostream& os, const kl::Text& t);
+std::ostream& operator<<(std::ostream& os, const kl::TextChain& tc);
+
 kl::TextChain operator+(const kl::Text&, const char*);
 kl::TextChain operator+(const kl::Text&, const kl::Text&);
 kl::TextChain operator+(const kl::TextChain&, const kl::Text&);

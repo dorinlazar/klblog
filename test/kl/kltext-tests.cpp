@@ -610,6 +610,9 @@ TEST(kltext, format_test) {
   Text v2("World");
 
   EXPECT_EQ(fmt::format("{}, {}!", v1, v2), "Hello, World!");
+  std::stringstream s;
+  s << v1 << ", " << v2 << "!";
+  EXPECT_EQ(s.view(), "Hello, World!"sv);
 }
 
 TEST(kltext, operator_index) {

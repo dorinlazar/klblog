@@ -875,3 +875,7 @@ kl::TextChain operator+(const kl::TextChain& t, const char* p) {
   tc.add(p);
   return tc;
 }
+
+std::ostream& operator<<(std::ostream& os, const kl::TextView& tv) { return os << tv.view(); }
+std::ostream& operator<<(std::ostream& os, const kl::Text& t) { return os << t.to_view(); }
+std::ostream& operator<<(std::ostream& os, const kl::TextChain& tc) { return os << fmt::format("{}", tc); }

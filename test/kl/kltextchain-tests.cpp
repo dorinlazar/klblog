@@ -93,4 +93,7 @@ TEST(kltextchain, join_ops) {
 TEST(kltextchain, formatting) {
   TextChain tc{"Hello"_t, "world"_t};
   EXPECT_EQ(fmt::format("{}", tc), R"({"Hello"}, {"world"})");
+  std::stringstream s;
+  s << tc;
+  EXPECT_EQ(s.view(), R"({"Hello"}, {"world"})"sv);
 }

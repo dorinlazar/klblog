@@ -656,6 +656,9 @@ TEST(kltextview, format_test) {
   TextView v2("World");
 
   EXPECT_EQ(fmt::format("{}, {}!", v1, v2), "Hello, World!");
+  std::stringstream s;
+  s << v1 << ", " << v2 << "!";
+  EXPECT_EQ(s.view(), "Hello, World!"sv);
 }
 
 TEST(kltextview, expect_test) {
