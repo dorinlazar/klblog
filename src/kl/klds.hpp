@@ -121,38 +121,6 @@ public:
   T& last() { return m_vec.back(); }
 };
 
-template <typename T>
-class Queue {
-  std::deque<T> m_queue;
-
-public:
-  Queue() = default;
-  void push(const T& elem) { m_queue.push_back(elem); }
-  void push(T&& elem) { m_queue.emplace_back(std::move(elem)); }
-  void push(const List<T>& elem) {
-    for (const auto& item: elem) {
-      m_queue.push_back(item);
-    }
-  }
-  T pop() {
-    if (m_queue.empty()) {
-      throw std::out_of_range("Pop on empty queue");
-    }
-    T value = m_queue.front();
-    m_queue.pop_front();
-    return value;
-  }
-  [[nodiscard]] bool empty() const { return m_queue.empty(); }
-  [[nodiscard]] bool has(const T& value) {
-    for (const auto& v: m_queue) {
-      if (v == value) {
-        return true;
-      }
-    }
-    return false;
-  }
-};
-
 template <typename K, typename V>
 class Dict {
   std::map<K, V> m_map;

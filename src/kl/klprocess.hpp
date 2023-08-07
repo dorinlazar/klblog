@@ -1,6 +1,7 @@
 #pragma once
 #include "kltext.hpp"
 #include "klds.hpp"
+#include <queue>
 
 namespace kl {
 
@@ -45,7 +46,7 @@ public:
 
 class ProcessHorde {
   PList<ExecutionNode> m_nodes;
-  Queue<ExecutionNode*> m_execution_queue;
+  std::deque<ExecutionNode*> m_execution_queue;
   List<ExecutionNode*> m_waiting_queue;
 
 public:

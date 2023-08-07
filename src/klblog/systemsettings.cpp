@@ -1,9 +1,11 @@
 #include "systemsettings.hpp"
+#include <queue>
 
 namespace klblog {
 const kl::Text VerboseFlag{" - v "};
 
 SystemSettings::SystemSettings(int argc, char** argv, char** envp) {
+  std::deque<kl::Text> args;
   kl::check(argc > 0, "internal error: invalid number of arguments: {}", argc);
   for (int i = 1; i < argc; i++) {
     const kl::Text arg(argv[i]);
@@ -11,6 +13,7 @@ SystemSettings::SystemSettings(int argc, char** argv, char** envp) {
       verbosity = VerbosityLevel::Verbose;
     } else {
       arguments.add(arg);
+      args.push_back(arg);
     }
   }
   while (*envp != nullptr) {
@@ -20,15 +23,16 @@ SystemSettings::SystemSettings(int argc, char** argv, char** envp) {
   }
 
   try {
-    kl::Queue<kl::Text> args;
-    args.push(arguments);
     while (!args.empty()) {
-      auto arg = args.pop();
+      auto arg = args.front();
+      args.pop_front();
       if (arg == "-d") {
-        source_folder = args.pop();
+        source_folder = args.front();
+        args.pop_front();
       }
       if (arg == "-o") {
-        destination_folder = args.pop();
+        destination_folder = args.front();
+        args.pop_front();
       }
     }
   } catch (...) {

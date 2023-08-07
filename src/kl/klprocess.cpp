@@ -127,7 +127,7 @@ ExecutionNode* ProcessHorde::add_node(const List<Text>& params, const List<Execu
   m_nodes.add(std::make_unique<ExecutionNode>(params, deps));
   auto p = m_nodes[m_nodes.size() - 1].get();
   if (deps.size() == 0) {
-    m_execution_queue.push(p);
+    m_execution_queue.push_back(p);
   } else {
     m_waiting_queue.add(p);
   }
@@ -141,7 +141,8 @@ bool ProcessHorde::run(uint32_t n_jobs, bool verbose) {
   Dict<pid_t, ptr<ExecutionMonitorNode>> monitor;
   while (monitor.size() > 0 || !m_execution_queue.empty()) {
     while (monitor.size() < n_jobs && !m_execution_queue.empty()) {
-      auto node = m_execution_queue.pop();
+      auto node = m_execution_queue.front();
+      m_execution_queue.pop_front();
       auto monitor_node = std::make_shared<ExecutionMonitorNode>(node);
       if (verbose) {
         kl::log("> [{}]", fmt::join(node->m_params, ","));
@@ -167,7 +168,7 @@ bool ProcessHorde::run(uint32_t n_jobs, bool verbose) {
         if (task->m_dependencies.all(
                 [](const kl::ExecutionNode* n) { return n->m_state == Process::State::Finished; })) {
           m_waiting_queue.remove_at(i);
-          m_execution_queue.push(task);
+          m_execution_queue.push_back(task);
         } else {
           i++;
         }
