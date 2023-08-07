@@ -69,7 +69,7 @@ public:
     }
   }
 
-  [[nodiscard]] bool has(const T& value) const { return std::find(m_vec.begin(), m_vec.end(), value) != m_vec.end(); }
+  [[nodiscard]] bool has(const T& value) const { return m_vec.contains(value); }
 
   void for_each(std::function<void(const T&)> op) const {
     for (const auto& item: m_vec) {
@@ -121,25 +121,6 @@ public:
   T& last() { return m_vec.back(); }
 };
 
-template <typename T1, typename T2>
-class Pair {
-  std::pair<T1, T2> m_pair;
-
-public:
-  Pair(T1&& t1, T2&& t2) : m_pair(t1, t2) {}
-  Pair(T1 t1, T2 t2) : m_pair(t1, t2) {}
-  Pair(Pair&&) noexcept = default;
-  Pair(const Pair&) = default;
-  Pair& operator=(const Pair&) = default;
-  Pair& operator=(Pair&&) noexcept = default;
-  ~Pair() = default;
-
-  auto first() { return m_pair.first(); }
-  auto first() const { return m_pair.first(); }
-  auto second() { return m_pair.second(); }
-  auto second() const { return m_pair.second(); }
-};
-
 template <typename T>
 class Queue {
   std::deque<T> m_queue;
@@ -178,7 +159,7 @@ class Dict {
 
 public:
   Dict() = default;
-  explicit Dict(const List<Pair<K, V>>& pairList) {
+  explicit Dict(const List<std::pair<K, V>>& pairList) {
     m_map.reserve(pairList.size());
     for (const auto& it: pairList) {
       add(it.first(), it.second());
@@ -250,7 +231,7 @@ public:
 };
 
 template <typename T1, typename T2>
-class List<Pair<T1, T2>> {
+class List<std::pair<T1, T2>> {
 public:
   Dict<T1, T2> to_dict() { return Dict(*this); }
 };
