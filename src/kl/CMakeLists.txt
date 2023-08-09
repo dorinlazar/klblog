@@ -21,6 +21,8 @@ add_library(
   kltime.hpp
   klvalue.hpp
   klds.hpp
+  klargparser.cpp
+  klargparser.hpp
   textscanner.cpp
   textscanner.hpp)
 target_include_directories(klbase PRIVATE ${CMAKE_SOURCE_DIR}/src)

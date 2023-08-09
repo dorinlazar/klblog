@@ -2,13 +2,15 @@
 
 namespace kl {
 
-OperationNotSupported::OperationNotSupported(const Text& op, const Text& reason)
-    : std::logic_error(("Operation not supported"_t + op + ": " + reason).to_text().to_string()) {}
-InvalidInputData::InvalidInputData(const Text& received, const Text& expected)
-    : std::logic_error(("Invalid input data: [" + received + "], expected: " + expected).to_text().to_string()) {}
+KlException::KlException(Text message) : std::logic_error({message.begin(), message.end()}) {}
 
-IOException::IOException(const Text& why) : m_why(why) {}
+OperationNotSupported::OperationNotSupported(Text op, Text reason)
+    : KlException(("Operation not supported"_t + op + ": " + reason).to_text()) {}
+
+InvalidInputData::InvalidInputData(Text received, Text expected)
+    : KlException(("Invalid input data: [" + received + "], expected: [" + expected + "]"_t).to_text()) {}
+
+IOException::IOException(Text why) : KlException(("IOException: "_t + why).to_text()) {}
 IOException IOException::current_standard_error() { return IOException{strerror(errno)}; }
-const Text& IOException::what() { return m_why; }
 
 } // namespace kl
