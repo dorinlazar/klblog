@@ -11,19 +11,19 @@ class Argument {};
 class ArgumentParser {
 public:
   ArgumentParser(Text prog_name, Text description, Text epilog);
-  ArgumentParser(const ArgumentParser&) = delete;
-  ArgumentParser(ArgumentParser&&) = delete;
-  ArgumentParser& operator=(const ArgumentParser&) = delete;
-  ArgumentParser& operator=(ArgumentParser&&) = delete;
+  ArgumentParser(const ArgumentParser&) = default;
+  ArgumentParser(ArgumentParser&&) = default;
+  ArgumentParser& operator=(const ArgumentParser&) = default;
+  ArgumentParser& operator=(ArgumentParser&&) = default;
   ~ArgumentParser() = default;
 
   void add(const Argument& argument);
-  std::shared_ptr<ArgumentParser> create_subparser(kl::Text feature);
+  ArgumentParser& create_subparser(kl::Text feature);
 
 private:
   ArgumentParser();
   bool m_child_parser = false;
-  std::unordered_map<kl::Text, std::shared_ptr<ArgumentParser>> m_children;
+  std::unordered_map<kl::Text, ArgumentParser> m_children;
 };
 
 } // namespace kl
