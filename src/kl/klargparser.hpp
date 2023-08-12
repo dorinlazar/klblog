@@ -5,7 +5,11 @@
 
 namespace kl {
 
-class Argument {};
+struct Argument {
+  char short_arg = '\0';
+  Text long_arg = {};
+  int n_params = 0;
+};
 
 // Inspiration source: https://docs.python.org/3/library/argparse.html
 class ArgumentParser {
@@ -23,7 +27,7 @@ public:
 private:
   ArgumentParser();
   bool m_child_parser = false;
-  std::unordered_map<kl::Text, ArgumentParser> m_children;
+  std::unordered_map<kl::Text, std::unique_ptr<ArgumentParser>> m_children;
 };
 
 } // namespace kl
