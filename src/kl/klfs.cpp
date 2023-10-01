@@ -316,8 +316,8 @@ void Folder::add_item(const kl::FileSystemEntryInfo& fi, const kl::Text& full_pa
   } else {
     auto fi2 = fi;
     auto base_folder = fi.path.base_folder();
-    kl::check(m_folders.has(base_folder), "Sanity check: File in folder", base_folder,
-              "added, but folder not recorded");
+    kl::check(m_folders.has(base_folder), "Sanity check: File in folder {} added, but folder not recorded",
+              base_folder);
     fi2.path = fi2.path.discard_base_folder();
     m_folders[base_folder]->add_item(fi2, full_path);
   }

@@ -10,7 +10,7 @@ int main(int argc, char** argv, char** envp) {
   }
 
   const kl::TimeCounter time_counter(
-      fmt::format("Blog generation from {}->{}", system_settings->source_folder, system_settings->destination_folder));
+      std::format("Blog generation from {}->{}", system_settings->source_folder, system_settings->destination_folder));
   const klblog::Blog blog(system_settings);
 
   blog.process();

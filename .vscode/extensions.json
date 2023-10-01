@@ -1,9 +1,12 @@
 {
     "recommendations": [
-        "ms-vscode.cmake-tools",
-        "ms-vscode.cpptools-extension-pack",
         "cheshirekow.cmake-format",
         "davidanson.vscode-markdownlint",
-        "editorconfig.editorconfig"
+        "editorconfig.editorconfig",
+        "stkb.rewrap",
+        "ms-vscode.cpptools",
+        "ms-vscode.cmake-tools",
+        "twxs.cmake",
+        "ms-vscode.wordcount"
     ]
 }

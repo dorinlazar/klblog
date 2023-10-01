@@ -26,4 +26,3 @@ add_library(
   textscanner.cpp
   textscanner.hpp)
 target_include_directories(klbase PRIVATE ${CMAKE_SOURCE_DIR}/src)
-target_link_libraries(klbase fmt::fmt)

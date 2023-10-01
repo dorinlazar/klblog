@@ -44,7 +44,7 @@ bool TextView::ends_with(const TextView& tv) const { return m_view.ends_with(tv.
 
 char TextView::operator[](ssize_t index) const {
   if (index >= static_cast<ssize_t>(size()) || (-index > static_cast<ssize_t>(size()))) [[unlikely]] {
-    throw std::out_of_range(fmt::format("Requested index {} out of {}", index, size()));
+    throw std::out_of_range(std::format("Requested index {} out of {}", index, size()));
   }
   return m_view[index + ((index < 0) ? size() : 0)];
 }
@@ -405,7 +405,7 @@ Text Text::copy() const { return {m_memblock->text_data() + m_start, size()}; }
 
 char Text::operator[](ssize_t index) const {
   if (index >= static_cast<ssize_t>(size()) || (-index > static_cast<ssize_t>(size()))) [[unlikely]] {
-    throw std::out_of_range(fmt::format("Requested index {} out of {}", index, size()));
+    throw std::out_of_range(std::format("Requested index {} out of {}", index, size()));
   }
   return *(m_memblock->text_data() + m_start + index + ((index < 0) ? size() : 0));
 }
@@ -844,7 +844,7 @@ size_t TextChain::size() const { return m_length; }
 
 std::ostream& operator<<(std::ostream& os, const kl::TextView& tv) { return os << tv.view(); }
 std::ostream& operator<<(std::ostream& os, const kl::Text& t) { return os << t.to_view(); }
-std::ostream& operator<<(std::ostream& os, const kl::TextChain& tc) { return os << fmt::format("{}", tc); }
+std::ostream& operator<<(std::ostream& os, const kl::TextChain& tc) { return os << std::format("{}", tc); }
 
 } // namespace kl
 

@@ -126,7 +126,7 @@ DateTime DateTime::operator+(TimeSpan ts) const { return from_ticks(m_ticks + ts
 std::ostream& operator<<(std::ostream& os, kl::DateTime t) {
   auto date = t.date();
   auto time = t.time_of_day();
-  return os << fmt::format("{:0>4}-{:0>2}-{:0>2} {:0>2}:{:0>2}:{:0>2}.{:0>3}", date.year, date.month, date.day,
+  return os << std::format("{:0>4}-{:0>2}-{:0>2} {:0>2}:{:0>2}:{:0>2}.{:0>3}", date.year, date.month, date.day,
                            time.hour, time.min, time.sec, time.nanos / TimeLimits::NanosecondsPerMillisecond);
 }
 
@@ -144,7 +144,7 @@ std::ostream& operator<<(std::ostream& os, TimeSpan t) {
     os << days << "d ";
   }
 
-  return os << fmt::format("{:0>2}:{:0>2}:{:0>2}.{:0>3}", hours, minutes, seconds, millis);
+  return os << std::format("{:0>2}:{:0>2}:{:0>2}.{:0>3}", hours, minutes, seconds, millis);
 }
 
 inline std::tuple<int32_t, int32_t, int32_t> kltime_read_date(TextScanner& sc) {

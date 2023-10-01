@@ -14,8 +14,5 @@ if(COVERAGE_ENABLED)
   SET(CMAKE_CXX_FLAGS "-g -O0 --coverage -fprofile-arcs -ftest-coverage")
 endif(COVERAGE_ENABLED)
 
-
-find_package(fmt)
-
 add_subdirectory(src)
 add_subdirectory(test)

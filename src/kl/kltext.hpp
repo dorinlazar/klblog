@@ -10,7 +10,6 @@
 #include <string_view>
 #include <vector>
 #include <span>
-#include <fmt/format.h>
 
 // NOLINTBEGIN(google-explicit-constructor)
 namespace kl {
@@ -266,21 +265,29 @@ struct std::hash<kl::Text> {
 };
 
 template <>
-struct fmt::formatter<kl::Text> : public fmt::formatter<std::string_view> {
+struct std::formatter<kl::TextView> : public std::formatter<std::string_view> {
   template <typename FormatContext>
-  auto format(const kl::Text& c, FormatContext& ctx) const {
-    return fmt::formatter<std::string_view>::format(c.to_view(), ctx);
+  auto format(const kl::TextView& c, FormatContext& ctx) const {
+    return std::formatter<std::string_view>::format(c.view(), ctx);
   }
 };
 
 template <>
-struct fmt::formatter<kl::TextChain> : public fmt::formatter<std::string_view> {
+struct std::formatter<kl::Text> : public std::formatter<std::string_view> {
+  template <typename FormatContext>
+  auto format(const kl::Text& c, FormatContext& ctx) const {
+    return std::formatter<std::string_view>::format(c.to_view(), ctx);
+  }
+};
+
+template <>
+struct std::formatter<kl::TextChain> : public std::formatter<std::string_view> {
   template <typename FormatContext>
   auto format(const kl::TextChain& tc, FormatContext& ctx) const {
     const kl::Text split{R"("}, {")"};
     const kl::Text prefix{R"({")"};
     const kl::Text suffix{R"("})"};
-    return fmt::formatter<std::string_view>::format(tc.join(split, prefix, suffix).to_view(), ctx);
+    return std::formatter<std::string_view>::format(tc.join(split, prefix, suffix).to_view(), ctx);
   }
 };
 

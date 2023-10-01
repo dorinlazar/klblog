@@ -133,13 +133,13 @@ public:
 } // namespace kl
 
 template <>
-struct fmt::formatter<kl::TimeSpan> {
+struct std::formatter<kl::TimeSpan> {
   // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
   constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
     auto it = ctx.begin();
     auto end = ctx.end();
     if (it != end && *it != '}') {
-      throw fmt::format_error("invalid format");
+      throw std::format_error("invalid format");
     }
     return it;
   }
@@ -158,29 +158,29 @@ struct fmt::formatter<kl::TimeSpan> {
     uint32_t millis = t.milliseconds();
 
     if (days > 0) {
-      return fmt::format_to(ctx.out(), "{}{}d {:0>2}:{:0>2}:{:0>2}.{:0>3}", s, days, hours, minutes, seconds, millis);
+      return std::format_to(ctx.out(), "{}{}d {:0>2}:{:0>2}:{:0>2}.{:0>3}", s, days, hours, minutes, seconds, millis);
     }
 
     if (hours > 0) {
-      return fmt::format_to(ctx.out(), "{}{:0>2}:{:0>2}:{:0>2}.{:0>3}", s, hours, minutes, seconds, millis);
+      return std::format_to(ctx.out(), "{}{:0>2}:{:0>2}:{:0>2}.{:0>3}", s, hours, minutes, seconds, millis);
     }
 
     if (minutes > 0) {
-      return fmt::format_to(ctx.out(), "{}{:0>2}:{:0>2}.{:0>3}", s, minutes, seconds, millis);
+      return std::format_to(ctx.out(), "{}{:0>2}:{:0>2}.{:0>3}", s, minutes, seconds, millis);
     }
 
-    return fmt::format_to(ctx.out(), "{}{:0>2}.{:0>3}", s, seconds, millis);
+    return std::format_to(ctx.out(), "{}{:0>2}.{:0>3}", s, seconds, millis);
   }
 };
 
 template <>
-struct fmt::formatter<kl::DateTime> {
+struct std::formatter<kl::DateTime> {
   // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
   constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
     auto it = ctx.begin();
     auto end = ctx.end();
     if (it != end && *it != '}') {
-      throw fmt::format_error("invalid format");
+      throw std::format_error("invalid format");
     }
     return it;
   }
@@ -188,7 +188,7 @@ struct fmt::formatter<kl::DateTime> {
   auto format(const kl::DateTime& dt, FormatContext& ctx) const -> decltype(ctx.out()) {
     auto d = dt.date();
     auto t = dt.time_of_day();
-    return fmt::format_to(ctx.out(), "{:0>4}.{:0>2}.{:0>2}T{:0>2}:{:0>2}:{:0>2}.{:0>3}Z", d.year, d.month, d.day,
+    return std::format_to(ctx.out(), "{:0>4}.{:0>2}.{:0>2}T{:0>2}:{:0>2}:{:0>2}.{:0>3}Z", d.year, d.month, d.day,
                           t.hour, t.min, t.sec, t.nanos / kl::TimeLimits::NanosecondsPerMillisecond);
   }
 };
