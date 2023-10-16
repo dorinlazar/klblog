@@ -8,7 +8,7 @@ add_executable(
   systemsettings.hpp
   klblog.cpp)
 target_include_directories(klblog PRIVATE ${CMAKE_SOURCE_DIR}/src)
-target_link_libraries(klblog klfileformats klbase)
+target_link_libraries(klblog klfileformats)
 
 if(CMAKE_BUILD_TYPE MATCHES RELEASE)
   set_property(TARGET klblog PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
