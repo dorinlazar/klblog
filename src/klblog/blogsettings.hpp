@@ -1,5 +1,5 @@
 #pragma once
-#include "kl/kltext.hpp"
+#include <kl/kltext.hpp>
 
 namespace klblog {
 struct Settings {

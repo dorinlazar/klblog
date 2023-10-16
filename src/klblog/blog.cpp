@@ -1,6 +1,6 @@
 #include "blog.hpp"
-#include "kl/kl.hpp"
-#include "kl/klfs.hpp"
+#include <kl/kl.hpp>
+#include <kl/klfs.hpp>
 
 namespace klblog {
 

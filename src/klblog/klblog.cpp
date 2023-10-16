@@ -1,7 +1,7 @@
 #include "systemsettings.hpp"
 #include "blog.hpp"
-#include "ff/poorconfig.hpp"
-#include "kl/kltimecounter.hpp"
+#include <ff/poorconfig.hpp>
+#include <kl/kltimecounter.hpp>
 
 int main(int argc, char** argv, char** envp) {
   auto system_settings = std::make_shared<klblog::SystemSettings>(argc, argv, envp);

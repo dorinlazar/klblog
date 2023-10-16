@@ -1,6 +1,6 @@
 #include "poorconfig.hpp"
-#include "kl/textscanner.hpp"
-#include "kl/klfs.hpp"
+#include <kl/textscanner.hpp>
+#include <kl/klfs.hpp>
 
 namespace kl {
 class PoorConfigParser {

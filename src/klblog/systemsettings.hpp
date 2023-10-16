@@ -1,7 +1,7 @@
 #pragma once
 
-#include "kl/kltext.hpp"
-#include "kl/klds.hpp"
+#include <kl/kltext.hpp>
+#include <kl/klds.hpp>
 
 namespace klblog {
 

@@ -2,11 +2,11 @@
 
 // Markwrite file format (.mw), format definition in progress.
 
-#include "kl/klds.hpp"
-#include "kl/kltext.hpp"
-#include "kl/kltime.hpp"
-#include "kl/klvalue.hpp"
-#include "kl/textscanner.hpp"
+#include <kl/klds.hpp>
+#include <kl/kltext.hpp>
+#include <kl/kltime.hpp>
+#include <kl/klvalue.hpp>
+#include <kl/textscanner.hpp>
 #include <variant>
 
 namespace kl {
