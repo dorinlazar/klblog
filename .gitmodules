@@ -1,0 +1,3 @@
+[submodule "deps/kl"]
+	path = deps/kl
+	url = ../kl
