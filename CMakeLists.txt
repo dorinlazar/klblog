@@ -11,8 +11,9 @@ if(CMAKE_BUILD_TYPE MATCHES Release)
 endif(CMAKE_BUILD_TYPE MATCHES Release)
 
 if(COVERAGE_ENABLED)
-  SET(CMAKE_CXX_FLAGS "-g -O0 --coverage -fprofile-arcs -ftest-coverage")
+  set(CMAKE_CXX_FLAGS "-g -O0 --coverage -fprofile-arcs -ftest-coverage")
 endif(COVERAGE_ENABLED)
 
+add_subdirectory(deps)
 add_subdirectory(src)
 add_subdirectory(test)
